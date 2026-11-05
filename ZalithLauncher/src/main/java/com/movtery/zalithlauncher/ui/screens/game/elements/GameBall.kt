@@ -52,6 +52,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.setting.enums.FpsDisplayMode
+import com.movtery.zalithlauncher.utils.device.VoidFpsMonitor
 import com.movtery.zalithlauncher.ui.components.FloatingBall
 import com.movtery.zalithlauncher.ui.screens.content.elements.MemoryPreview
 
@@ -106,6 +107,9 @@ private fun GameBallContent(
     val history = fpsHistory()
     val fpsMaxValue = fpsMax()
     val fpsMinValue = fpsMin()
+    val stutterDropDetected = remember(history) {
+        VoidFpsMonitor.hasSevereRecentDrop(history)
+    }
 
     val showFps = remember(fps) {
         fps != null
@@ -157,6 +161,17 @@ private fun GameBallContent(
                 visible = showFps || showMemory
             ) {
                 Spacer(Modifier.height(4.dp))
+            }
+            // Coarse one-second FPS history warning; not a frame-time percentile.
+            CustomAnimatedVisibility(
+                visible = showFps && stutterDropDetected
+            ) {
+                Text(
+                    modifier = Modifier.padding(end = 4.dp),
+                    text = "FPS DROP DETECTED",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.labelSmall
+                )
             }
             //帧率显示
             CustomAnimatedVisibility(
