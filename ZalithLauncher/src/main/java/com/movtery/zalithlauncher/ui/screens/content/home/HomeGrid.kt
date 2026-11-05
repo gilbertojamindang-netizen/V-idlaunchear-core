@@ -450,7 +450,7 @@ fun HomeGrid(
                                     customMemoryMb = it.toInt().coerceIn(512, safeCustomMemoryMb)
                                     performancePreferences.edit().putInt("custom_memory", customMemoryMb).apply()
                                 },
-                                valueRange = 512f..safeCustomMemoryMb.toFloat(),
+                                valueRange = 512f..safeCustomMemoryMb.coerceAtLeast(513).toFloat(),
                                 steps = if (safeCustomMemoryMb > 512) 6 else 0,
                                 enabled = safeCustomMemoryMb > 512
                             )
