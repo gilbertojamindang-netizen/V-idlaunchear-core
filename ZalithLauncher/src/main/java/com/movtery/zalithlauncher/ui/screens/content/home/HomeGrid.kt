@@ -26,6 +26,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -107,8 +108,11 @@ fun HomeGrid(
 ) {
     val scrollState = rememberScrollState()
     val appContext = LocalContext.current
-    val performanceAdvice = remember(appContext) {
-        VoidPerformanceAdvisor.recommend(appContext)
+    var selectedPerformanceProfile by remember {
+        mutableStateOf(VoidPerformanceAdvisor.recommend(appContext).profile)
+    }
+    val performanceAdvice = remember(appContext, selectedPerformanceProfile) {
+        VoidPerformanceAdvisor.recommend(appContext, selectedPerformanceProfile)
     }
     //长按调整工具栏触发的卡片操作
     var operation by remember { mutableStateOf<HomeCardOperation>(HomeCardOperation.None) }
@@ -335,6 +339,29 @@ fun HomeGrid(
                                 color = Color(0xFFF3E7FF),
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        VoidPerformanceAdvisor.Profile.values().forEach { profile ->
+                            val selected = profile == selectedPerformanceProfile
+                            Text(
+                                text = profile.name.replace('_', ' '),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .background(
+                                        if (selected) Color(0xFF65358D) else Color.White.copy(alpha = 0.055f),
+                                        RoundedCornerShape(9.dp)
+                                    )
+                                    .clickable { selectedPerformanceProfile = profile }
+                                    .padding(horizontal = 5.dp, vertical = 9.dp),
+                                color = if (selected) Color.White else Color(0xFFBCA7C8),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                                maxLines = 1
                             )
                         }
                     }
