@@ -50,6 +50,14 @@ class VoidCoreCommandRouterTest {
     }
 
     @Test
+    fun worldBackupCommandsOpenTheWorldVault() {
+        val result = VoidCoreCommandRouter.route("/backup worlds")
+        assertEquals(VoidCoreCommandRouter.Action.OPEN_WORLD_VAULT, result.action)
+        assertFalse(result.requiresConfirmation)
+        assertTrue(result.message.contains("safety backup"))
+    }
+
+    @Test
     fun unknownCommandReturnsHelp() {
         assertEquals(
             VoidCoreCommandRouter.Action.HELP,
