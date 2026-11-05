@@ -75,6 +75,32 @@ pub(crate) fn evaluate_walking(t: f32) -> AnimFrame {
     walking(t * 8.)
 }
 
+/// 空中松手后的骨骼翻落动作时长（秒）。
+pub(crate) const RAGDOLL_DURATION: f32 = 1.35;
+
+/// 空中跌落时的四肢摆动姿态，使用指数阻尼平滑回到基础动画。
+pub(crate) fn evaluate_ragdoll(t: f32) -> AnimFrame {
+    let time = t.max(0.0);
+    let damping = (-3.2 * time).exp();
+    let wobble = (time * 15.0).sin() * damping;
+    AnimFrame {
+        body_rot: Vec3::new(0.10 * damping, 0.0, (0.82 + wobble * 0.16) * damping),
+        head_rot: Vec3::new(-0.28 * damping, wobble * 0.10, -0.18 * damping),
+        arms: [
+            Vec3::new((1.35 + wobble * 0.18) * damping, 0.0, -0.88 * damping),
+            Vec3::new((-1.22 - wobble * 0.17) * damping, 0.0, 0.82 * damping),
+        ],
+        legs: [
+            Vec3::new((-0.72 + wobble * 0.20) * damping, 0.0, 0.14 * damping),
+            Vec3::new((0.92 - wobble * 0.18) * damping, 0.0, -0.12 * damping),
+        ],
+        body_pos: Vec3::new(0.0, -0.34 * damping, 0.0),
+        head_pos: -0.07 * damping,
+        cape_x: std::f32::consts::PI * 0.06 + 0.48 * damping + wobble * 0.08,
+        cape_z: Some(wobble * 0.12),
+    }
+}
+
 /// 坐下姿态的缓慢呼吸周期（秒）。
 pub(crate) const SITTING_PERIOD: f32 = std::f32::consts::TAU;
 
@@ -169,6 +195,19 @@ mod tests {
 
     /// 换基校验:原始 GLTF 基的新公式必须与旧渲染基公式呈 180°Y 共轭,
     /// 保证行走观感与换基前逐帧一致。
+    #[test]
+    fn ragdoll_pose_is_finite_and_damps_toward_rest() {
+        let start = evaluate_ragdoll(0.0);
+        let middle = evaluate_ragdoll(0.45);
+        let end = evaluate_ragdoll(RAGDOLL_DURATION);
+        assert!(start.body_rot.is_finite());
+        assert!(middle.arms.iter().all(|arm| arm.is_finite()));
+        assert!(middle.legs.iter().all(|leg| leg.is_finite()));
+        assert!(start.body_rot.z.abs() > end.body_rot.z.abs());
+        assert!(start.arms[0].x.abs() > end.arms[0].x.abs());
+        assert!(end.body_pos.y.abs() < 0.02);
+    }
+
     #[test]
     fn sitting_pose_is_finite_and_keeps_a_bent_leg_posture() {
         for index in 0..240 {
