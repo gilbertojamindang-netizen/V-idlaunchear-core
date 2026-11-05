@@ -81,28 +81,24 @@ object ControlManager {
                     file.isFile && file.exists() && file.extension.equals("json", true)
                 }
 
-            // Install the Bedrock-inspired layout once. Preserve a selected
-            // custom layout, including older installs whose selection was not saved.
+            // Install Bedrock once and only auto-select it for a fresh install,
+            // an unset selection, or an untouched copy of the bundled default.
+            // A user-edited layout must never be replaced just because its name
+            // and author still match the stock template.
             val selectedName = AllSettings.controlLayout.getValue()
             val selectedFile = selectedName
                 .takeIf { it.isNotBlank() }
                 ?.let { File(PathManager.DIR_CONTROL_LAYOUTS, it) }
-            val selectedLayout = selectedFile
-                ?.takeIf { it.isFile }
-                ?.let { file -> runCatching { loadLayoutFromFile(file) }.getOrNull() }
-
-            fun isStockDefault(layout: ControlLayout?): Boolean =
-                layout?.let {
-                    it.info.name.default.equals("default", ignoreCase = true) &&
-                        it.info.author.default.equals("MovTery", ignoreCase = true)
-                } == true
-
-            val stockDefaultExists = files.any { file ->
-                isStockDefault(runCatching { loadLayoutFromFile(file) }.getOrNull())
-            }
+            val stockDefaultBytes = runCatching {
+                context.assets.open("default_layout.json").use { it.readBytes() }
+            }.getOrNull()
+            val selectedIsUnmodifiedDefault = selectedFile?.let { file ->
+                file.isFile && stockDefaultBytes != null &&
+                    runCatching { file.readBytes().contentEquals(stockDefaultBytes) }.getOrDefault(false)
+            } == true
             val shouldSelectBedrock = files.isEmpty() ||
-                isStockDefault(selectedLayout) ||
-                (selectedName.isBlank() && stockDefaultExists)
+                selectedName.isBlank() ||
+                selectedIsUnmodifiedDefault
 
             if (files.isEmpty()) {
                 unpackDefaultControl(context)
@@ -122,7 +118,7 @@ object ControlManager {
                 }
             }
 
-            if (shouldSelectBedrock && bedrockFile.isFile) {
+            if (installingBedrock && shouldSelectBedrock && bedrockFile.isFile) {
                 AllSettings.controlLayout.save(bedrockFile.name)
             }
 
