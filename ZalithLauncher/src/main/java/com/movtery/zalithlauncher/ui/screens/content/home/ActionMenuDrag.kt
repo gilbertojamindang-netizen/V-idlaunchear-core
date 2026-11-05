@@ -225,6 +225,11 @@ class ActionMenuDragState(
     var outerPaddingPx = 0f
 
     /**
+     * 停泊卡片上方保留的标题栏高度（像素）
+     */
+    var topContentOffsetPx = 0f
+
+    /**
      * 停泊槽宽度（像素），即换边时内容区与卡片的位移量
      */
     var menuSpanPx = 0f
@@ -235,7 +240,7 @@ class ActionMenuDragState(
     fun landingOf(side: ActionMenuSide): Offset {
         val physicallyLeft = if (isRtl) side == ActionMenuSide.END else side == ActionMenuSide.START
         val x = if (physicallyLeft) outerPaddingPx else parentWidthPx - menuSpanPx
-        return Offset(x, outerPaddingPx)
+        return Offset(x, outerPaddingPx + topContentOffsetPx)
     }
 
     override fun addExclusion(exclusion: ActionMenuDragExclusion) {
