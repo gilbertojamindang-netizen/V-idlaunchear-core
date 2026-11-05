@@ -94,6 +94,24 @@ class VoidPerformanceAdvisorTest {
     }
 
     @Test
+    fun cpuParserPrefersHardwareOrModelName() {
+        val hardware = VoidPerformanceAdvisor.parseCpuModel(
+            "processor : 0\nHardware : MediaTek MT6769V\n"
+        )
+        assertEquals("MediaTek MT6769V", hardware)
+
+        val modelName = VoidPerformanceAdvisor.parseCpuModel(
+            "model name : Example CPU 8-Core\n"
+        )
+        assertEquals("Example CPU 8-Core", modelName)
+    }
+
+    @Test
+    fun cpuParserReturnsNullWhenNoModelFieldsExist() {
+        assertEquals(null, VoidPerformanceAdvisor.parseCpuModel("flags : aes\n"))
+    }
+
+    @Test
     fun invalidRamEstimateIsClampedToSafeMinimum() {
         val result = VoidPerformanceAdvisor.recommend(
             0,
