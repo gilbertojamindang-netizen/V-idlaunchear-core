@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,6 +38,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.movtery.petlib.ArmModel
+import com.movtery.petlib.PetAnimation
 import com.movtery.petlib.PetTapReaction
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -76,11 +79,12 @@ fun VoidCompanionStage(
         val squash = remember { Animatable(1f) }
         var dragging by remember { mutableStateOf(false) }
         var dropping by remember { mutableStateOf(false) }
+        var sitting by remember { mutableStateOf(false) }
         var dragX by remember { mutableStateOf(0f) }
         var dragY by remember { mutableStateOf(0f) }
 
-        LaunchedEffect(maxX, maxY, dragging, dropping) {
-            if (!dragging && !dropping) {
+        LaunchedEffect(maxX, maxY, dragging, dropping, sitting) {
+            if (!dragging && !dropping && !sitting) {
                 while (true) {
                     delay(Random.nextLong(900L, 2100L))
                     val targetX = if (maxX <= 0f) 0f else Random.nextFloat() * maxX * 2f - maxX
@@ -114,6 +118,7 @@ fun VoidCompanionStage(
                 .pointerInput(maxX, maxY) {
                     detectDragGestures(
                         onDragStart = {
+                            sitting = false
                             dragging = true
                             dragX = offsetX.value
                             dragY = offsetY.value
@@ -190,9 +195,19 @@ fun VoidCompanionStage(
                 yaw = yaw,
                 tapReaction = PetTapReaction.Interact,
                 dragYaw = false,
-                animation = if (dragging || dropping) null else com.movtery.petlib.PetAnimation.Idle,
-                autonomousIdle = !dragging && !dropping
+                animation = when {
+                    dragging || dropping -> null
+                    sitting -> PetAnimation.Sitting
+                    else -> PetAnimation.Idle
+                },
+                autonomousIdle = !dragging && !dropping && !sitting
             )
+        }
+        Button(
+            onClick = { sitting = !sitting },
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 7.dp)
+        ) {
+            Text(if (sitting) "STAND UP" else "SIT")
         }
     }
 }
