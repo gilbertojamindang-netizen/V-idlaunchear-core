@@ -40,7 +40,7 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import java.util.concurrent.TimeUnit
 
-val URL_USER_AGENT: String = "${BuildKeys.LAUNCHER_SHORT_NAME}/Android_${BuildConfig.VERSION_NAME}"
+val URL_USER_AGENT: String = "VoidLaunchear/Android_${BuildConfig.VERSION_NAME}"
 val TIME_OUT = TimeUnit.SECONDS.toMillis(10L)
 
 const val HOST_CURSEFORGE_API = "api.curseforge.com"
