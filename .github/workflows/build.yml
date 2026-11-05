@@ -170,6 +170,9 @@ jobs:
           test "$(stat -c%s "$apk")" -gt 100000000
           echo "APK ready for public release: $apk"
 
+      - name: Checkout source for release metadata
+        uses: actions/checkout@v6
+
       - name: Read app version
         id: version
         run: |
