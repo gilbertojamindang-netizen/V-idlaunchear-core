@@ -77,6 +77,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.movtery.zalithlauncher.BuildKeys
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.legal.AvailableAgreement
+import com.movtery.zalithlauncher.legal.displayTitle
 import com.movtery.zalithlauncher.ui.base.BaseScreen
 import com.movtery.zalithlauncher.ui.components.ScalingActionButton
 import com.movtery.zalithlauncher.ui.components.fadeEdge
@@ -590,7 +591,7 @@ private fun WelcomeIntroduction(
                             InfoLayoutTextItem(
                                 modifier = Modifier.fillMaxWidth(),
                                 onClick = { selectedDocument = document },
-                                title = document.title,
+                                title = document.displayTitle(),
                             )
                         }
                     }
