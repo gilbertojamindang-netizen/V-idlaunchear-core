@@ -57,6 +57,8 @@ object VoidPerformanceApplier {
             }
 
             val backupId = "void-settings-${System.currentTimeMillis()}"
+            val optionsExisted = optionsFile.isFile
+            val configExisted = configFile.isFile
             val backedUp = mutableListOf<String>()
             if (optionsFile.isFile) {
                 optionsFile.copyTo(File(backupDirectory, "$backupId-options.txt"), overwrite = false)
@@ -66,6 +68,10 @@ object VoidPerformanceApplier {
                 configFile.copyTo(File(backupDirectory, "$backupId-version.config"), overwrite = false)
                 backedUp.add("version.config")
             }
+
+            File(backupDirectory, "$backupId.meta").writeText(
+                "version=${version.getVersionName()}\\noptionsExisted=$optionsExisted\\nconfigExisted=$configExisted\\n"
+            )
 
             val safeMemory = recommendation.maxMemoryMb.coerceIn(512, 4096)
             val renderDistance = recommendation.renderDistance.coerceIn(2, 24)
@@ -158,31 +164,54 @@ object VoidPerformanceApplier {
 
         val optionsBackup = File(backupDirectory, "$backupId-options.txt")
         val configBackup = File(backupDirectory, "$backupId-version.config")
-        if (!optionsBackup.isFile && !configBackup.isFile) {
+        val manifestFile = File(backupDirectory, "$backupId.meta")
+        if (!manifestFile.isFile && !optionsBackup.isFile && !configBackup.isFile) {
             error("That backup was not found for the selected Minecraft installation.")
         }
+        val manifest = if (manifestFile.isFile) manifestFile.readLines().associate {
+            it.substringBefore("=") to it.substringAfter("=", "")
+        } else emptyMap()
+        val manifestVersion = manifest["version"]
+        if (manifestVersion != null && manifestVersion != version.getVersionName()) {
+            error("This backup belongs to Minecraft version $manifestVersion, not ${version.getVersionName()}.")
+        }
+        val optionsExisted = manifest["optionsExisted"]?.toBooleanStrictOrNull()
+        val configExisted = manifest["configExisted"]?.toBooleanStrictOrNull()
 
         val optionsFile = File(gameDirectory, "options.txt")
         val configFile = File(version.getZalithVersionPath(), "version.config")
         val safetyId = "void-before-restore-${System.currentTimeMillis()}"
-        if (optionsFile.isFile && optionsBackup.isFile) {
+        if (optionsFile.isFile) {
             optionsFile.copyTo(File(backupDirectory, "$safetyId-options.txt"), overwrite = false)
         }
-        if (configFile.isFile && configBackup.isFile) {
+        if (configFile.isFile) {
             configFile.copyTo(File(backupDirectory, "$safetyId-version.config"), overwrite = false)
         }
 
         val restored = mutableListOf<String>()
-        if (optionsBackup.isFile) {
-            optionsBackup.copyTo(optionsFile, overwrite = true)
-            restored.add("options.txt")
+        when {
+            optionsBackup.isFile -> {
+                optionsBackup.copyTo(optionsFile, overwrite = true)
+                restored.add("options.txt")
+            }
+            optionsExisted == false && optionsFile.exists() -> {
+                if (!optionsFile.delete()) error("Could not restore the original missing options.txt state.")
+                restored.add("options.txt (removed because it did not exist at backup time)")
+            }
         }
-        if (configBackup.isFile) {
-            configBackup.copyTo(configFile, overwrite = true)
-            val restoredConfig = com.movtery.zalithlauncher.game.version.installed.VersionConfig
-                .parseConfig(version.getVersionPath())
-            version.getVersionConfig().ramAllocation = restoredConfig.ramAllocation
-            restored.add("version.config")
+        when {
+            configBackup.isFile -> {
+                configBackup.copyTo(configFile, overwrite = true)
+                val restoredConfig = com.movtery.zalithlauncher.game.version.installed.VersionConfig
+                    .parseConfig(version.getVersionPath())
+                version.getVersionConfig().ramAllocation = restoredConfig.ramAllocation
+                restored.add("version.config")
+            }
+            configExisted == false && configFile.exists() -> {
+                if (!configFile.delete()) error("Could not restore the original missing version.config state.")
+                version.getVersionConfig().ramAllocation = -1
+                restored.add("version.config (removed because it did not exist at backup time)")
+            }
         }
 
         RestoreResult(
