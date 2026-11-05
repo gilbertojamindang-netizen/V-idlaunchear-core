@@ -177,7 +177,7 @@ object VoidPerformanceAdvisor {
         val valid = version.isValid()
         val clientJar = version.getClientJar()
         val gameDirectory = version.getGameDir()
-        return "Selected: ${version.getVersionName()} • Minecraft: ${info?.minecraftVersion ?: "unknown"} • Loader: $loader • Version folder: ${if (valid) "valid" else "missing/invalid"} • Client JAR: ${if (clientJar.isFile) "present" else "missing"} • Game data directory: ${if (gameDirectory.isDirectory) "present" else "not found"}. This checks installation files only; it does not launch or modify the game."
+        return "Selected: ${version.getVersionName()} • Minecraft: ${info?.minecraftVersion ?: "unknown"} • Loader: $loader • Version folder: ${if (valid) "valid" else "missing/invalid"} • Client JAR at direct version path: ${if (clientJar.isFile) "present" else "not present (may be inherited or incomplete)"} • Game data directory: ${if (gameDirectory.isDirectory) "present" else "not found"}. This checks installation files only; it does not launch or modify the game."
     }
 
     /** Count local mod files; compatibility still needs each mod's declared metadata. */
