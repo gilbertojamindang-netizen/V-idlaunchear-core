@@ -167,7 +167,7 @@ private fun DownloadHubHeader() {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 14.dp, top = 14.dp, bottom = 9.dp),
+            .padding(start = 14.dp, top = 14.dp, end = 14.dp, bottom = 9.dp),
         shape = RoundedCornerShape(26.dp),
         color = Color.Transparent,
         contentColor = Color.White
