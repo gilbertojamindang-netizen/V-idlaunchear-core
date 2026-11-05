@@ -812,6 +812,7 @@ fun HomeGrid(
                             )
                             saveVoidCoreEntry(message)
                             isCleaningCache = false
+                            showCacheCleanupConfirmation = false
                         }
                     },
                     enabled = !isCleaningCache
@@ -838,6 +839,11 @@ fun HomeGrid(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text("WORLDS IN THE CURRENT MINECRAFT INSTALLATION", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                    Text(
+                        "Close Minecraft before creating a backup so world files are stable while copied. Backups are stored locally for the currently selected installation.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     if (worldEntries.isEmpty()) {
                         Text("No local worlds were found. Select the Minecraft version that contains your saves.", style = MaterialTheme.typography.bodySmall)
                     }
