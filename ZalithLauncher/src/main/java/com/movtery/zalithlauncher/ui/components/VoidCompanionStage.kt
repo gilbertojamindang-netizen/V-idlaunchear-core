@@ -74,6 +74,8 @@ fun VoidCompanionStage(
         val squash = remember { Animatable(1f) }
         var dragging by remember { mutableStateOf(false) }
         var dropping by remember { mutableStateOf(false) }
+        var dragX by remember { mutableStateOf(0f) }
+        var dragY by remember { mutableStateOf(0f) }
 
         LaunchedEffect(maxX, maxY, dragging, dropping) {
             if (!dragging && !dropping) {
@@ -111,6 +113,8 @@ fun VoidCompanionStage(
                     detectDragGestures(
                         onDragStart = {
                             dragging = true
+                            dragX = offsetX.value
+                            dragY = offsetY.value
                             launch {
                                 offsetX.stop()
                                 offsetY.stop()
@@ -124,6 +128,7 @@ fun VoidCompanionStage(
                             launch {
                                 val lean = if (offsetX.value >= 0f) 18f else -18f
                                 offsetY.animateTo(maxY, tween(220))
+                                dragY = maxY
                                 launch { rotation.animateTo(lean, tween(130)) }
                                 launch { squash.animateTo(0.84f, tween(100)) }
                                 offsetY.animateTo(
@@ -140,6 +145,8 @@ fun VoidCompanionStage(
                                     1f,
                                     spring(dampingRatio = 0.48f, stiffness = Spring.StiffnessMedium)
                                 )
+                                dragY = offsetY.value
+                                dragX = offsetX.value
                                 dropping = false
                             }
                         },
@@ -148,16 +155,26 @@ fun VoidCompanionStage(
                             dragging = false
                             launch {
                                 offsetY.animateTo(maxY, tween(220))
+                                dragY = maxY
                                 rotation.animateTo(0f, spring())
                                 squash.animateTo(1f, spring())
+                                dragX = offsetX.value
+                                dragY = offsetY.value
                                 dropping = false
                             }
                         },
                         onDrag = { change, dragAmount ->
                             change.consume()
-                            offsetX.snapTo((offsetX.value + dragAmount.x).coerceIn(-maxX, maxX))
-                            offsetY.snapTo((offsetY.value + dragAmount.y).coerceIn(-maxY, maxY))
-                            rotation.snapTo((dragAmount.x / 9f).coerceIn(-18f, 18f))
+                            dragX = (dragX + dragAmount.x).coerceIn(-maxX, maxX)
+                            dragY = (dragY + dragAmount.y).coerceIn(-maxY, maxY)
+                            val nextX = dragX
+                            val nextY = dragY
+                            val nextRotation = (dragAmount.x / 9f).coerceIn(-18f, 18f)
+                            launch {
+                                offsetX.snapTo(nextX)
+                                offsetY.snapTo(nextY)
+                                rotation.snapTo(nextRotation)
+                            }
                         }
                     )
                 },
