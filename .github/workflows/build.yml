@@ -1,6 +1,9 @@
 name: Build Vøidlaunchear Debug APK
 
 on:
+  push:
+    branches:
+      - void-branding-foundation
   workflow_dispatch:
   workflow_call:
 
