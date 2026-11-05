@@ -11,6 +11,10 @@ package com.movtery.zalithlauncher.utils.device
 import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
+import com.movtery.zalithlauncher.game.multirt.RuntimesManager
+import com.movtery.zalithlauncher.game.version.installed.VersionsManager
+import com.movtery.zalithlauncher.setting.AllSettings
+import java.io.File
 import kotlin.math.min
 
 /**
@@ -133,6 +137,69 @@ object VoidPerformanceAdvisor {
             .joinToString(" ")
             .ifBlank { "Android device" }
 
+
+
+    /** Inspect installed Java runtimes and the active launcher's Java selection. */
+    fun javaDiagnostics(): String {
+        val currentVersion = VersionsManager.currentVersion.value
+        val installed = runCatching { RuntimesManager.getRuntimes(forceLoad = true) }
+            .getOrElse { error -> 
+                return "Unable to read installed Java runtimes: ${error.message ?: "unknown error"}"
+            }
+        val versionOverride = currentVersion?.getJavaRuntime()?.takeIf { it.isNotBlank() }
+        val globalRuntime = AllSettings.javaRuntime.state.takeIf { it.isNotBlank() }
+        val selectedName = versionOverride ?: globalRuntime
+        val selected = installed.firstOrNull { it.name == selectedName }
+        val compatible = installed.filter { it.isCompatible() }
+        val selectedLabel = when {
+            selectedName == null -> "automatic runtime selection"
+            selected == null -> "selected runtime '$selectedName' is not installed"
+            !selected.isCompatible() -> "selected runtime '$selectedName' is incompatible with this device architecture"
+            else -> "Java ${selected.javaVersion} (${selected.name}, ${selected.arch})"
+        }
+        val autoPick = if (AllSettings.autoPickJavaRuntime.state) "enabled" else "disabled"
+        val versionLabel = currentVersion?.getVersionName() ?: "no Minecraft version selected"
+        val availableLabel = compatible
+            .joinToString { "Java ${it.javaVersion}" }
+            .ifBlank { "none detected" }
+        return "Minecraft: $versionLabel • Selection: $selectedLabel • Auto-pick: $autoPick • Compatible installed runtimes: $availableLabel. Runtime compatibility also depends on the Minecraft version's Java requirement."
+    }
+
+    /** Inspect the selected installation and its client jar without changing files. */
+    fun minecraftDiagnostics(): String {
+        val version = VersionsManager.currentVersion.value
+            ?: return "No Minecraft version is currently selected. Choose an installed version before launching."
+        val info = version.getVersionInfo()
+        val loader = info?.loaderInfos
+            ?.joinToString { "${it.loader.displayName} ${it.version}" }
+            ?.takeIf { it.isNotBlank() }
+            ?: if (info == null) "metadata unavailable" else "Vanilla"
+        val valid = version.isValid()
+        val clientJar = version.getClientJar()
+        val gameDirectory = version.getGameDir()
+        return "Selected: ${version.getVersionName()} • Minecraft: ${info?.minecraftVersion ?: "unknown"} • Loader: $loader • Version folder: ${if (valid) "valid" else "missing/invalid"} • Client JAR: ${if (clientJar.isFile) "present" else "missing"} • Game data directory: ${if (gameDirectory.isDirectory) "present" else "not found"}. This checks installation files only; it does not launch or modify the game."
+    }
+
+    /** Count local mod files; compatibility still needs each mod's declared metadata. */
+    fun modDiagnostics(): String {
+        val version = VersionsManager.currentVersion.value
+            ?: return "No Minecraft version is selected. Select a version before checking its mods."
+        val modsDirectory = File(version.getGameDir(), "mods")
+        if (!modsDirectory.isDirectory) {
+            return "No mods folder exists for ${version.getVersionName()}. The selected installation currently has no local mods directory."
+        }
+        val candidates = modsDirectory.listFiles()
+            ?.filter { file ->
+                file.isFile && (
+                    file.extension.equals("jar", ignoreCase = true) ||
+                        file.name.endsWith(".jar.disabled", ignoreCase = true)
+                    )
+            }
+            ?: return "The mods folder exists, but its contents could not be read."
+        val disabled = candidates.count { it.name.endsWith(".disabled", ignoreCase = true) }
+        val enabled = candidates.size - disabled
+        return "Minecraft ${version.getVersionName()} • Mod files: ${candidates.size} • Enabled: $enabled • Disabled: $disabled. File counts do not prove version/loader compatibility; check each mod's declared Minecraft and loader support."
+    }
 
     /** Query Android's declared graphics capabilities without guessing a GPU model. */
     fun graphicsDiagnostics(context: Context): String {
