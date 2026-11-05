@@ -190,7 +190,8 @@ fun VoidCompanionStage(
                 yaw = yaw,
                 tapReaction = PetTapReaction.Interact,
                 dragYaw = false,
-                autonomousIdle = true
+                animation = if (dragging || dropping) null else com.movtery.petlib.PetAnimation.Idle,
+                autonomousIdle = !dragging && !dropping
             )
         }
     }
