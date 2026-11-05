@@ -1,17 +1,25 @@
 {
   "schemaVersion": 1,
   "app": {
-    "id": "com.movtery.zalithlauncher",
+    "id": "com.movtery.zalithlauncher.v2",
     "name": "VøidLaunchear",
-    "latestVersion": "1.0.6",
-    "releaseTag": "v1.0.6",
+    "latestVersion": "1.0.7",
+    "releaseTag": "v1.0.7",
     "releasePage": "https://github.com/gilbertojamindang-netizen/V-idlaunchear-core/releases"
   },
   "announcements": [
     {
+      "id": "v107-release",
+      "title": "VøidLaunchear 1.0.7 is available",
+      "message": "The ARM64 build is published. This release was built successfully by GitHub Actions; device-level testing is still required. More launcher improvements are planned for the next update.",
+      "category": "UPDATE",
+      "publishedAt": "2026-11-06T00:00:00Z",
+      "active": true
+    },
+    {
       "id": "welcome-void",
       "title": "Welcome to VøidLaunchear",
-      "message": "The VøidLaunchear update feed is ready for live announcements. New notices will appear here when the in-app feed is connected.",
+      "message": "Check this feed for launcher updates, service notices, and maintenance announcements.",
       "category": "INFO",
       "publishedAt": "2026-11-06T00:00:00Z",
       "active": true
