@@ -20,6 +20,7 @@ import com.movtery.zalithlauncher.setting.AllSettings
 import java.io.File
 import java.io.RandomAccessFile
 import java.nio.charset.StandardCharsets
+import java.util.Locale
 import kotlin.math.min
 
 /**
@@ -239,6 +240,7 @@ object VoidPerformanceAdvisor {
                 val value = line.lowercase()
                 listOf("exception", "error", "failed", "mixin", "outofmemory", "unsupportedclass").any(value::contains)
             }
+            .toList()
             .takeLast(3)
             .joinToString(" | ")
             .take(360)
