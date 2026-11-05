@@ -3,3 +3,5 @@ Source version: 1.0.6
 Includes latest main-screen full-body animated Minecraft player preview and Kotlin About screen compilation fix.
 Build all configured architectures and publish the ARM64 Debug APK as v1.0.6.
 Note: CI success confirms compilation only; physical-device testing remains separate.
+
+Release workflow fix: checkout source before reading app version metadata.
