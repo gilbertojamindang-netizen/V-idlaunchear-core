@@ -35,6 +35,7 @@ import com.movtery.zalithlauncher.setting.enums.DarkMode
 import com.movtery.zalithlauncher.setting.enums.FpsDisplayMode
 import com.movtery.zalithlauncher.setting.enums.GamepadInputMode
 import com.movtery.zalithlauncher.setting.enums.GestureActionType
+import com.movtery.zalithlauncher.setting.enums.LauncherFontStyle
 import com.movtery.zalithlauncher.setting.enums.MirrorSourceType
 import com.movtery.zalithlauncher.setting.enums.MouseControlMode
 import com.movtery.zalithlauncher.setting.enums.MouseTouchBlockMode
@@ -401,6 +402,9 @@ object AllSettings : SettingsRegistry() {
      * 启动器UI深色主题
      */
     val launcherDarkMode = enumSetting("launcherDarkMode", DarkMode.FollowSystem)
+
+    /** Launcher text font family. */
+    val launcherFontStyle = enumSetting("launcherFontStyle", LauncherFontStyle.SYSTEM)
 
     /**
      * 启动器语言
