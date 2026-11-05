@@ -6,6 +6,8 @@ pub enum AnimationId {
     Idle,
     /// 行走
     Walking,
+    /// 坐下呼吸姿态
+    Sitting,
 }
 
 /// 单帧动画姿态
@@ -71,6 +73,32 @@ pub(crate) const WALKING_PERIOD: f32 = 15. * std::f32::consts::PI;
 /// t 为累计动画时间（秒，已含速度缩放）。
 pub(crate) fn evaluate_walking(t: f32) -> AnimFrame {
     walking(t * 8.)
+}
+
+/// 坐下姿态的缓慢呼吸周期（秒）。
+pub(crate) const SITTING_PERIOD: f32 = std::f32::consts::TAU;
+
+/// 坐下循环：腿向前弯曲、躯干轻微后仰，并保留细小的呼吸/头部动作。
+pub(crate) fn evaluate_sitting(t: f32) -> AnimFrame {
+    let phase = t.rem_euclid(SITTING_PERIOD);
+    let breathe = (phase * 2.0).sin();
+    let glance = (phase * 0.7).sin();
+    AnimFrame {
+        body_rot: Vec3::new(-0.08, 0.0, 0.0),
+        head_rot: Vec3::new(glance * 0.025, (phase * 1.1).sin() * 0.035, 0.0),
+        arms: [
+            Vec3::new(-0.38, 0.0, -0.035),
+            Vec3::new(-0.38, 0.0, 0.035),
+        ],
+        legs: [
+            Vec3::new(-1.22 + breathe * 0.012, 0.0, 0.0),
+            Vec3::new(-1.22 + breathe * 0.012, 0.0, 0.0),
+        ],
+        body_pos: Vec3::new(0.0, -0.72 + breathe * 0.018, 0.0),
+        head_pos: breathe * 0.015,
+        cape_x: std::f32::consts::PI * 0.06,
+        cape_z: Some(0.0),
+    }
 }
 
 /// 行走动画，移植 skinview3d 的 WalkingAnimation
@@ -141,6 +169,20 @@ mod tests {
 
     /// 换基校验:原始 GLTF 基的新公式必须与旧渲染基公式呈 180°Y 共轭,
     /// 保证行走观感与换基前逐帧一致。
+    #[test]
+    fn sitting_pose_is_finite_and_keeps_a_bent_leg_posture() {
+        for index in 0..240 {
+            let frame = evaluate_sitting(index as f32 / 60.0);
+            assert!(frame.body_pos.is_finite());
+            assert!(frame.head_rot.is_finite());
+            assert!(frame.legs.iter().all(|leg| leg.x < -1.0));
+            assert!(frame.arms.iter().all(|arm| arm.is_finite()));
+        }
+        let first = evaluate_sitting(0.0);
+        let wrapped = evaluate_sitting(SITTING_PERIOD);
+        assert!(first.body_pos.abs_diff_eq(wrapped.body_pos, 1e-5));
+    }
+
     #[test]
     fn walking_matches_conjugated_reference() {
         let conj = |q: Quat| flip_quat(q).normalize();
