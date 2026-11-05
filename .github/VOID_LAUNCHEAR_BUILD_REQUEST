@@ -1,11 +1,3 @@
-Owner-requested Debug APK build.
-Source version: 1.0.6
-Includes latest main-screen full-body animated Minecraft player preview and Kotlin About screen compilation fix.
-Build all configured architectures and publish the ARM64 Debug APK as v1.0.6.
-Note: CI success confirms compilation only; physical-device testing remains separate.
-
-Release workflow fix: checkout source before reading app version metadata.
-
-Retry public ARM64 release after fixing checkout in publish job.
-
-Build v1.0.7 with Java-properties-safe Unicode app label.
+Download Lab fallback search build request
+Search fix commit: daa9446dd703f96ad3bdb330102ae6d102c19a3c
+Requested: 2026-11-05T22:27:19.999Z
