@@ -40,7 +40,16 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import java.util.concurrent.TimeUnit
 
-val URL_USER_AGENT: String = "${BuildKeys.LAUNCHER_SHORT_NAME}/Android_${BuildConfig.VERSION_NAME}"
+/**
+ * HTTP headers must contain ASCII-safe values. Never use the localized display name
+ * (for example "VøidLaunchear") as a User-Agent: OkHttp rejects non-ASCII bytes.
+ */
+private fun String.toHttpToken(fallback: String): String =
+    filter { it in 'a'..'z' || it in 'A'..'Z' || it in '0'..'9' || it == '-' || it == '_' || it == '.' }
+        .ifBlank { fallback }
+
+val URL_USER_AGENT: String =
+    "${BuildKeys.LAUNCHER_IDENTIFIER.toHttpToken("VoidLaunchear")}/Android_${BuildConfig.VERSION_NAME.toHttpToken("unknown")}"
 val TIME_OUT = TimeUnit.SECONDS.toMillis(10L)
 
 const val HOST_CURSEFORGE_API = "api.curseforge.com"
