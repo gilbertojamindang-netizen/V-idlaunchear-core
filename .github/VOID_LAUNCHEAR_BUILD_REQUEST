@@ -5,3 +5,5 @@ Build all configured architectures and publish the ARM64 Debug APK as v1.0.6.
 Note: CI success confirms compilation only; physical-device testing remains separate.
 
 Release workflow fix: checkout source before reading app version metadata.
+
+Retry public ARM64 release after fixing checkout in publish job.
