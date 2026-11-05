@@ -90,7 +90,7 @@ object VoidCoreCommandRouter {
             "device", "check device", "device info" -> Result(
                 Action.SHOW_DEVICE_SUMMARY,
                 "Device summary",
-                context?.let(VoidPerformanceAdvisor::deviceDiagnostics)
+                context?.let { VoidPerformanceAdvisor.deviceDiagnostics(it) }
                     ?: "${VoidPerformanceAdvisor.deviceSummary()} • Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT}). Basic device identification only; live memory details require an Android context."
             )
             "check minecraft", "minecraft" -> Result(
