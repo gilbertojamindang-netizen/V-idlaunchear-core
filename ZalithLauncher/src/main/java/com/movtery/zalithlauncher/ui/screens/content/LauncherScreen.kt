@@ -418,20 +418,53 @@ private fun AccountAvatarCenter(
     refreshKey: Any? = null,
     onClick: () -> Unit = {}
 ) {
+    val refreshWardrobe by AccountsManager.refreshWardrobe.collectAsStateWithLifecycle()
+    val armModel = account?.skinModelType?.toArmModel()
+    val skinStamp = account?.getSkinFile()?.lastModified()
+    val capeStamp = account?.getCapeFile()?.lastModified()
+    val skinBytes by produceState<ByteArray?>(
+        null, account, refreshKey, refreshWardrobe, skinStamp, armModel
+    ) {
+        value = withContext(Dispatchers.IO) {
+            account?.getSkinFile()?.takeIf { it.exists() }
+                ?.inputStream()?.use { it.readBytes() }
+        }
+    }
+    val capeBytes by produceState<ByteArray?>(
+        null, account, refreshKey, refreshWardrobe, capeStamp
+    ) {
+        value = withContext(Dispatchers.IO) {
+            account?.getCapeFile()?.takeIf { it.exists() }
+                ?.inputStream()?.use { it.readBytes() }
+        }
+    }
+
     Box(
         modifier = modifier
             .clip(shape = MaterialTheme.shapes.extraLarge)
             .clickable(onClick = onClick)
     ) {
         Column(
-            modifier = Modifier.padding(all = 12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 6.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             if (account != null) {
-                PlayerFace(
-                    account = account,
-                    avatarSize = 64.dp,
-                    refreshKey = refreshKey
+                PetModelView(
+                    modifier = Modifier
+                        .width(176.dp)
+                        .height(238.dp),
+                    skin = skinBytes,
+                    cape = capeBytes,
+                    arm = armModel,
+                    yaw = Math.toRadians(35.0).toFloat(),
+                    animation = PetAnimation.Idle,
+                    animationSpeed = 1.05f,
+                    tapReaction = PetTapReaction.Interact,
+                    dragYaw = true,
+                    autonomousIdle = true
                 )
             } else {
                 Icon(
@@ -442,7 +475,8 @@ private fun AccountAvatarCenter(
             }
 
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(3.dp)
             ) {
                 Text(
                     text = account?.username ?: stringResource(R.string.account_add_new_account),
