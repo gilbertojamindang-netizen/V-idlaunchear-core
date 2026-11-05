@@ -208,6 +208,9 @@ suspend fun searchAssets(
                     if (queryResult.getAssetsPage(platformClasses).data.isNotEmpty()) break
                 }
             } catch (e: Exception) {
+                // Cancellation is not a failed keyword: stop immediately so stale
+                // searches cannot continue after the user changes filters or leaves.
+                if (e is CancellationException) throw e
                 //当前关键词搜索失败，记录异常并继续尝试下一个
                 lastException = e
             }
