@@ -20,7 +20,6 @@ package com.movtery.zalithlauncher.ui.screens.splash
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.keyframes
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,6 +29,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.Text
