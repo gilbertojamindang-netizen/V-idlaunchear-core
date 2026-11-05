@@ -11,7 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
-import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
@@ -175,7 +174,7 @@ object VoidWorldBackupManager {
             name != "." &&
             name != ".." &&
             '/' !in name &&
-            '\\\\' !in name &&
+            '\\' !in name &&
             '\u0000' !in name
 
     private fun safeChild(parent: File, childName: String): File {
@@ -278,7 +277,7 @@ object VoidWorldBackupManager {
                     require(
                         entry.name.isNotBlank() &&
                             !entry.name.startsWith('/') &&
-                            '\\\\' !in entry.name &&
+                            '\\' !in entry.name &&
                             entry.name.split('/').none { it == ".." || it == "." }
                     ) {
                         "The backup contains an unsafe file path."
