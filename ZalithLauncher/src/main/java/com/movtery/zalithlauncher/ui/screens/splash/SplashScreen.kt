@@ -18,18 +18,24 @@
 
 package com.movtery.zalithlauncher.ui.screens.splash
 
-import androidx.compose.foundation.Image
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -46,6 +52,7 @@ import com.movtery.zalithlauncher.ui.screens.NestedNavDisplay
 import com.movtery.zalithlauncher.ui.screens.rememberTransitionSpec
 import com.movtery.zalithlauncher.viewmodel.SplashBackStackViewModel
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.delay
 
 /**
  * @param startAllTask 开启全部的解压任务
@@ -132,6 +139,14 @@ private fun LoadingScreen(
         currentKey = screenViewModel.splashScreen.currentKey
     ) { isVisible ->
         val ctx = rememberAnimatedContext(isVisible = isVisible)
+        val logoProgress = remember { Animatable(0f) }
+        LaunchedEffect(isVisible) {
+            if (isVisible) {
+                logoProgress.snapTo(0f)
+                delay(100)
+                logoProgress.animateTo(1f, animationSpec = tween(durationMillis = 850))
+            }
+        }
 
         Box(
             modifier = Modifier
@@ -143,11 +158,26 @@ private fun LoadingScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Image(
-                    modifier = Modifier.size(58.dp),
-                    painter = painterResource(R.drawable.img_launcher),
-                    contentDescription = stringResource(R.string.generic_loading)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        modifier = Modifier.offset(x = (-28f * (1f - logoProgress.value)).dp),
+                        text = "VØID",
+                        color = Color(0xFFD5B0FF),
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 2.sp
+                    )
+                    Text(
+                        modifier = Modifier.offset(x = (28f * (1f - logoProgress.value)).dp),
+                        text = "LAUNCHER",
+                        color = Color(0xFFF4E9FF),
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    )
+                }
                 LinearWavyProgressIndicator(
                     modifier = Modifier.width(128.dp),
                     wavelength = 32.dp
