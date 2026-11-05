@@ -99,8 +99,6 @@ fun AboutInfoScreen(
                     title = stringResource(R.string.about_launcher_title)
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        val launcherName = remember { launcherName() }
-
                         ButtonIconItem(
                             icon = painterResource(R.drawable.img_launcher),
                             title = "VøidLaunchear",
