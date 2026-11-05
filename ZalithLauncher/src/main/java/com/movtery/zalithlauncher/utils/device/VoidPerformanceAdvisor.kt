@@ -377,7 +377,27 @@ object VoidPerformanceAdvisor {
         return "OpenGL ES: $glLabel • Vulkan system feature flags: ${if (vulkan) "present" else "not both present"} • Android hardware identifier: $hardware. Exact GPU/driver capabilities depend on the selected renderer and driver; check Renderer settings for the live renderer."
     }
 
-    /** Read basic Android memory and ABI details for a real local device report. */
+    internal fun parseCpuModel(cpuInfo: String): String? {
+        val entries = cpuInfo.lineSequence()
+            .mapNotNull { line ->
+                val separator = line.indexOf(':')
+                if (separator <= 0) null
+                else line.substring(0, separator).trim().lowercase(Locale.ROOT) to
+                    line.substring(separator + 1).trim()
+            }
+            .filter { (_, value) -> value.isNotBlank() }
+        return entries.firstOrNull { it.first == "hardware" || it.first == "model name" }?.second
+            ?: entries.firstOrNull { it.first == "processor" }?.second
+    }
+
+    private fun cpuModelLabel(): String {
+        val cpuInfo = runCatching { File("/proc/cpuinfo").readText() }.getOrDefault("")
+        return parseCpuModel(cpuInfo)
+            ?: Build.HARDWARE.takeIf { it.isNotBlank() }
+            ?: "not reported"
+    }
+
+    /** Read basic Android CPU, memory and ABI details for a real local device report. */
     fun deviceDiagnostics(context: Context): String {
         val activityManager =
             context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
@@ -392,9 +412,11 @@ object VoidPerformanceAdvisor {
             "RAM information unavailable"
         }
         val abi = Build.SUPPORTED_ABIS.firstOrNull() ?: "unknown ABI"
-        val hardware = Build.HARDWARE.takeIf { it.isNotBlank() }?.let { " • $it" }.orEmpty()
+        val hardware = Build.HARDWARE.takeIf { it.isNotBlank() }?.let { " • SoC/hardware: $it" }.orEmpty()
+        val cpu = cpuModelLabel()
+        val logicalCores = Runtime.getRuntime().availableProcessors().coerceAtLeast(1)
         val lowRam = if (activityManager?.isLowRamDevice == true) "yes" else "no"
 
-        return "${deviceSummary()}$hardware • Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT}) • $ramLabel • $abi • Android low-RAM device: $lowRam"
+        return "${deviceSummary()}$hardware • CPU: $cpu • $logicalCores logical cores • Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT}) • $ramLabel • $abi • Android low-RAM device: $lowRam"
     }
 }
