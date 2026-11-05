@@ -1022,6 +1022,7 @@ private fun MouseControlLayout(
             modifier = Modifier.fillMaxSize(),
             screenSize = screenSize,
             cursorMode = cursorMode,
+            enableMouseClick = isBedrockTouchLayout || AllSettings.enableMouseClick.state,
             onTouch = onTouch,
             onMouse = onMouseMoved,
             gamepadViewModel = gamepadViewModel,
