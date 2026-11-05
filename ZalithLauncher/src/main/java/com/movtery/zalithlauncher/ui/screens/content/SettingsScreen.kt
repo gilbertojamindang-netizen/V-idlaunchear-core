@@ -19,6 +19,7 @@
 package com.movtery.zalithlauncher.ui.screens.content
 
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -39,10 +40,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.navigation3.runtime.entryProvider
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.ui.base.BaseScreen
@@ -140,6 +146,40 @@ private fun TabMenu(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(12.dp))
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 7.dp)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color(0xFF21132F))
+                .padding(horizontal = 10.dp, vertical = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            Text(
+                text = "Ø",
+                color = Color(0xFFE8C8FF),
+                fontSize = 25.sp,
+                fontWeight = FontWeight.Black
+            )
+            Text(
+                text = "VØID",
+                color = Color(0xFFE8C8FF),
+                fontSize = 11.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 1.5.sp,
+                maxLines = 1
+            )
+            Text(
+                text = "SETTINGS",
+                color = Color(0xFFB99ACD),
+                fontSize = 8.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.8.sp,
+                maxLines = 1
+            )
+        }
+        Spacer(modifier = Modifier.height(10.dp))
         settingItems.forEach { item ->
             if (item.division) {
                 HorizontalDivider(
