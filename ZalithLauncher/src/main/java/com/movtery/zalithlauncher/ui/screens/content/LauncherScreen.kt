@@ -51,7 +51,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -115,8 +114,6 @@ import com.movtery.zalithlauncher.ui.screens.content.home.server.LocalServerCard
 import com.movtery.zalithlauncher.ui.screens.content.home.version.LocalHomeCardLauncher
 import com.movtery.zalithlauncher.ui.screens.content.home.version.LocalHomeCardVersionSettings
 import com.movtery.zalithlauncher.viewmodel.ScreenBackStackViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 
 private const val ContentWeight = 7f
@@ -680,39 +677,6 @@ private fun ActionMenuTallerContent(
     toVersionManageScreen: () -> Unit,
     toVersionSettingsScreen: () -> Unit,
 ) {
-    val refreshWardrobe by AccountsManager.refreshWardrobe.collectAsStateWithLifecycle()
-    Column(
-        modifier = Modifier
-            .actionMenuDragAnchor()
-            .guideNode(
-                key = GuideKeys.Main.Step.CardDrag,
-                holeRadius = 0.dp,
-            )
-            .then(modifier),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
-        // 偏航角符号与停泊侧相反，让模型面向屏幕内容一侧
-        val yaw = Math.toRadians(
-            ((if (dockedSide == ActionMenuSide.START) 35.0 else -(35.0)) * (if (isRtl) -1 else 1))
-        ).toFloat()
-
-        val armModel = account?.skinModelType?.toArmModel()
-        val skinStamp = account?.getSkinFile()?.lastModified()
-        val capeStamp = account?.getCapeFile()?.lastModified()
-        val skinBytes by produceState<ByteArray?>(null, account, refreshWardrobe, skinStamp) {
-            value = withContext(Dispatchers.IO) {
-                account?.getSkinFile()?.takeIf { it.exists() }
-                    ?.inputStream()?.use { it.readBytes() }
-            }
-        }
-        val capeBytes by produceState<ByteArray?>(null, account, refreshWardrobe, capeStamp) {
-            value = withContext(Dispatchers.IO) {
-                account?.getCapeFile()?.takeIf { it.exists() }
-                    ?.inputStream()?.use { it.readBytes() }
-            }
-        }
-
         BackgroundCard(
             modifier = Modifier
                 .guideNode(
