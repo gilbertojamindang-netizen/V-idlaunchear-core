@@ -55,6 +55,8 @@ object VoidCacheCleaner {
                     failures.add("${directory.name}: ${error.message ?: "unable to clear"}")
                 } catch (error: SecurityException) {
                     failures.add("${directory.name}: permission denied")
+                } catch (error: Exception) {
+                    failures.add("${directory.name}: ${error.message ?: "unable to clear"}")
                 }
             }
         }
