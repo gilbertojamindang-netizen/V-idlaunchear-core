@@ -24,7 +24,8 @@ object VoidPerformanceAdvisor {
         BATTERY_SAVER,
         BALANCED,
         PERFORMANCE,
-        EXTREME
+        EXTREME,
+        CUSTOM
     }
 
     data class Recommendation(
@@ -114,6 +115,14 @@ object VoidPerformanceAdvisor {
                 simulationDistance = if (ramMb < 6144) 5 else 8,
                 entityDistancePercent = 100,
                 explanation = "Extreme is an experimental recommendation, not a guaranteed FPS boost. Reduce settings if frame times or heat worsen."
+            )
+            Profile.CUSTOM -> Recommendation(
+                profile = profile,
+                maxMemoryMb = safeRamMb,
+                renderDistance = if (ramMb <= 4096) 6 else 8,
+                simulationDistance = 4,
+                entityDistancePercent = 100,
+                explanation = "Custom starts from a conservative device-safe limit. Adjust the values below to fit your device and monitor stability."
             )
         }
     }
