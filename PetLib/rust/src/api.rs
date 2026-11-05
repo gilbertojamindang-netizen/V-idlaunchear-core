@@ -274,6 +274,21 @@ mod tests {
     }
 
     #[test]
+    fn sitting_animation_renders_visible_companion() {
+        let mut model = test_model();
+        model.play_animation(AnimationId::Sitting, 1.0, true);
+        let (w, h) = (225usize, 262usize);
+        let mut out = vec![0u8; w * h * 4];
+        for frame in 0..90 {
+            model
+                .render(w, h, frame as f32 / 60.0, 1.0 / 60.0, &mut out)
+                .unwrap();
+        }
+        let visible = out.chunks_exact(4).filter(|pixel| pixel[3] > 0).count();
+        assert!(visible > 1000, "sitting pose should keep the skin visible");
+    }
+
+    #[test]
     fn hit_test_matches_rendered_pixels() {
         let mut model = test_model();
         let (w, h) = (225usize, 262usize);
