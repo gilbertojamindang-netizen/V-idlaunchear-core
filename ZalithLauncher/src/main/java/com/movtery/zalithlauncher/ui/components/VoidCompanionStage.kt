@@ -86,9 +86,9 @@ fun VoidCompanionStage(
                     val targetX = if (maxX <= 0f) 0f else Random.nextFloat() * maxX * 2f - maxX
                     val targetY = if (maxY <= 0f) 0f else (Random.nextFloat() * 1.5f - 0.45f) * maxY
                     val duration = Random.nextInt(850, 1650)
-                    dragScope.launch { offsetX.animateTo(targetX, tween(duration)) }
-                    dragScope.launch { offsetY.animateTo(targetY.coerceIn(-maxY, maxY), tween(duration)) }
-                    launch {
+                    dragScope.dragScope.launch { offsetX.animateTo(targetX, tween(duration)) }
+                    dragScope.dragScope.launch { offsetY.animateTo(targetY.coerceIn(-maxY, maxY), tween(duration)) }
+                    dragScope.launch {
                         rotation.animateTo(
                             if (targetX >= offsetX.value) 5f else -5f,
                             tween(duration)
@@ -117,7 +117,7 @@ fun VoidCompanionStage(
                             dragging = true
                             dragX = offsetX.value
                             dragY = offsetY.value
-                            dragScope.launch {
+                            dragScope.dragScope.launch {
                                 offsetX.stop()
                                 offsetY.stop()
                                 rotation.stop()
@@ -127,17 +127,17 @@ fun VoidCompanionStage(
                         onDragEnd = {
                             dropping = true
                             dragging = false
-                            dragScope.launch {
+                            dragScope.dragScope.launch {
                                 val lean = if (offsetX.value >= 0f) 18f else -18f
                                 offsetY.animateTo(maxY, tween(220))
                                 dragY = maxY
-                                dragScope.launch { rotation.animateTo(lean, tween(130)) }
-                                dragScope.launch { squash.animateTo(0.84f, tween(100)) }
+                                dragScope.dragScope.launch { rotation.animateTo(lean, tween(130)) }
+                                dragScope.dragScope.launch { squash.animateTo(0.84f, tween(100)) }
                                 offsetY.animateTo(
                                     (maxY - 13f).coerceAtLeast(-maxY),
                                     spring(dampingRatio = 0.38f, stiffness = Spring.StiffnessMedium)
                                 )
-                                dragScope.launch {
+                                dragScope.dragScope.launch {
                                     rotation.animateTo(
                                         0f,
                                         spring(dampingRatio = 0.42f, stiffness = Spring.StiffnessLow)
@@ -155,7 +155,7 @@ fun VoidCompanionStage(
                         onDragCancel = {
                             dropping = true
                             dragging = false
-                            launch {
+                            dragScope.launch {
                                 offsetY.animateTo(maxY, tween(220))
                                 dragY = maxY
                                 rotation.animateTo(0f, spring())
@@ -172,7 +172,7 @@ fun VoidCompanionStage(
                             val nextX = dragX
                             val nextY = dragY
                             val nextRotation = (dragAmount.x / 9f).coerceIn(-18f, 18f)
-                            launch {
+                            dragScope.launch {
                                 offsetX.snapTo(nextX)
                                 offsetY.snapTo(nextY)
                                 rotation.snapTo(nextRotation)
