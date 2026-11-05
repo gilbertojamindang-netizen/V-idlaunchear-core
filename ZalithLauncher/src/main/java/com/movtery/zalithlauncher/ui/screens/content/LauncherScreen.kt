@@ -171,6 +171,8 @@ fun LauncherScreen(
             dragState.outerPaddingPx = with(LocalDensity.current) { ActionMenuOuterPadding.toPx() }
             dragState.menuSpanPx = parentWidthPx * (ActionMenuWeight / (ActionMenuWeight + ContentWeight))
 
+            var isBackgroundOnly by remember { mutableStateOf(false) }
+
             //拖拽期间以预览侧为准
             val effectiveSide = dragState.previewSide ?: dockedSide
 
@@ -196,6 +198,7 @@ fun LauncherScreen(
                 }
             }
 
+            if (!isBackgroundOnly) {
             // 内容区域
             Row(
                 modifier = Modifier
@@ -287,20 +290,35 @@ fun LauncherScreen(
                         )
                     }
                 }
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = "VØID CORE",
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 1.1.sp
-                    )
-                    Text(
-                        text = "VERSION ${BuildConfig.VERSION_NAME}",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 8.sp,
-                        letterSpacing = 0.7.sp
-                    )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            text = "VØID CORE",
+                            color = MaterialTheme.colorScheme.primary,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.1.sp
+                        )
+                        Text(
+                            text = "VERSION ${BuildConfig.VERSION_NAME}",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 8.sp,
+                            letterSpacing = 0.7.sp
+                        )
+                    }
+                    IconButton(
+                        modifier = Modifier.size(38.dp),
+                        onClick = { isBackgroundOnly = true }
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_visibility_off_outlined),
+                            contentDescription = "Hide home menu",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
 
@@ -330,6 +348,34 @@ fun LauncherScreen(
                         toAccountManageScreen = toAccountManageScreen,
                         toVersionManageScreen = toVersionManageScreen,
                         toVersionSettingsScreen = toVersionSettingsScreen
+                    )
+                }
+            }
+            }
+
+            if (isBackgroundOnly) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp)
+                        .clip(MaterialTheme.shapes.large)
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.82f))
+                        .clickable { isBackgroundOnly = false }
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_visibility_outlined),
+                        contentDescription = "Show home menu",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "SHOW UI",
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.sp,
+                        letterSpacing = 0.7.sp
                     )
                 }
             }
