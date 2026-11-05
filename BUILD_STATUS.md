@@ -31,6 +31,6 @@ Actual renderer support depends on the Android device, GPU, driver, and Minecraf
 
 ## Build
 
-The repository's `.github/workflows/push_ci.yml` invokes the debug build workflow on pushes. A fresh push was made to this branch to trigger that workflow. Build results must be checked in the GitHub Actions run and artifacts; the existence of a workflow alone is not proof that an APK built successfully.
+The repository's `.github/workflows/push_ci.yml` invokes the debug build workflow on pushes. A fresh commit was pushed, but the GitHub Actions API currently reports zero workflow runs. The build workflow also supports manual `workflow_dispatch`: open Actions → Build APK → Run workflow → choose `Debug`. Build results and APK artifacts must be checked before claiming success.
 
 Do not distribute an APK as tested or release-ready until the build and device checks above have passed.
