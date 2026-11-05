@@ -84,6 +84,7 @@ import com.movtery.zalithlauncher.game.support.touch_controller.touchControllerI
 import com.movtery.zalithlauncher.game.support.touch_controller.touchControllerTouchModifier
 import com.movtery.zalithlauncher.game.version.installed.Version
 import com.movtery.zalithlauncher.setting.AllSettings
+import com.movtery.zalithlauncher.setting.enums.GestureActionType
 import com.movtery.zalithlauncher.setting.enums.isLauncherInDarkTheme
 import com.movtery.zalithlauncher.setting.enums.toAction
 import com.movtery.zalithlauncher.terracotta.Terracotta
@@ -683,6 +684,7 @@ fun GameScreen(
                 //虚拟鼠标控制层
                 MouseControlLayout(
                     isTouchProxyEnabled = isTouchProxyEnabled,
+                    isBedrockTouchLayout = viewModel.currentControlFile?.name == "void_bedrock.json",
                     modifier = Modifier.fillMaxSize(),
                     cursorMode = cursorMode,
                     screenSize = screenSize,
@@ -980,6 +982,7 @@ private fun PreviewGameInfoBox() {
 @Composable
 private fun MouseControlLayout(
     isTouchProxyEnabled: Boolean,
+    isBedrockTouchLayout: Boolean,
     modifier: Modifier = Modifier,
     cursorMode: Int,
     screenSize: IntSize,
@@ -1011,6 +1014,9 @@ private fun MouseControlLayout(
         val capturedSpeedFactor = AllSettings.mouseCaptureSensitivity.state / 100f
         val capturedTapMouseAction = AllSettings.gestureTapMouseAction.state.toAction()
         val capturedLongPressMouseAction = AllSettings.gestureLongPressMouseAction.state.toAction()
+        val bedrockTapMouseAction = GestureActionType.MOUSE_RIGHT.toAction()
+        val bedrockLongPressMouseAction = GestureActionType.MOUSE_LEFT.toAction()
+        val enableCapturedTouchGestures = isBedrockTouchLayout || AllSettings.gestureControl.state
 
         SwitchableMouseLayout(
             modifier = Modifier.fillMaxSize(),
@@ -1024,8 +1030,10 @@ private fun MouseControlLayout(
                 CallbackBridge.putMouseEventWithCoords(LwjglGlfwKeycode.GLFW_MOUSE_BUTTON_LEFT.toInt(), gamePosition.x, gamePosition.y)
             },
             onCapturedTap = {
-                if (AllSettings.gestureControl.state) {
-                    CallbackBridge.putMouseEvent(capturedTapMouseAction)
+                if (enableCapturedTouchGestures) {
+                    CallbackBridge.putMouseEvent(
+                        if (isBedrockTouchLayout) bedrockTapMouseAction else capturedTapMouseAction
+                    )
                 }
             },
             onLongPress = {
@@ -1035,13 +1043,19 @@ private fun MouseControlLayout(
                 CallbackBridge.putMouseEvent(LwjglGlfwKeycode.GLFW_MOUSE_BUTTON_LEFT.toInt(), false)
             },
             onCapturedLongPress = {
-                if (AllSettings.gestureControl.state) {
-                    CallbackBridge.putMouseEvent(capturedLongPressMouseAction, true)
+                if (enableCapturedTouchGestures) {
+                    CallbackBridge.putMouseEvent(
+                        if (isBedrockTouchLayout) bedrockLongPressMouseAction else capturedLongPressMouseAction,
+                        true
+                    )
                 }
             },
             onCapturedLongPressEnd = {
-                if (AllSettings.gestureControl.state) {
-                    CallbackBridge.putMouseEvent(capturedLongPressMouseAction, false)
+                if (enableCapturedTouchGestures) {
+                    CallbackBridge.putMouseEvent(
+                        if (isBedrockTouchLayout) bedrockLongPressMouseAction else capturedLongPressMouseAction,
+                        false
+                    )
                 }
             },
             onPointerMove = { pos ->
