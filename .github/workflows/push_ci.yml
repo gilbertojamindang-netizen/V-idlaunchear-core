@@ -1,20 +1,24 @@
 name: Build CI
 
-concurrency:
-  group: voidlaunchear-ci-${{ github.ref }}
-  cancel-in-progress: true
-
+# APK builds are intentionally manual while VØID features are still in development.
+# Run this workflow from Actions only after the feature-complete review is approved.
 on:
-  push:
-    branches:
-      - '**'
   workflow_dispatch:
+    inputs:
+      variant:
+        description: Build variant
+        required: true
+        type: choice
+        options:
+          - Debug
+          - Release
+        default: Debug
 
 jobs:
   Build:
     uses: ./.github/workflows/build.yml
     with:
-      variant: Debug
+      variant: ${{ inputs.variant }}
     secrets:
       KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
