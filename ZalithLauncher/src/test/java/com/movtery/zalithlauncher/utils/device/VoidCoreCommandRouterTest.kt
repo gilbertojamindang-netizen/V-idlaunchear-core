@@ -58,6 +58,14 @@ class VoidCoreCommandRouterTest {
     }
 
     @Test
+    fun worldVaultCommandsOpenTheWorldManager() {
+        listOf("/world backup", "/worlds", "backup world", "/restore world").forEach { command ->
+            val result = VoidCoreCommandRouter.route(command)
+            assertEquals(VoidCoreCommandRouter.Action.OPEN_WORLD_VAULT, result.action)
+        }
+    }
+
+    @Test
     fun unknownCommandReturnsHelp() {
         assertEquals(
             VoidCoreCommandRouter.Action.HELP,
