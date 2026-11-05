@@ -79,6 +79,7 @@ import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.setting.enums.AppLanguage
 import com.movtery.zalithlauncher.setting.enums.BackgroundBlur
 import com.movtery.zalithlauncher.setting.enums.DarkMode
+import com.movtery.zalithlauncher.setting.enums.LauncherFontStyle
 import com.movtery.zalithlauncher.setting.enums.MirrorSourceType
 import com.movtery.zalithlauncher.setting.enums.applyLanguage
 import com.movtery.zalithlauncher.setting.unit.floatRange
@@ -198,6 +199,26 @@ fun LauncherSettingsScreen(
                         items = DarkMode.entries,
                         title = stringResource(R.string.settings_launcher_dark_mode_title),
                         getItemText = { stringResource(it.textRes) }
+                    )
+
+                    ListSettingsCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        position = CardPosition.Middle,
+                        unit = AllSettings.launcherFontStyle,
+                        items = LauncherFontStyle.entries,
+                        title = stringResource(R.string.settings_launcher_font_style_title),
+                        summary = stringResource(R.string.settings_launcher_font_style_summary),
+                        getItemText = {
+                            stringResource(
+                                when (it) {
+                                    LauncherFontStyle.SYSTEM -> R.string.font_style_system
+                                    LauncherFontStyle.SANS_SERIF -> R.string.font_style_sans_serif
+                                    LauncherFontStyle.SERIF -> R.string.font_style_serif
+                                    LauncherFontStyle.MONOSPACE -> R.string.font_style_monospace
+                                    LauncherFontStyle.CURSIVE -> R.string.font_style_cursive
+                                }
+                            )
+                        }
                     )
 
                     ListSettingsCard(
