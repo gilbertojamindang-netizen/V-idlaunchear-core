@@ -6,6 +6,8 @@
  */
 package com.movtery.zalithlauncher.utils.device
 
+import android.os.Build
+
 /**
  * Offline command interpretation for the VØID CORE assistant.
  *
@@ -87,7 +89,7 @@ object VoidCoreCommandRouter {
             "device", "check device", "device info" -> Result(
                 Action.SHOW_DEVICE_SUMMARY,
                 "Device summary",
-                "${deviceSummary()} • Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT}). This is a basic device identification check, not a live GPU benchmark."
+                "${VoidPerformanceAdvisor.deviceSummary()} • Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT}). This is a basic device identification check, not a live GPU benchmark."
             )
             "check minecraft", "minecraft" -> Result(
                 Action.REVIEW_MINECRAFT_INSTALLATION,
@@ -103,7 +105,7 @@ object VoidCoreCommandRouter {
             "help", "commands", "" -> Result(
                 Action.HELP,
                 "VØID CORE commands",
-                "Try /optimize, /low-end, /check gpu, /check java, /fix settings, /restore settings, /check mods, /fps, /check minecraft, or /clean cache."
+                "Try /device, /optimize, /low-end, /check gpu, /check java, /fix settings, /restore settings, /check mods, /fps, /check minecraft, or /clean cache."
             )
             else -> Result(
                 Action.HELP,
