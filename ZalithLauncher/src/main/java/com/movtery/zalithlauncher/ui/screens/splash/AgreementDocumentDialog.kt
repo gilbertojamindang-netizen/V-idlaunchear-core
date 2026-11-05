@@ -48,6 +48,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.context.readAssetFile
 import com.movtery.zalithlauncher.legal.AvailableAgreement
+import com.movtery.zalithlauncher.legal.displayTitle
 import com.movtery.zalithlauncher.ui.components.CardTitleLayout
 import com.movtery.zalithlauncher.ui.components.MarkdownView
 import com.movtery.zalithlauncher.ui.components.fadeEdge
@@ -119,7 +120,7 @@ fun AgreementDocumentDialog(
                             modifier = Modifier
                                 .padding(horizontal = 4.dp)
                                 .weight(1f),
-                            text = document.title
+                            text = document.displayTitle()
                         )
 
                         TextButton(
