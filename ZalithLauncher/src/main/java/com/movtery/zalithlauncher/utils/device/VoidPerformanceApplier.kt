@@ -70,7 +70,11 @@ object VoidPerformanceApplier {
             }
 
             File(backupDirectory, "$backupId.meta").writeText(
-                "version=${version.getVersionName()}\\noptionsExisted=$optionsExisted\\nconfigExisted=$configExisted\\n"
+                listOf(
+                    "version=${version.getVersionName()}",
+                    "optionsExisted=$optionsExisted",
+                    "configExisted=$configExisted"
+                ).joinToString(System.lineSeparator())
             )
 
             val safeMemory = recommendation.maxMemoryMb.coerceIn(512, 4096)
