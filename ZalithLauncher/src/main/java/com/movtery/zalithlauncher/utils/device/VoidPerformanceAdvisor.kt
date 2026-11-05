@@ -362,8 +362,14 @@ object VoidPerformanceAdvisor {
 
     /** Query Android's declared graphics capabilities without guessing a GPU model. */
     fun graphicsDiagnostics(context: Context): String {
-        val vulkan = runCatching {
-            checkVulkanSupport(context.packageManager)
+        val vulkanApiVersion = runCatching {
+            getVulkanApiVersion(context.packageManager)
+        }.getOrNull()
+        val vulkanVersionLabel = vulkanApiVersion
+            ?.let(::formatVulkanApiVersion)
+            ?: "not reported"
+        val vulkan11 = vulkanApiVersion != null && runCatching {
+            checkVulkan11Support(context.packageManager)
         }.getOrDefault(false)
         val activityManager =
             context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
@@ -374,7 +380,7 @@ object VoidPerformanceAdvisor {
             "not reported"
         }
         val hardware = Build.HARDWARE.takeIf { it.isNotBlank() } ?: "not reported"
-        return "OpenGL ES: $glLabel • Vulkan system feature flags: ${if (vulkan) "present" else "not both present"} • Android hardware identifier: $hardware. Exact GPU/driver capabilities depend on the selected renderer and driver; check Renderer settings for the live renderer."
+        return "OpenGL ES: $glLabel • Android-declared Vulkan API: $vulkanVersionLabel • Vulkan 1.1+: ${if (vulkan11) "yes" else "not reported/supported"} • Android hardware identifier: $hardware. These are PackageManager feature declarations, not a live renderer test; Vulkan may be software-emulated and driver/plugin compatibility must still be checked in Renderer settings."
     }
 
     internal fun parseCpuModel(cpuInfo: String): String? {
