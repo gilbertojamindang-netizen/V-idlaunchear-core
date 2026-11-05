@@ -45,6 +45,72 @@ import com.movtery.zalithlauncher.utils.festival.LocalFestivals
 import com.movtery.zalithlauncher.viewmodel.BackgroundViewModel
 import com.movtery.zalithlauncher.viewmodel.LocalBackgroundViewModel
 
+private val voidLight = lightColorScheme(
+    primary = Color(0xFF7436B8),
+    onPrimary = Color(0xFFFFFFFF),
+    primaryContainer = Color(0xFFEBD9FF),
+    onPrimaryContainer = Color(0xFF260047),
+    secondary = Color(0xFF62536F),
+    onSecondary = Color(0xFFFFFFFF),
+    secondaryContainer = Color(0xFFE9DDF2),
+    onSecondaryContainer = Color(0xFF21172C),
+    tertiary = Color(0xFF80536F),
+    onTertiary = Color(0xFFFFFFFF),
+    tertiaryContainer = Color(0xFFFFD8EF),
+    onTertiaryContainer = Color(0xFF32102A),
+    background = Color(0xFFFAF7FC),
+    onBackground = Color(0xFF1D1723),
+    surface = Color(0xFFFAF7FC),
+    onSurface = Color(0xFF1D1723),
+    surfaceVariant = Color(0xFFEAE0F0),
+    onSurfaceVariant = Color(0xFF4D4355),
+    outline = Color(0xFF7D7185),
+    outlineVariant = Color(0xFFCEC1D7),
+    inverseSurface = Color(0xFF32283A),
+    inverseOnSurface = Color(0xFFF6EDF9),
+    inversePrimary = Color(0xFFD8B8FF),
+    surfaceDim = Color(0xFFE2D9E8),
+    surfaceBright = Color(0xFFFAF7FC),
+    surfaceContainerLowest = Color(0xFFFFFFFF),
+    surfaceContainerLow = Color(0xFFF4EEF8),
+    surfaceContainer = Color(0xFFEEE7F3),
+    surfaceContainerHigh = Color(0xFFE8E0ED),
+    surfaceContainerHighest = Color(0xFFE2D9E8)
+)
+
+private val voidDark = darkColorScheme(
+    primary = Color(0xFFD8B8FF),
+    onPrimary = Color(0xFF3D0068),
+    primaryContainer = Color(0xFF5B258C),
+    onPrimaryContainer = Color(0xFFF1DBFF),
+    secondary = Color(0xFFD0BFDF),
+    onSecondary = Color(0xFF352742),
+    secondaryContainer = Color(0xFF4C3D59),
+    onSecondaryContainer = Color(0xFFECDDF7),
+    tertiary = Color(0xFFF1B8D7),
+    onTertiary = Color(0xFF4B1D3B),
+    tertiaryContainer = Color(0xFF653452),
+    onTertiaryContainer = Color(0xFFFFD8EF),
+    background = Color(0xFF08060D),
+    onBackground = Color(0xFFF0EAF5),
+    surface = Color(0xFF0B0811),
+    onSurface = Color(0xFFF0EAF5),
+    surfaceVariant = Color(0xFF4B4056),
+    onSurfaceVariant = Color(0xFFD0C3DA),
+    outline = Color(0xFF988AA5),
+    outlineVariant = Color(0xFF4B4056),
+    inverseSurface = Color(0xFFF0EAF5),
+    inverseOnSurface = Color(0xFF34283D),
+    inversePrimary = Color(0xFF7436B8),
+    surfaceDim = Color(0xFF08060D),
+    surfaceBright = Color(0xFF393044),
+    surfaceContainerLowest = Color(0xFF05040A),
+    surfaceContainerLow = Color(0xFF15101D),
+    surfaceContainer = Color(0xFF1B1525),
+    surfaceContainerHigh = Color(0xFF261E32),
+    surfaceContainerHighest = Color(0xFF30263D)
+)
+
 private val embermireLight = lightColorScheme(
     primary = primaryLight.embermire,
     onPrimary = onPrimaryLight.embermire,
@@ -629,6 +695,7 @@ fun ZalithLauncherTheme(
                 ColorThemeType.VERDANTFIELD -> verdantFieldDark
                 ColorThemeType.URBAN_ASH -> urbanAshDark
                 ColorThemeType.VERDANT_DAWN -> verdantDawnDark
+                ColorThemeType.VOID -> voidDark
                 ColorThemeType.CUSTOM -> customDark(
                     color = customColor,
                     style = customPaletteStyle
@@ -644,6 +711,7 @@ fun ZalithLauncherTheme(
                 ColorThemeType.VERDANTFIELD -> verdantFieldLight
                 ColorThemeType.URBAN_ASH -> urbanAshLight
                 ColorThemeType.VERDANT_DAWN -> verdantDawnLight
+                ColorThemeType.VOID -> voidLight
                 ColorThemeType.CUSTOM -> customLight(
                     color = customColor,
                     style = customPaletteStyle
