@@ -142,6 +142,8 @@
     <string name="theme_color_urban_ash">Urban Ash</string>
     <!-- Option of the theme color setting in launcher settings -->
     <string name="theme_color_verdant_dawn">Silent Forest Dawn</string>
+    <!-- Vøidlaunchear signature black and neon-purple theme -->
+    <string name="theme_color_void">VØID — Neon Purple</string>
     <!-- Title of the color picker dialog -->
     <string name="theme_color_picker_title">Color Picker</string>
     <!-- Button in the color picker dialog to edit the color as a hex code -->
