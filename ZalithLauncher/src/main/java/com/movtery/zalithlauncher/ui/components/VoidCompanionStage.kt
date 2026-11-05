@@ -10,7 +10,6 @@ package com.movtery.zalithlauncher.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -68,7 +67,7 @@ fun VoidCompanionStage(
         contentAlignment = Alignment.Center
     ) {
         PetModelView(
-            modifier = Modifier.size(width = 132.dp, height = 190.dp),
+            modifier = Modifier.fillMaxSize(),
             skin = skin,
             cape = cape,
             arm = arm,
