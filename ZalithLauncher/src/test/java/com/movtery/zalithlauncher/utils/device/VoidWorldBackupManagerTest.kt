@@ -24,7 +24,7 @@ class VoidWorldBackupManagerTest {
         assertFalse(VoidWorldBackupManager.isSafeWorldName(".."))
         assertFalse(VoidWorldBackupManager.isSafeWorldName("../outside"))
         assertFalse(VoidWorldBackupManager.isSafeWorldName("folder/world"))
-        assertFalse(VoidWorldBackupManager.isSafeWorldName("folder\\\\world"))
+        assertFalse(VoidWorldBackupManager.isSafeWorldName("folder\\world"))
         assertFalse(VoidWorldBackupManager.isSafeWorldName("bad\u0000name"))
     }
 
@@ -42,7 +42,7 @@ class VoidWorldBackupManagerTest {
         assertFalse(VoidWorldBackupManager.isSafeArchiveEntryName("../outside.txt"))
         assertFalse(VoidWorldBackupManager.isSafeArchiveEntryName("region/../../outside.txt"))
         assertFalse(VoidWorldBackupManager.isSafeArchiveEntryName("region/./level.dat"))
-        assertFalse(VoidWorldBackupManager.isSafeArchiveEntryName("region\\\\outside.txt"))
+        assertFalse(VoidWorldBackupManager.isSafeArchiveEntryName("region\\outside.txt"))
         assertFalse(VoidWorldBackupManager.isSafeArchiveEntryName("region/\u0000bad.dat"))
     }
 }
