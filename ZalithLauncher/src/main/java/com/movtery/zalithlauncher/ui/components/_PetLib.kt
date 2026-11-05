@@ -31,6 +31,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.delay
 import com.movtery.petlib.ArmModel
 import com.movtery.petlib.PetAnimation
 import com.movtery.petlib.PetController
@@ -87,6 +88,7 @@ fun PetModelView(
     tapReaction: PetTapReaction = PetTapReaction.Squash,
     dragYaw: Boolean = true,
     gazeEnabled: Boolean = true,
+    autonomousIdle: Boolean = false,
 ) {
     val context = LocalContext.current
     val petController = remember {
@@ -102,9 +104,22 @@ fun PetModelView(
     LaunchedEffect(petController, cape) {
         petController.setCape(cape)
     }
-    LaunchedEffect(petController, animation, animationSpeed) {
-        if (animation != null) {
+    LaunchedEffect(petController, animation, animationSpeed, autonomousIdle) {
+        if (autonomousIdle) {
+            // Light idle/walk cycle for the launcher companion. This animates in place;
+            // it does not pretend to provide physical dragging or ragdoll physics.
+            while (true) {
+                petController.playAnimation(PetAnimation.Idle, animationSpeed)
+                delay(kotlin.random.Random.nextLong(2800L, 5200L))
+                petController.rotateYaw(if (kotlin.random.Random.nextBoolean()) 0.65f else -0.65f)
+                petController.playAnimation(PetAnimation.Walking, animationSpeed)
+                delay(kotlin.random.Random.nextLong(1400L, 2300L))
+                petController.playAnimation(PetAnimation.Idle, animationSpeed)
+            }
+        } else if (animation != null) {
             petController.playAnimation(animation, animationSpeed)
+        } else {
+            petController.stopAnimation()
         }
     }
     LaunchedEffect(petController, yaw) {
