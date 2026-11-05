@@ -784,7 +784,7 @@ fun HomeGrid(
             title = { Text("VØID CORE") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
-                    Text("Offline command console. Try /help, /device, /optimize, /low-end, /check gpu, /check java, /check mods, or /fps.", style = MaterialTheme.typography.bodySmall)
+                    Text("Offline command console. Try /help, /device, /optimize, /low-end, /check gpu, /check java, /check mods, /check minecraft, /restore settings, /clean cache, or /fps.", style = MaterialTheme.typography.bodySmall)
                     voidCoreHistory.takeLast(4).forEach { Text(it, style = MaterialTheme.typography.bodySmall) }
                     OutlinedTextField(value = voidCoreInput, onValueChange = { voidCoreInput = it }, modifier = Modifier.fillMaxWidth(), singleLine = true, label = { Text("Enter a command") })
                 }
