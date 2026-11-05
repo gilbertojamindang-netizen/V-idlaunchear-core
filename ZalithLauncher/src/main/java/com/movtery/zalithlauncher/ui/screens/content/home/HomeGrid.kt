@@ -47,6 +47,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -56,6 +60,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -86,6 +91,7 @@ import com.movtery.zalithlauncher.ui.screens.content.home.server.ServerCardSetti
 import com.movtery.zalithlauncher.ui.screens.content.home.version.VersionCardManager
 import com.movtery.zalithlauncher.ui.theme.cardColor
 import com.movtery.zalithlauncher.ui.theme.onCardColor
+import com.movtery.zalithlauncher.utils.device.VoidCoreCommandRouter
 import com.movtery.zalithlauncher.utils.device.VoidPerformanceAdvisor
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -126,6 +132,9 @@ fun HomeGrid(
     }
     //长按调整工具栏触发的卡片操作
     var operation by remember { mutableStateOf<HomeCardOperation>(HomeCardOperation.None) }
+    var showVoidCore by remember { mutableStateOf(false) }
+    var voidCoreInput by remember { mutableStateOf("") }
+    val voidCoreHistory = remember { mutableStateListOf<String>() }
 
     // 播种持久化的用户卡片布局
     LaunchedEffect(Unit) {
@@ -425,6 +434,20 @@ fun HomeGrid(
                 }
             }
 
+            Box(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 6.dp)
+                    .background(Brush.linearGradient(listOf(Color(0xFF29143B), Color(0xFF120D1B))), RoundedCornerShape(18.dp))
+                    .clickable { showVoidCore = true }.padding(horizontal = 15.dp, vertical = 13.dp)
+            ) {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                    Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                        Text("VØID CORE", color = Color(0xFFE5CCFF), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.ExtraBold)
+                        Text("LOCAL COMMAND ASSISTANT • OFFLINE", color = Color(0xFFB7A2C8), style = MaterialTheme.typography.labelSmall)
+                    }
+                    Text("OPEN CONSOLE  ›", color = Color(0xFFD7B3FF), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                }
+            }
+
             val systemCards = HomeCards.systemCards()
             if (!systemCards.isEmpty()) {
                 Column(
@@ -484,6 +507,30 @@ fun HomeGrid(
         operation = operation,
         onChange = { operation = it }
     )
+    if (showVoidCore) {
+        AlertDialog(
+            onDismissRequest = { showVoidCore = false },
+            title = { Text("VØID CORE") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                    Text("Offline command console. Try /help, /optimize, /low-end, /check gpu, /check java, /check mods, or /fps.", style = MaterialTheme.typography.bodySmall)
+                    voidCoreHistory.takeLast(4).forEach { Text(it, style = MaterialTheme.typography.bodySmall) }
+                    OutlinedTextField(value = voidCoreInput, onValueChange = { voidCoreInput = it }, modifier = Modifier.fillMaxWidth(), singleLine = true, label = { Text("Enter a command") })
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    val command = voidCoreInput.trim()
+                    if (command.isNotEmpty()) {
+                        val response = VoidCoreCommandRouter.route(command)
+                        voidCoreHistory.add("> " + command + "\n" + response.title + ": " + response.message + if (response.requiresConfirmation) "\nConfirmation required before this action." else "")
+                        voidCoreInput = ""
+                    }
+                }, enabled = voidCoreInput.isNotBlank()) { Text("RUN") }
+            },
+            dismissButton = { TextButton(onClick = { showVoidCore = false }) { Text("CLOSE") } }
+        )
+    }
 }
 
 @Composable
