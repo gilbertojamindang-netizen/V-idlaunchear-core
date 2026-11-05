@@ -39,6 +39,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -97,6 +98,7 @@ import com.movtery.zalithlauncher.utils.device.VoidCoreCommandRouter
 import com.movtery.zalithlauncher.utils.device.VoidCacheCleaner
 import com.movtery.zalithlauncher.utils.device.VoidPerformanceApplier
 import com.movtery.zalithlauncher.utils.device.VoidPerformanceAdvisor
+import com.movtery.zalithlauncher.utils.device.VoidWorldBackupManager
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
@@ -178,6 +180,13 @@ fun HomeGrid(
     var operation by remember { mutableStateOf<HomeCardOperation>(HomeCardOperation.None) }
     var showVoidCore by remember { mutableStateOf(false) }
     var voidCoreInput by remember { mutableStateOf("") }
+    var showWorldVault by remember { mutableStateOf(false) }
+    var showWorldRestoreConfirmation by remember { mutableStateOf(false) }
+    var selectedWorldBackupId by remember { mutableStateOf<String?>(null) }
+    var worldEntries by remember { mutableStateOf<List<VoidWorldBackupManager.WorldInfo>>(emptyList()) }
+    var worldBackups by remember { mutableStateOf<List<VoidWorldBackupManager.BackupInfo>>(emptyList()) }
+    var isWorldOperationRunning by remember { mutableStateOf(false) }
+    var worldVaultMessage by remember { mutableStateOf<String?>(null) }
     var showPerformanceApply by remember { mutableStateOf(false) }
     var showPerformanceRestore by remember { mutableStateOf(false) }
     var showCacheCleanupConfirmation by remember { mutableStateOf(false) }
@@ -188,6 +197,19 @@ fun HomeGrid(
         mutableStateOf(performancePreferences.getString("last_backup", null))
     }
     val performanceScope = rememberCoroutineScope()
+    val worldVaultScope = rememberCoroutineScope()
+    suspend fun refreshWorldVault() {
+        worldEntries = runCatching { VoidWorldBackupManager.listWorlds() }
+            .getOrElse { error ->
+                worldVaultMessage = "World list unavailable: ${error.message ?: "unknown error"}"
+                emptyList()
+            }
+        worldBackups = runCatching { VoidWorldBackupManager.listBackups() }
+            .getOrElse { error ->
+                worldVaultMessage = "Backup list unavailable: ${error.message ?: "unknown error"}"
+                emptyList()
+            }
+    }
     val voidCorePreferences = remember(appContext) {
         appContext.getSharedPreferences("void_core", android.content.Context.MODE_PRIVATE)
     }
@@ -602,6 +624,32 @@ fun HomeGrid(
                 }
             }
 
+            Box(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 3.dp)
+                    .background(Brush.linearGradient(listOf(Color(0xFF241432), Color(0xFF100C18))), RoundedCornerShape(18.dp))
+                    .clickable {
+                        showWorldVault = true
+                        worldVaultScope.launch {
+                            isWorldOperationRunning = true
+                            refreshWorldVault()
+                            isWorldOperationRunning = false
+                        }
+                    }
+                    .padding(horizontal = 15.dp, vertical = 13.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                        Text("WORLD VAULT", color = Color(0xFFE5CCFF), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.ExtraBold)
+                        Text("LOCAL WORLD BACKUPS • SAFE RESTORE", color = Color(0xFFB7A2C8), style = MaterialTheme.typography.labelSmall)
+                    }
+                    Text("OPEN  ›", color = Color(0xFFD7B3FF), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                }
+            }
+
             val systemCards = HomeCards.systemCards()
             if (!systemCards.isEmpty()) {
                 Column(
@@ -775,6 +823,137 @@ fun HomeGrid(
                     onClick = { showCacheCleanupConfirmation = false },
                     enabled = !isCleaningCache
                 ) { Text("CANCEL") }
+            }
+        )
+    }
+    if (showWorldVault) {
+        AlertDialog(
+            onDismissRequest = { if (!isWorldOperationRunning) showWorldVault = false },
+            title = { Text("VØID WORLD VAULT") },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 420.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("WORLDS IN THE CURRENT MINECRAFT INSTALLATION", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                    if (worldEntries.isEmpty()) {
+                        Text("No local worlds were found. Select the Minecraft version that contains your saves.", style = MaterialTheme.typography.bodySmall)
+                    }
+                    worldEntries.forEach { world ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(world.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                                Text("${world.sizeBytes / (1024L * 1024L)} MB", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            TextButton(
+                                enabled = !isWorldOperationRunning,
+                                onClick = {
+                                    worldVaultScope.launch {
+                                        isWorldOperationRunning = true
+                                        val outcome = runCatching { VoidWorldBackupManager.createBackup(world.name) }
+                                        worldVaultMessage = outcome.fold(
+                                            onSuccess = { "Backup created for ${it.worldName}: ${it.id}" },
+                                            onFailure = { "Backup failed: ${it.message ?: "unknown error"}" }
+                                        )
+                                        refreshWorldVault()
+                                        isWorldOperationRunning = false
+                                    }
+                                }
+                            ) { Text("BACK UP") }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.fillMaxWidth().height(1.dp).background(MaterialTheme.colorScheme.outlineVariant))
+                    Text("BACKUP ARCHIVES", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                    if (worldBackups.isEmpty()) {
+                        Text("Your VØID backup archive is empty.", style = MaterialTheme.typography.bodySmall)
+                    }
+                    worldBackups.forEach { backup ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(backup.worldName, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                                Text(
+                                    "${java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault()).format(java.util.Date(backup.createdAt))} • ${backup.sizeBytes / (1024L * 1024L)} MB",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            TextButton(
+                                enabled = !isWorldOperationRunning,
+                                onClick = {
+                                    selectedWorldBackupId = backup.id
+                                    showWorldRestoreConfirmation = true
+                                }
+                            ) { Text("RESTORE") }
+                        }
+                    }
+                    worldVaultMessage?.let {
+                        Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                    }
+                    if (isWorldOperationRunning) {
+                        Text("WORKING…", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = !isWorldOperationRunning,
+                    onClick = {
+                        worldVaultScope.launch {
+                            isWorldOperationRunning = true
+                            refreshWorldVault()
+                            isWorldOperationRunning = false
+                        }
+                    }
+                ) { Text("REFRESH") }
+            },
+            dismissButton = {
+                TextButton(
+                    enabled = !isWorldOperationRunning,
+                    onClick = { showWorldVault = false }
+                ) { Text("CLOSE") }
+            }
+        )
+    }
+    if (showWorldRestoreConfirmation && selectedWorldBackupId != null) {
+        AlertDialog(
+            onDismissRequest = { showWorldRestoreConfirmation = false },
+            title = { Text("RESTORE WORLD BACKUP?") },
+            text = {
+                Text("The current world with this backup's name will be backed up first, then replaced. Do not close the launcher while the restore is running.")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val backupId = selectedWorldBackupId ?: return@Button
+                        showWorldRestoreConfirmation = false
+                        worldVaultScope.launch {
+                            isWorldOperationRunning = true
+                            val outcome = runCatching { VoidWorldBackupManager.restoreBackup(backupId) }
+                            worldVaultMessage = outcome.fold(
+                                onSuccess = {
+                                    "Restored ${it.worldName}. Safety archive: ${it.safetyBackupId ?: "not needed"}"
+                                },
+                                onFailure = { "Restore failed: ${it.message ?: "unknown error"}" }
+                            )
+                            refreshWorldVault()
+                            isWorldOperationRunning = false
+                        }
+                    },
+                    enabled = !isWorldOperationRunning
+                ) { Text("RESTORE") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showWorldRestoreConfirmation = false }) { Text("CANCEL") }
             }
         )
     }
