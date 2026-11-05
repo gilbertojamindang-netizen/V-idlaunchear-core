@@ -395,6 +395,20 @@ pub extern "system" fn Java_com_movtery_petlib_PetLibNative_nativePlayAnimation(
 }
 
 #[no_mangle]
+pub extern "system" fn Java_com_movtery_petlib_PetLibNative_nativePlayRagdoll(
+    _env: JNIEnv,
+    _class: JClass,
+    ptr: jlong,
+) {
+    guard(|| {
+        // SAFETY: 句柄由宿主渲染线程独占使用。
+        if let Some(model) = unsafe { model_from(ptr) } {
+            model.play_ragdoll();
+        }
+    })
+}
+
+#[no_mangle]
 pub extern "system" fn Java_com_movtery_petlib_PetLibNative_nativeStopAnimation(
     _env: JNIEnv,
     _class: JClass,
