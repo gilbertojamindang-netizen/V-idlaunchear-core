@@ -143,3 +143,44 @@ jobs:
           name: Void Launchear APK (${{ matrix.arch }})
           path: ZalithLauncher/build/outputs/apk/debug/Void-Launchear-*.apk
           if-no-files-found: error
+
+  publish-public-apk:
+    name: Publish public ARM64 APK
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - name: Download ARM64 APK
+        uses: actions/download-artifact@v4
+        with:
+          name: Void Launchear APK (arm64)
+          path: release-assets
+
+      - name: Verify APK asset
+        run: |
+          apk="$(find release-assets -maxdepth 2 -type f -name '*.apk' -print -quit)"
+          if [ -z "$apk" ]; then
+            echo "ARM64 APK artifact is missing"
+            exit 1
+          fi
+          file "$apk"
+          test "$(stat -c%s "$apk")" -gt 100000000
+          echo "APK ready for public release: $apk"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.3
+          name: VøidLaunchear 1.0.3 — ARM64
+          body: |
+            Public ARM64 Debug APK for VøidLaunchear 1.0.3.
+
+            Download: Void-Launchear-1.0.3-arm64-Debug.apk
+
+            This is a successful CI build. It has not yet been verified on a physical Android device.
+          files: release-assets/*.apk
+          fail_on_unmatched_files: true
+          make_latest: true
