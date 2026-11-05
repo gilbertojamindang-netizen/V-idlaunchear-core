@@ -124,6 +124,10 @@ impl PetModel {
         self.skeleton.play_animation(id, speed, head_follow);
     }
 
+    pub fn play_ragdoll(&mut self) {
+        self.skeleton.play_ragdoll();
+    }
+
     pub fn stop_animation(&mut self) {
         self.skeleton.stop_animation();
     }
