@@ -466,7 +466,6 @@ fun JoystickStyleWidget(
     var joystickPosition by remember { mutableStateOf(centerPoint) }
     var isLocked by remember { mutableStateOf(false) }
     var internalCanLock by remember { mutableStateOf(false) }
-    var lastDragPosition by remember { mutableStateOf(Offset.Zero) }
 
     fun updateJoystickState(position: Offset) {
         val clampedPosition = position.clampToRegion(
@@ -483,7 +482,7 @@ fun JoystickStyleWidget(
 
         internalCanLock =
             direction == JoystickDirection.North &&
-            lastDragPosition.y < -lockThresholdPx
+            (clampedPosition.y - centerPoint.y) < -lockThresholdPx
     }
 
     val currentBackgroundColor = remember(theme.backgroundColor, theme.alpha) {
@@ -516,13 +515,11 @@ fun JoystickStyleWidget(
                     detectDragGestures(
                         onDragStart = { offset ->
                             if (currentBackgroundRegion.contains(offset.x.toInt(), offset.y.toInt())) {
-                                lastDragPosition = offset
                                 updateJoystickState(offset)
                             }
                         },
                         onDrag = { change, _ ->
                             change.consume()
-                            lastDragPosition = change.position
                             if (isLocked) isLocked = false
                             updateJoystickState(change.position)
                         },
