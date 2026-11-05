@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.movtery.petlib.ArmModel
 import com.movtery.petlib.PetAnimation
 import com.movtery.petlib.PetTapReaction
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
@@ -80,6 +81,7 @@ fun VoidCompanionStage(
         val squash = remember { Animatable(1f) }
         var dragging by remember { mutableStateOf(false) }
         var dropping by remember { mutableStateOf(false) }
+        var dropJob by remember { mutableStateOf<Job?>(null) }
         var ragdollTrigger by remember { mutableIntStateOf(0) }
         var sitting by remember { mutableStateOf(false) }
         var dragX by remember { mutableStateOf(0f) }
@@ -120,6 +122,9 @@ fun VoidCompanionStage(
                 .pointerInput(maxX, maxY) {
                     detectDragGestures(
                         onDragStart = {
+                            dropJob?.cancel()
+                            dropJob = null
+                            dropping = false
                             sitting = false
                             dragging = true
                             dragX = offsetX.value
@@ -136,23 +141,22 @@ fun VoidCompanionStage(
                             if (releasedWhileAirborne) ragdollTrigger++
                             dropping = true
                             dragging = false
-                            dragScope.launch {
+                            dropJob?.cancel()
+                            dropJob = dragScope.launch {
                                 val direction = if (offsetX.value >= 0f) 1f else -1f
                                 val lean = direction * if (releasedWhileAirborne) 64f else 18f
                                 offsetY.animateTo(maxY, tween(220))
                                 dragY = maxY
-                                dragScope.launch { rotation.animateTo(lean, tween(130)) }
-                                dragScope.launch { squash.animateTo(if (releasedWhileAirborne) 0.74f else 0.84f, tween(100)) }
+                                rotation.animateTo(lean, tween(130))
+                                squash.animateTo(if (releasedWhileAirborne) 0.74f else 0.84f, tween(100))
                                 offsetY.animateTo(
                                     (maxY - 13f).coerceAtLeast(-maxY),
                                     spring(dampingRatio = 0.38f, stiffness = Spring.StiffnessMedium)
                                 )
-                                dragScope.launch {
-                                    rotation.animateTo(
-                                        0f,
-                                        spring(dampingRatio = 0.42f, stiffness = Spring.StiffnessLow)
-                                    )
-                                }
+                                rotation.animateTo(
+                                    0f,
+                                    spring(dampingRatio = 0.42f, stiffness = Spring.StiffnessLow)
+                                )
                                 squash.animateTo(
                                     1f,
                                     spring(dampingRatio = 0.48f, stiffness = Spring.StiffnessMedium)
@@ -161,12 +165,14 @@ fun VoidCompanionStage(
                                 dragX = offsetX.value
                                 if (releasedWhileAirborne) delay(1450L)
                                 dropping = false
+                                dropJob = null
                             }
                         },
                         onDragCancel = {
                             dropping = true
                             dragging = false
-                            dragScope.launch {
+                            dropJob?.cancel()
+                            dropJob = dragScope.launch {
                                 offsetY.animateTo(maxY, tween(220))
                                 dragY = maxY
                                 rotation.animateTo(0f, spring())
@@ -174,6 +180,7 @@ fun VoidCompanionStage(
                                 dragX = offsetX.value
                                 dragY = offsetY.value
                                 dropping = false
+                                dropJob = null
                             }
                         },
                         onDrag = { change, dragAmount ->
