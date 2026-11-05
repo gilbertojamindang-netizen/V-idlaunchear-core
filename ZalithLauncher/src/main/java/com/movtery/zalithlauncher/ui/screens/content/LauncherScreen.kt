@@ -98,7 +98,6 @@ import com.movtery.zalithlauncher.ui.components.AnimatedDirection
 import com.movtery.zalithlauncher.ui.components.BackgroundCard
 import com.movtery.zalithlauncher.ui.components.MarqueeText
 import com.movtery.zalithlauncher.ui.components.ScalingActionButton
-import com.movtery.zalithlauncher.ui.components.VoidCompanionStage
 import com.movtery.zalithlauncher.ui.components.animated
 import com.movtery.zalithlauncher.ui.components.rememberAnimatedContext
 import com.movtery.zalithlauncher.ui.guide.GuideKeys
@@ -712,34 +711,6 @@ private fun ActionMenuTallerContent(
                 account?.getCapeFile()?.takeIf { it.exists() }
                     ?.inputStream()?.use { it.readBytes() }
             }
-        }
-
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .clip(MaterialTheme.shapes.extraLarge)
-                .background(Color(0xFF160D20))
-        ) {
-            Text(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(start = 13.dp, top = 10.dp),
-                text = "VØID COMPANION",
-                color = Color(0xFFDAB9FF),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 1.2.sp
-            )
-            VoidCompanionStage(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 18.dp),
-                skin = skinBytes,
-                cape = capeBytes,
-                arm = armModel,
-                yaw = yaw
-            )
         }
 
         BackgroundCard(
