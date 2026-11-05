@@ -66,6 +66,16 @@ class VoidCoreCommandRouterTest {
     }
 
     @Test
+    fun crashCommandRunsLocalCrashDiagnostics() {
+        val result = VoidCoreCommandRouter.route("/check crash")
+        assertEquals(VoidCoreCommandRouter.Action.REVIEW_CRASH_REPORT, result.action)
+        assertTrue(
+            result.message.contains("No recent Minecraft") ||
+                result.message.contains("Report:")
+        )
+    }
+
+    @Test
     fun unknownCommandReturnsHelp() {
         assertEquals(
             VoidCoreCommandRouter.Action.HELP,
