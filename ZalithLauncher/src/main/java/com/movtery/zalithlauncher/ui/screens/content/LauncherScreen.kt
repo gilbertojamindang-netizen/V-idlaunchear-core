@@ -671,31 +671,49 @@ private fun ActionMenuTallerContent(
             }
         }
 
-        PetModelView(
+        Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .offset { companionOffset }
-                .pointerInput(Unit) {
-                    detectDragGestures { change, dragAmount ->
-                        change.consume()
-                        val maxX = (size.width / 3).coerceAtLeast(1)
-                        val maxY = (size.height / 4).coerceAtLeast(1)
-                        companionOffset = IntOffset(
-                            (companionOffset.x + dragAmount.x.roundToInt()).coerceIn(-maxX, maxX),
-                            (companionOffset.y + dragAmount.y.roundToInt()).coerceIn(-maxY, maxY)
-                        )
-                    }
-                },
-            skin = skinBytes,
-            cape = capeBytes,
-            arm = armModel,
-            yaw = yaw,
-            animation = PetAnimation.Idle,
-            tapReaction = PetTapReaction.Interact,
-            dragYaw = false,
-            autonomousIdle = true
-        )
+                .clip(MaterialTheme.shapes.extraLarge)
+                .background(Color(0xFF160D20))
+        ) {
+            Text(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(start = 13.dp, top = 10.dp),
+                text = "VØID COMPANION",
+                color = Color(0xFFDAB9FF),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 1.2.sp
+            )
+            PetModelView(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 18.dp)
+                    .offset { companionOffset }
+                    .pointerInput(Unit) {
+                        detectDragGestures { change, dragAmount ->
+                            change.consume()
+                            val maxX = (size.width / 3).coerceAtLeast(1)
+                            val maxY = (size.height / 4).coerceAtLeast(1)
+                            companionOffset = IntOffset(
+                                (companionOffset.x + dragAmount.x.roundToInt()).coerceIn(-maxX, maxX),
+                                (companionOffset.y + dragAmount.y.roundToInt()).coerceIn(-maxY, maxY)
+                            )
+                        }
+                    },
+                skin = skinBytes,
+                cape = capeBytes,
+                arm = armModel,
+                yaw = yaw,
+                animation = PetAnimation.Idle,
+                tapReaction = PetTapReaction.Interact,
+                dragYaw = false,
+                autonomousIdle = true
+            )
+        }
 
         BackgroundCard(
             modifier = Modifier
