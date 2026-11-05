@@ -65,7 +65,7 @@ object VoidCoreCommandRouter {
             "check java", "java" -> Result(
                 Action.OPEN_JAVA_DIAGNOSTICS,
                 "Java diagnostics",
-                "Review the selected Java runtime and the Minecraft version's runtime requirements before launching."
+                VoidPerformanceAdvisor.javaDiagnostics()
             )
             "fix settings", "review settings" -> Result(
                 Action.REVIEW_GAME_SETTINGS,
@@ -80,8 +80,8 @@ object VoidCoreCommandRouter {
             )
             "check mods", "mods" -> Result(
                 Action.REVIEW_MODS,
-                "Mod compatibility",
-                "Check that each mod matches the selected Minecraft version and mod loader. Dependency checks require the installed mod metadata."
+                "Installed mod inventory",
+                VoidPerformanceAdvisor.modDiagnostics()
             )
             "fps", "check fps" -> Result(
                 Action.SHOW_FPS_GUIDANCE,
@@ -97,7 +97,7 @@ object VoidCoreCommandRouter {
             "check minecraft", "minecraft" -> Result(
                 Action.REVIEW_MINECRAFT_INSTALLATION,
                 "Minecraft installation",
-                "Review the selected version, loader, runtime, and required files before launching."
+                VoidPerformanceAdvisor.minecraftDiagnostics()
             )
             "clean cache", "clear cache" -> Result(
                 Action.CLEAN_CACHE,
