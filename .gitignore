@@ -32,3 +32,8 @@ LWJGL/*/build/
 
 .vscode/
 
+
+# Local signing credentials and private release keystores
+*.jks
+*.keystore
+.release_keystore_path.txt
