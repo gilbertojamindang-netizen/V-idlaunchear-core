@@ -2,7 +2,7 @@
 
 use glam::{EulerRot, Mat4, Quat, Vec2, Vec3};
 
-use crate::animation::{evaluate_walking, AnimFrame, AnimationId, WALKING_PERIOD};
+use crate::animation::{evaluate_sitting, evaluate_walking, AnimFrame, AnimationId, SITTING_PERIOD, WALKING_PERIOD};
 use crate::clip::{self, ClipPose, IdleClips};
 use crate::clip_data::{CLIP_IDLE, CLIP_INTERACT, CLIP_SUBS};
 
@@ -91,6 +91,8 @@ enum Source {
     Idle,
     /// 行走
     Walking,
+    /// 坐下循环
+    Sitting,
     /// 随机待机子动画
     Sub(usize),
     /// 点击反应
@@ -141,7 +143,7 @@ impl Track {
     }
 
     fn is_base(&self) -> bool {
-        matches!(self.source, Source::Idle | Source::Walking)
+        matches!(self.source, Source::Idle | Source::Walking | Source::Sitting)
     }
 
     fn is_oneshot(&self) -> bool {
@@ -345,6 +347,7 @@ impl Skeleton {
         let source = match id {
             AnimationId::Idle => Source::Idle,
             AnimationId::Walking => Source::Walking,
+            AnimationId::Sitting => Source::Sitting,
         };
         self.tracks.push(Track::looping(source));
         self.animation = Some((id, speed.max(0.01), head_follow));
@@ -424,6 +427,7 @@ impl Skeleton {
                         let source = match id {
                             AnimationId::Idle => Source::Idle,
                             AnimationId::Walking => Source::Walking,
+                            AnimationId::Sitting => Source::Sitting,
                         };
                         self.tracks.push(Track::base_fade_in(source));
                     }
@@ -457,6 +461,11 @@ impl Skeleton {
                     base.time = (base.time + (dt * speed).min(0.05)) % WALKING_PERIOD;
                 }
             }
+            Some((AnimationId::Sitting, speed, _)) => {
+                if let Some(base) = self.tracks.iter_mut().find(|t| t.source == Source::Sitting) {
+                    base.time = (base.time + (dt * speed).min(0.05)) % SITTING_PERIOD;
+                }
+            }
             None => {}
         }
 
@@ -480,6 +489,7 @@ impl Skeleton {
         match track.source {
             Source::Idle => snapshot_from_pose(clip::sample(&CLIP_IDLE, self.idle_clips.base_time)),
             Source::Walking => snapshot_from_frame(evaluate_walking(track.time), cape_z),
+            Source::Sitting => snapshot_from_frame(evaluate_sitting(track.time), cape_z),
             Source::Sub(index) => snapshot_from_pose(clip::sample(&CLIP_SUBS[index], track.time)),
             Source::Interact => snapshot_from_pose(clip::sample(&CLIP_INTERACT, track.time)),
         }
