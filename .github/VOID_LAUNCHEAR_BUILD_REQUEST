@@ -1,20 +1,5 @@
-Owner-requested Debug APK build trigger.
-Distribution name: Void Launchear
-Source version: 1.0.3
-Retry after compiler fixes, using the latest main commit.
-Public ARM64 release upload enabled. Build and publish v1.0.3.
-Source version: 1.0.4
-Download Hub + game catalog + asset browser redesign.
-Rebuild 1.0.4 with the redesigned VØID Download Lab, library channels, asset archive header and filter console.
-Retry after fixing Compose padding parameters in DownloadHubHeader.
-Build v1.0.5 with the main-menu Hide UI background viewing toggle.
-
-Owner-requested Debug APK build after Bedrock controller implementation.
-Source version: 1.0.5
-Controller: Bedrock-style joystick, jump/sneak/attack layout, tap-to-use and hold-to-mine gestures.
-Use latest main commit; publish ARM64 Debug APK as configured in build.yml.
-
-Retry owner-requested Debug APK build after Kotlin compile fixes.
-Fixes: restore tall main-menu Column wrapper; add missing Material3 Surface import.
-Include Bedrock controller preset and touch gesture integration.
-Build latest main commit for all supported architectures; publish ARM64 Debug APK.
+Owner-requested Debug APK build.
+Source version: 1.0.6
+Includes latest main-screen full-body animated Minecraft player preview and all source changes currently committed.
+Build all configured architectures and publish the ARM64 Debug APK as v1.0.6.
+Note: CI success confirms compilation only; physical-device testing remains separate.
