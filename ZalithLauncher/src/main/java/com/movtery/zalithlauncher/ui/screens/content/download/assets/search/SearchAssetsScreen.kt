@@ -442,12 +442,32 @@ fun SearchAssetsScreen(
             val filterCtx = rememberAnimatedContext(isVisible = isVisible)
             val searchedMcMods by viewModel.searchedMcMods.collectAsStateWithLifecycle()
             val searchedVersions by viewModel.searchedVersions.collectAsStateWithLifecycle()
-            SearchFilter(
+            Surface(
                 modifier = Modifier
                     .fillMaxHeight()
                     .weight(3f)
-                    .animated(filterCtx, from = AnimatedDirection.Right),
-                contentPadding = PaddingValues(top = 12.dp, bottom = 12.dp, end = 12.dp),
+                    .padding(end = 12.dp, top = 8.dp, bottom = 8.dp),
+                shape = RoundedCornerShape(21.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.48f)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 9.dp, vertical = 10.dp)
+                ) {
+                    Text(
+                        text = "FILTER CONSOLE",
+                        modifier = Modifier.padding(start = 4.dp, bottom = 6.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Black,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                    SearchFilter(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1f)
+                            .animated(filterCtx, from = AnimatedDirection.Right),
+                        contentPadding = PaddingValues(top = 4.dp, bottom = 8.dp, end = 4.dp),
                 enablePlatform = enablePlatform,
                 searchPlatform = viewModel.searchPlatform,
                 onPlatformChange = {
@@ -492,7 +512,9 @@ fun SearchAssetsScreen(
                     )
                 },
                 extraFilter = extraFilter
-            )
+                    )
+                }
+            }
             }
         }
     }
