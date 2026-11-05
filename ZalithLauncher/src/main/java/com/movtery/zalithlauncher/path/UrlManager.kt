@@ -19,7 +19,6 @@
 package com.movtery.zalithlauncher.path
 
 import com.movtery.zalithlauncher.BuildConfig
-import com.movtery.zalithlauncher.BuildKeys
 import com.movtery.zalithlauncher.utils.network.ResilientDns
 import com.movtery.zalithlauncher.utils.network.TLSSecurity
 import io.ktor.client.HttpClient
@@ -48,8 +47,10 @@ private fun String.toHttpToken(fallback: String): String =
     filter { it in 'a'..'z' || it in 'A'..'Z' || it in '0'..'9' || it == '-' || it == '_' || it == '.' }
         .ifBlank { fallback }
 
+// Keep the network identity independent from localized app branding or generated build keys.
+ // OkHttp requires header values to be ASCII; the visible app name contains "ø".
 val URL_USER_AGENT: String =
-    "${BuildKeys.LAUNCHER_IDENTIFIER.toHttpToken("VoidLaunchear")}/Android_${BuildConfig.VERSION_NAME.toHttpToken("unknown")}"
+    "VoidLaunchear/Android_${BuildConfig.VERSION_NAME.toHttpToken("unknown")}"
 val TIME_OUT = TimeUnit.SECONDS.toMillis(10L)
 
 const val HOST_CURSEFORGE_API = "api.curseforge.com"
