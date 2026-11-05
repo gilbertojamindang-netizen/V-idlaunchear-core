@@ -148,25 +148,34 @@ object VoidWorldBackupManager {
         val version = VersionsManager.currentVersion.value
             ?: error("Select an installed Minecraft version first.")
         if (!version.isValid()) error("The selected Minecraft installation is not valid.")
-        val gameDir = version.getGameDir()
+        val gameDir = version.getGameDir().canonicalFile
         val saves = File(gameDir, "saves")
         if (!saves.exists() && !saves.mkdirs()) {
             error("Unable to open the selected installation's saves folder.")
         }
         if (!saves.isDirectory) error("The saves path is not a folder.")
-        return saves.canonicalFile
+        val canonicalSaves = saves.canonicalFile
+        require(canonicalSaves.parentFile == gameDir) {
+            "The saves folder resolves outside the selected Minecraft directory."
+        }
+        return canonicalSaves
     }
 
     private fun backupDirectory(): File {
         val version = VersionsManager.currentVersion.value
             ?: error("Select an installed Minecraft version first.")
         if (!version.isValid()) error("The selected Minecraft installation is not valid.")
-        val directory = File(version.getGameDir(), ".void-world-backups")
+        val gameDir = version.getGameDir().canonicalFile
+        val directory = File(gameDir, ".void-world-backups")
         if (!directory.exists() && !directory.mkdirs()) {
             error("Unable to create the VØID world backup folder.")
         }
         if (!directory.isDirectory) error("The VØID backup path is not a folder.")
-        return directory.canonicalFile
+        val canonicalDirectory = directory.canonicalFile
+        require(canonicalDirectory.parentFile == gameDir) {
+            "The VØID backup folder resolves outside the selected Minecraft directory."
+        }
+        return canonicalDirectory
     }
 
     internal fun isSafeWorldName(name: String): Boolean =
