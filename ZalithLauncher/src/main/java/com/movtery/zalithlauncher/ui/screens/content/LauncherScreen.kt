@@ -648,7 +648,8 @@ private fun ActionMenuTallerContent(
             yaw = yaw,
             animation = PetAnimation.Idle,
             tapReaction = PetTapReaction.Interact,
-            dragYaw = false
+            dragYaw = false,
+            autonomousIdle = true
         )
 
         BackgroundCard(
