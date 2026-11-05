@@ -1007,6 +1007,23 @@ fun HomeGrid(
                                     saveVoidCoreEntry("MOD COMPATIBILITY SCAN\n" + report)
                                 }
                             }
+                            VoidCoreCommandRouter.Action.REVIEW_GAME_SETTINGS,
+                            VoidCoreCommandRouter.Action.SHOW_OPTIMIZATION_ADVICE -> {
+                                showPerformanceApply = true
+                                saveVoidCoreEntry(
+                                    historyEntry + "\nReview the current VØID profile. Apply it only after confirming the backup and settings summary."
+                                )
+                            }
+                            VoidCoreCommandRouter.Action.SHOW_LOW_END_ADVICE -> {
+                                selectedPerformanceProfile = VoidPerformanceAdvisor.Profile.BATTERY_SAVER
+                                performancePreferences.edit()
+                                    .putString("profile", VoidPerformanceAdvisor.Profile.BATTERY_SAVER.name)
+                                    .apply()
+                                showPerformanceApply = true
+                                saveVoidCoreEntry(
+                                    historyEntry + "\nSelected Battery Saver. Review the values and confirm before changing Minecraft settings."
+                                )
+                            }
                             VoidCoreCommandRouter.Action.RESTORE_BACKUP -> {
                                 if (latestPerformanceBackupId.isNullOrBlank()) {
                                     saveVoidCoreEntry(historyEntry + "\nNo saved VØID profile backup is available yet.")
