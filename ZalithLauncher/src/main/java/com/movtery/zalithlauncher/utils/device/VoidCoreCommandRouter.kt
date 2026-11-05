@@ -24,6 +24,7 @@ object VoidCoreCommandRouter {
         REVIEW_MODS,
         SHOW_FPS_GUIDANCE,
         REVIEW_MINECRAFT_INSTALLATION,
+        SHOW_DEVICE_SUMMARY,
         CLEAN_CACHE,
         HELP
     }
@@ -82,6 +83,11 @@ object VoidCoreCommandRouter {
                 Action.SHOW_FPS_GUIDANCE,
                 "FPS and frame pacing",
                 "Compare average FPS with frame-time stability. If FPS drops while moving, test a lower render distance and allow chunk loading to settle."
+            )
+            "device", "check device", "device info" -> Result(
+                Action.SHOW_DEVICE_SUMMARY,
+                "Device summary",
+                "${deviceSummary()} • Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT}). This is a basic device identification check, not a live GPU benchmark."
             )
             "check minecraft", "minecraft" -> Result(
                 Action.REVIEW_MINECRAFT_INSTALLATION,
