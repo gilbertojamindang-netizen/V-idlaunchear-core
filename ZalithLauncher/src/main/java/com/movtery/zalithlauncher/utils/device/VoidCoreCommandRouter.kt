@@ -75,7 +75,7 @@ object VoidCoreCommandRouter {
             "restore settings", "restore" -> Result(
                 Action.RESTORE_BACKUP,
                 "Restore settings",
-                "Choose an existing backup and review its contents before restoring. No backup is overwritten automatically.",
+                "Use RESTORE LAST VØID BACKUP in the Performance card. It opens a confirmation and saves a safety snapshot of the current files before restoring the selected installation's latest VØID profile backup.",
                 requiresConfirmation = true
             )
             "check mods", "mods" -> Result(
@@ -86,7 +86,7 @@ object VoidCoreCommandRouter {
             "fps", "check fps" -> Result(
                 Action.SHOW_FPS_GUIDANCE,
                 "FPS and frame pacing",
-                "Compare average FPS with frame-time stability. If FPS drops while moving, test a lower render distance and allow chunk loading to settle."
+                "The in-game floating Game Ball can display live FPS, a 15-point history chart sampled once per second, and memory usage. If FPS drops while moving, apply a lower render distance and let chunk loading settle; this launcher does not expose Minecraft frame-time percentiles yet."
             )
             "device", "check device", "device info" -> Result(
                 Action.SHOW_DEVICE_SUMMARY,
@@ -102,7 +102,7 @@ object VoidCoreCommandRouter {
             "clean cache", "clear cache" -> Result(
                 Action.CLEAN_CACHE,
                 "Cache cleanup",
-                "Review cache categories and sizes first. Only disposable cache files should be removed; worlds, accounts, saves, and game data must be preserved.",
+                "This clears only disposable launcher app-icon, remote-homepage, and image caches after confirmation. It does not touch downloads, modpacks, worlds, saves, mods, accounts, Java runtimes, or Minecraft libraries.",
                 requiresConfirmation = true
             )
             "help", "commands", "" -> Result(
