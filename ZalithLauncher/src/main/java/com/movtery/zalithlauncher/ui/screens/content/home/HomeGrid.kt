@@ -64,6 +64,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -93,8 +94,10 @@ import com.movtery.zalithlauncher.ui.screens.content.home.version.VersionCardMan
 import com.movtery.zalithlauncher.ui.theme.cardColor
 import com.movtery.zalithlauncher.ui.theme.onCardColor
 import com.movtery.zalithlauncher.utils.device.VoidCoreCommandRouter
+import com.movtery.zalithlauncher.utils.device.VoidPerformanceApplier
 import com.movtery.zalithlauncher.utils.device.VoidPerformanceAdvisor
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 
 /** 主页网格的卡片操作 */
 private sealed interface HomeCardOperation {
@@ -174,6 +177,10 @@ fun HomeGrid(
     var operation by remember { mutableStateOf<HomeCardOperation>(HomeCardOperation.None) }
     var showVoidCore by remember { mutableStateOf(false) }
     var voidCoreInput by remember { mutableStateOf("") }
+    var showPerformanceApply by remember { mutableStateOf(false) }
+    var isApplyingPerformance by remember { mutableStateOf(false) }
+    var performanceApplyMessage by remember { mutableStateOf<String?>(null) }
+    val performanceScope = rememberCoroutineScope()
     val voidCorePreferences = remember(appContext) {
         appContext.getSharedPreferences("void_core", android.content.Context.MODE_PRIVATE)
     }
@@ -536,8 +543,22 @@ fun HomeGrid(
                         color = Color(0xFFB6A7C3),
                         style = MaterialTheme.typography.bodySmall
                     )
+                    Button(
+                        onClick = { showPerformanceApply = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !isApplyingPerformance
+                    ) {
+                        Text(if (isApplyingPerformance) "APPLYING VØID PROFILE…" else "APPLY PROFILE TO CURRENT VERSION")
+                    }
+                    performanceApplyMessage?.let { message ->
+                        Text(
+                            text = message,
+                            color = Color(0xFFD8C5E9),
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
                     Text(
-                        text = "Recommendations only • No settings are changed automatically",
+                        text = "Applying first creates a local backup. Nothing changes until you confirm.",
                         color = Color(0xFF8F809C),
                         style = MaterialTheme.typography.labelSmall
                     )
@@ -617,6 +638,43 @@ fun HomeGrid(
         operation = operation,
         onChange = { operation = it }
     )
+    if (showPerformanceApply) {
+        AlertDialog(
+            onDismissRequest = { showPerformanceApply = false },
+            title = { Text("APPLY VØID PERFORMANCE PROFILE?") },
+            text = {
+                Text(
+                    "This will update Java memory allocation and Minecraft render, simulation, and entity-distance values for the selected installation. Existing options.txt and version.config files are copied to .void-backups first. Continue?"
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showPerformanceApply = false
+                        isApplyingPerformance = true
+                        performanceApplyMessage = null
+                        performanceScope.launch {
+                            val outcome = runCatching {
+                                VoidPerformanceApplier.apply(performanceAdvice)
+                            }
+                            performanceApplyMessage = outcome.fold(
+                                onSuccess = { result ->
+                                    "Applied to ${result.minecraftVersion}: ${result.memoryMb} MB RAM • Render ${result.renderDistance} • Simulation ${result.simulationDistance} • Entity ${result.entityDistancePercent}%. Backup folder: .void-backups."
+                                },
+                                onFailure = { error ->
+                                    "Profile was not applied: ${error.message ?: "unknown error"}"
+                                }
+                            )
+                            isApplyingPerformance = false
+                        }
+                    }
+                ) { Text("APPLY") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPerformanceApply = false }) { Text("CANCEL") }
+            }
+        )
+    }
     if (showVoidCore) {
         AlertDialog(
             onDismissRequest = { showVoidCore = false },
