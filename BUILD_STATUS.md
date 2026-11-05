@@ -21,8 +21,8 @@ Actual renderer support depends on the Android device, GPU, driver, and Minecraf
 
 ## Not yet verified
 
-- Porting the separate VØID home-screen redesign bundle into the actual launcher screens; the current main screen remains the upstream Zalith UI.
-- A successful Android APK build from this branch.
+- The full VØID home-screen redesign; the main screen still uses the upstream layout.
+- The newly added VØID/LAUNCHEAR intro animation has not yet been compiled or device-tested.
 - Installation and launch on a physical Android device.
 - Microsoft account sign-in and a complete Minecraft 1.21.11 launch.
 - Offline singleplayer after the required game files and runtime have been installed.
@@ -31,6 +31,6 @@ Actual renderer support depends on the Android device, GPU, driver, and Minecraf
 
 ## Build
 
-The repository's `.github/workflows/push_ci.yml` invokes the debug build workflow on pushes. A fresh commit was pushed, but the GitHub Actions API currently reports zero workflow runs. The build workflow also supports manual `workflow_dispatch`: open Actions → Build APK → Run workflow → choose `Debug`. Build results and APK artifacts must be checked before claiming success.
+The repository's `.github/workflows/push_ci.yml` invokes the debug build workflow on pushes. A successful Debug ARM64 build was verified for commit `f8c4636903d129ecbbdebe4159bc856ca268abd2` (workflow run #3, artifact `Vøidlaunchear-debug-arm64`). Later source changes must trigger a fresh build before they are considered verified. The build workflow supports manual `workflow_dispatch`: open Actions → Build APK → Run workflow → choose `Debug`.
 
 Do not distribute an APK as tested or release-ready until the build and device checks above have passed.
