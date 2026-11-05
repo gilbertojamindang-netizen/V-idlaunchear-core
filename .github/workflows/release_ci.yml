@@ -9,7 +9,9 @@ permissions:
   contents: write
 
 jobs:
+  # A published release only builds APKs after the feature-complete marker is present.
   Build:
+    if: contains(github.event.release.body, '[VØID-FEATURE-COMPLETE]')
     uses: ./.github/workflows/build.yml
     with:
       variant: Release
