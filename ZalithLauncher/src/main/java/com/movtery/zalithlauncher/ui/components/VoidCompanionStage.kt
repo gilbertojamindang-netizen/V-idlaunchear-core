@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -79,6 +80,7 @@ fun VoidCompanionStage(
         val squash = remember { Animatable(1f) }
         var dragging by remember { mutableStateOf(false) }
         var dropping by remember { mutableStateOf(false) }
+        var ragdollTrigger by remember { mutableIntStateOf(0) }
         var sitting by remember { mutableStateOf(false) }
         var dragX by remember { mutableStateOf(0f) }
         var dragY by remember { mutableStateOf(0f) }
@@ -130,14 +132,17 @@ fun VoidCompanionStage(
                             }
                         },
                         onDragEnd = {
+                            val releasedWhileAirborne = dragY < maxY - with(density) { 24.dp.toPx() }
+                            if (releasedWhileAirborne) ragdollTrigger++
                             dropping = true
                             dragging = false
                             dragScope.launch {
-                                val lean = if (offsetX.value >= 0f) 18f else -18f
+                                val direction = if (offsetX.value >= 0f) 1f else -1f
+                                val lean = direction * if (releasedWhileAirborne) 64f else 18f
                                 offsetY.animateTo(maxY, tween(220))
                                 dragY = maxY
                                 dragScope.launch { rotation.animateTo(lean, tween(130)) }
-                                dragScope.launch { squash.animateTo(0.84f, tween(100)) }
+                                dragScope.launch { squash.animateTo(if (releasedWhileAirborne) 0.74f else 0.84f, tween(100)) }
                                 offsetY.animateTo(
                                     (maxY - 13f).coerceAtLeast(-maxY),
                                     spring(dampingRatio = 0.38f, stiffness = Spring.StiffnessMedium)
@@ -154,6 +159,7 @@ fun VoidCompanionStage(
                                 )
                                 dragY = offsetY.value
                                 dragX = offsetX.value
+                                if (releasedWhileAirborne) delay(900L)
                                 dropping = false
                             }
                         },
@@ -200,7 +206,8 @@ fun VoidCompanionStage(
                     sitting -> PetAnimation.Sitting
                     else -> PetAnimation.Idle
                 },
-                autonomousIdle = !dragging && !dropping && !sitting
+                autonomousIdle = !dragging && !dropping && !sitting,
+                ragdollTrigger = ragdollTrigger
             )
         }
         Button(
