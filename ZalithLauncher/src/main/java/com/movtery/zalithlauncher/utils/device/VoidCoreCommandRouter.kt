@@ -114,7 +114,7 @@ object VoidCoreCommandRouter {
             "help", "commands", "" -> Result(
                 Action.HELP,
                 "VØID CORE commands",
-                "Try /device, /optimize, /low-end, /check gpu, /check java, /fix settings, /restore settings, /check mods, /fps, /check minecraft, /clean cache, or /worlds."
+                "Try /device, /optimize, /low-end, /check gpu, /check java, /fix settings, /restore settings, /check mods, /fps, /check minecraft, /clean cache, or /world backup."
             )
             else -> Result(
                 Action.HELP,
