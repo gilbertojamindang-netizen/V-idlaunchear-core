@@ -44,6 +44,18 @@ class VoidPerformanceAdvisorTest {
     }
 
     @Test
+    fun customProfileStartsWithDeviceSafeMemoryLimit() {
+        val result = VoidPerformanceAdvisor.recommend(
+            8192,
+            VoidPerformanceAdvisor.Profile.CUSTOM
+        )
+        assertEquals(VoidPerformanceAdvisor.Profile.CUSTOM, result.profile)
+        assertEquals(2867, result.maxMemoryMb)
+        assertTrue(result.renderDistance in 2..24)
+        assertTrue(result.simulationDistance in 2..16)
+    }
+
+    @Test
     fun invalidRamEstimateIsClampedToSafeMinimum() {
         val result = VoidPerformanceAdvisor.recommend(
             0,
