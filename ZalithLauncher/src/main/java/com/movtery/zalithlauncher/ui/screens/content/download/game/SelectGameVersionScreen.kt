@@ -39,6 +39,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -65,6 +66,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
@@ -302,6 +304,7 @@ private fun SelectGameVersionContent(
 
                 is VersionState.None -> {
                     Column {
+                        DownloadCatalogBanner(versionCount = state.versions.size)
                         VersionHeader(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -346,6 +349,58 @@ private fun List<MinecraftVersion>.filterVersions(
     //Fix：单独过滤版本名称
     val versionId = versionFilter.id
     versionId.isEmptyOrBlank() || version.version.id.contains(versionId)
+}
+
+@Composable
+private fun DownloadCatalogBanner(versionCount: Int) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        shape = RoundedCornerShape(23.dp),
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 17.dp, vertical = 15.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "VØID  /  GAME CATALOG",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Black
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.65f),
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ) {
+                    Text(
+                        text = "$versionCount BUILDS",
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+            Text(
+                text = "Choose your Minecraft version",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Select a release or explore snapshots and legacy builds.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f)
+            )
+        }
+    }
 }
 
 @Composable
