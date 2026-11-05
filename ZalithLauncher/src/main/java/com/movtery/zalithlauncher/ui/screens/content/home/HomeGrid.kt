@@ -995,6 +995,18 @@ fun HomeGrid(
                                     isWorldOperationRunning = false
                                 }
                             }
+                            VoidCoreCommandRouter.Action.REVIEW_MODS -> {
+                                saveVoidCoreEntry(historyEntry + "\nScanning local mod metadata…")
+                                worldVaultScope.launch {
+                                    val report = runCatching {
+                                        VoidPerformanceAdvisor.modCompatibilityDiagnostics()
+                                    }.fold(
+                                        onSuccess = { it },
+                                        onFailure = { "Mod scan failed: ${it.message ?: "unknown error"}" }
+                                    )
+                                    saveVoidCoreEntry("MOD COMPATIBILITY SCAN\n" + report)
+                                }
+                            }
                             VoidCoreCommandRouter.Action.RESTORE_BACKUP -> {
                                 if (latestPerformanceBackupId.isNullOrBlank()) {
                                     saveVoidCoreEntry(historyEntry + "\nNo saved VØID profile backup is available yet.")
