@@ -120,12 +120,6 @@ android {
             keyAlias = "movtery_zalith"
             keyPassword = getKeyFromLocal("KEY_PASSWORD", ".key_password.txt")
         }
-        create("debugBuild") {
-            storeFile = file("zalith_launcher_debug.jks")
-            storePassword = defaultStorePassword
-            keyAlias = "movtery_zalith_debug"
-            keyPassword = defaultKeyPassword
-        }
     }
 
     defaultConfig {
@@ -152,7 +146,6 @@ android {
             isMinifyEnabled = false
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
-            signingConfig = signingConfigs.getByName("debugBuild")
         }
     }
 
