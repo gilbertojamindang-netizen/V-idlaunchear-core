@@ -170,7 +170,11 @@ suspend fun searchAssets(
                 val platformCandidates = listOf(
                     searchPlatform,
                     if (searchPlatform == Platform.MODRINTH) Platform.CURSEFORGE else Platform.MODRINTH
-                )
+                ).filter { candidate ->
+                    // Modrinth has no project type for saved worlds. Do not build a
+                    // request with a null project-type facet; use CurseForge directly.
+                    candidate != Platform.MODRINTH || platformClasses.modrinth != null
+                }
                 var queryResult: PlatformSearchResult? = null
                 for (candidatePlatform in platformCandidates) {
                     try {
