@@ -11,9 +11,6 @@ package com.movtery.zalithlauncher.utils.device
 import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
-import android.app.ActivityManager
-import android.content.Context
-import com.movtery.zalithlauncher.utils.device.checkVulkanSupport
 import kotlin.math.min
 
 /**
