@@ -29,8 +29,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -282,7 +280,6 @@ private fun TabMenu(
     )
 
     val ctx = rememberAnimatedContext(isVisible = isVisible)
-    val scrollState = rememberScrollState()
     Column(modifier = modifier) {
         Row(
             modifier = Modifier
@@ -292,31 +289,35 @@ private fun TabMenu(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "LIBRARY CHANNELS",
+                text = "DOWNLOAD CHANNELS",
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Black
             )
             Text(
-                text = "01 — 08",
+                text = "SELECT A CATEGORY",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold
             )
         }
-        Row(
+
+        androidx.compose.foundation.lazy.grid.LazyVerticalGrid(
+            columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(2),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 3.dp)
-                .fadeEdge(scrollState)
-                .horizontalScroll(scrollState)
+                .height(184.dp)
+                .padding(horizontal = 12.dp)
                 .animated(ctx, from = AnimatedDirection.Left),
             horizontalArrangement = Arrangement.spacedBy(9.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalArrangement = Arrangement.spacedBy(9.dp),
+            userScrollEnabled = true
         ) {
-            downloadsList.forEachIndexed { index, item ->
+            items(downloadsList.size) { index ->
+                val item = downloadsList[index]
                 val selected = backScreenViewModel.downloadScreen.currentKey == item.key
                 Surface(
+                    modifier = Modifier.height(82.dp),
                     onClick = { backStack.navigateOnce(item.key) },
                     shape = RoundedCornerShape(17.dp),
                     color = if (selected) Color(0xFF7042B8)
@@ -327,9 +328,8 @@ private fun TabMenu(
                 ) {
                     Column(
                         modifier = Modifier
-                            .width(132.dp)
-                            .height(76.dp)
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                            .fillMaxSize()
+                            .padding(horizontal = 13.dp, vertical = 10.dp),
                         verticalArrangement = Arrangement.SpaceBetween
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -349,11 +349,51 @@ private fun TabMenu(
                             fontWeight = FontWeight.Bold,
                             maxLines = 1
                         )
+                    }
+                }
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 7.dp),
+            horizontalArrangement = Arrangement.spacedBy(9.dp)
+        ) {
+            val quickItems = listOf(
+                CategoryItem(
+                    backScreenViewModel.downloadFavoritesScreen,
+                    { CategoryIcon(R.drawable.ic_favorite_outlined, R.string.download_category_favorites) },
+                    R.string.download_category_favorites
+                ),
+                CategoryItem(
+                    NormalNavKey.SearchId,
+                    { CategoryIcon(R.drawable.ic_card, R.string.download_category_by_id) },
+                    R.string.download_category_by_id
+                )
+            )
+            quickItems.forEach { item ->
+                val selected = backScreenViewModel.downloadScreen.currentKey == item.key
+                Surface(
+                    modifier = Modifier.weight(1f),
+                    onClick = { backStack.navigateOnce(item.key) },
+                    shape = RoundedCornerShape(14.dp),
+                    color = if (selected) Color(0xFF7042B8)
+                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.48f),
+                    contentColor = if (selected) Color.White
+                        else MaterialTheme.colorScheme.onSurfaceVariant
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        item.icon()
                         Text(
-                            text = if (selected) "ACTIVE CHANNEL" else "OPEN CHANNEL",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = if (selected) Color.White.copy(alpha = 0.78f)
-                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f)
+                            text = stringResource(item.textRes),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1
                         )
                     }
                 }
