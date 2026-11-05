@@ -222,82 +222,163 @@ fun HomeGrid(
                 .padding(6.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            // VØID home identity panel: intentionally distinct from the upstream launcher layout.
+            // VØID Control Deck — a purpose-built home surface.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 6.dp, vertical = 4.dp)
+                    .padding(horizontal = 6.dp, vertical = 5.dp)
                     .background(
                         brush = Brush.linearGradient(
-                            colors = listOf(
-                                Color(0xFF25103D),
-                                Color(0xFF120A20),
-                                Color(0xFF32164D)
-                            )
+                            colors = listOf(Color(0xFF35145A), Color(0xFF1A0D2B), Color(0xFF090711))
                         ),
-                        shape = RoundedCornerShape(22.dp)
+                        shape = RoundedCornerShape(26.dp)
                     )
-                    .padding(horizontal = 20.dp, vertical = 15.dp)
+                    .padding(horizontal = 19.dp, vertical = 19.dp)
             ) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(5.dp)
-                ) {
+                Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(Modifier.size(8.dp).background(Color(0xFFB879FF), CircleShape))
+                        Text(
+                            text = "VØID CONTROL DECK",
+                            color = Color(0xFFE1C6FF),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 2.1.sp
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text(
+                            text = "JAVA EDITION",
+                            color = Color(0xFFBCA7D2),
+                            style = MaterialTheme.typography.labelSmall,
+                            letterSpacing = 1.sp
+                        )
+                    }
                     Text(
-                        text = "WELCOME TO VØID",
-                        color = Color(0xFFCFA5FF),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 2.sp
+                        text = "YOUR NEXT\nWORLD STARTS HERE.",
+                        color = Color(0xFFFFFAFF),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Black,
+                        lineHeight = 31.sp
                     )
                     Text(
-                        text = "YOUR WORLD. YOUR RULES.",
-                        color = Color(0xFFF7F0FF),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 0.6.sp
-                    )
-                    Text(
-                        text = "A custom Minecraft Java launcher experience",
-                        color = Color(0xFFD0C1DE),
+                        text = "Build your setup. Choose a version. Enter your world.",
+                        color = Color(0xFFD1C0E0),
                         style = MaterialTheme.typography.bodySmall
                     )
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(top = 5.dp),
+                        horizontalArrangement = Arrangement.spacedBy(7.dp)
+                    ) {
+                        listOf("VERSION CONTROL", "MOD SUPPORT", "VØID ENGINE").forEach { label ->
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .background(Color.White.copy(alpha = 0.09f), RoundedCornerShape(10.dp))
+                                    .padding(horizontal = 5.dp, vertical = 9.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = label,
+                                    color = Color(0xFFE8D8F7),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 8.sp,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                    }
                 }
             }
 
-            // Advisory-only performance card. It never changes Minecraft settings automatically.
+            // Hardware-aware recommendations; this panel does not alter game settings.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 6.dp)
                     .background(
-                        color = Color(0xFF171020),
-                        shape = RoundedCornerShape(18.dp)
+                        brush = Brush.linearGradient(colors = listOf(Color(0xFF21152F), Color(0xFF100D18))),
+                        shape = RoundedCornerShape(20.dp)
                     )
-                    .padding(horizontal = 16.dp, vertical = 13.dp)
+                    .padding(horizontal = 16.dp, vertical = 14.dp)
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(
-                        text = "VØID PERFORMANCE ENGINE",
-                        color = Color(0xFFD5B0FF),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.3.sp
-                    )
-                    Text(
-                        text = "${performanceAdvice.profile.name.replace('_', ' ')} PROFILE  •  ${performanceAdvice.maxMemoryMb} MB SUGGESTED RAM",
-                        color = Color(0xFFF4E9FF),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Text(
-                        text = "Suggested render distance: ${performanceAdvice.renderDistance} chunks  •  Simulation: ${performanceAdvice.simulationDistance}",
-                        color = Color(0xFFBFA6D5),
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "VØID PERFORMANCE ENGINE",
+                                color = Color(0xFFDAB9FF),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 1.1.sp
+                            )
+                            Text(
+                                text = "DEVICE PROFILE • SMART RECOMMENDATIONS",
+                                color = Color(0xFF9D8AAC),
+                                style = MaterialTheme.typography.labelSmall,
+                                letterSpacing = 0.55.sp
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .background(Color(0xFF49256A), RoundedCornerShape(9.dp))
+                                .padding(horizontal = 10.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = performanceAdvice.profile.name.replace('_', ' '),
+                                color = Color(0xFFF3E7FF),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        listOf(
+                            "RAM" to "${performanceAdvice.maxMemoryMb} MB",
+                            "RENDER" to "${performanceAdvice.renderDistance} CHUNKS",
+                            "SIMULATION" to "${performanceAdvice.simulationDistance} CHUNKS"
+                        ).forEach { (label, value) ->
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .background(Color.White.copy(alpha = 0.055f), RoundedCornerShape(12.dp))
+                                    .padding(horizontal = 9.dp, vertical = 10.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = label,
+                                    color = Color(0xFFAA96BC),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontSize = 8.sp
+                                )
+                                Text(
+                                    text = value,
+                                    color = Color(0xFFF4EAFE),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                    }
                     Text(
                         text = performanceAdvice.explanation,
-                        color = Color(0xFF9F90AC),
+                        color = Color(0xFFB6A7C3),
                         style = MaterialTheme.typography.bodySmall
+                    )
+                    Text(
+                        text = "Recommendations only • No settings are changed automatically",
+                        color = Color(0xFF8F809C),
+                        style = MaterialTheme.typography.labelSmall
                     )
                 }
             }
