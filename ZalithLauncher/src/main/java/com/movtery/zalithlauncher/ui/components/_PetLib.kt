@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -89,6 +90,7 @@ fun PetModelView(
     dragYaw: Boolean = true,
     gazeEnabled: Boolean = true,
     autonomousIdle: Boolean = false,
+    ragdollTrigger: Int = 0,
 ) {
     val context = LocalContext.current
     val petController = remember {
@@ -104,7 +106,8 @@ fun PetModelView(
     LaunchedEffect(petController, cape) {
         petController.setCape(cape)
     }
-    LaunchedEffect(petController, animation, animationSpeed, autonomousIdle, yaw) {
+    var lastRagdollTrigger by remember { mutableIntStateOf(0) }
+    LaunchedEffect(petController, animation, animationSpeed, autonomousIdle, yaw, ragdollTrigger) {
         if (autonomousIdle) {
             // Alternate idle and walking while turning relative to the caller's base yaw.
             // setModelYaw prevents small random turns from accumulating into an endless spin.
@@ -121,10 +124,16 @@ fun PetModelView(
                 petController.setModelYaw(yaw)
                 petController.playAnimation(PetAnimation.Idle, animationSpeed)
             }
-        } else if (animation != null) {
-            petController.playAnimation(animation, animationSpeed)
         } else {
-            petController.stopAnimation()
+            if (animation != null) {
+                petController.playAnimation(animation, animationSpeed)
+            } else {
+                petController.stopAnimation()
+            }
+            if (ragdollTrigger != lastRagdollTrigger) {
+                lastRagdollTrigger = ragdollTrigger
+                petController.playRagdoll()
+            }
         }
     }
     LaunchedEffect(petController, yaw) {
