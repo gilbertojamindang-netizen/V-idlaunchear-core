@@ -8,3 +8,8 @@ Download Hub + game catalog + asset browser redesign.
 Rebuild 1.0.4 with the redesigned VØID Download Lab, library channels, asset archive header and filter console.
 Retry after fixing Compose padding parameters in DownloadHubHeader.
 Build v1.0.5 with the main-menu Hide UI background viewing toggle.
+
+Owner-requested Debug APK build after Bedrock controller implementation.
+Source version: 1.0.5
+Controller: Bedrock-style joystick, jump/sneak/attack layout, tap-to-use and hold-to-mine gestures.
+Use latest main commit; publish ARM64 Debug APK as configured in build.yml.
