@@ -132,6 +132,30 @@ private fun LoadingScreen(
         currentKey = screenViewModel.splashScreen.currentKey
     ) { isVisible ->
         val ctx = rememberAnimatedContext(isVisible = isVisible)
+        val leftOffset = remember { Animatable(-420f) }
+        val rightOffset = remember { Animatable(420f) }
+        var merged by remember { mutableStateOf(false) }
+
+        LaunchedEffect(isVisible) {
+            if (isVisible) {
+                leftOffset.snapTo(-420f)
+                rightOffset.snapTo(420f)
+                merged = false
+                leftOffset.animateTo(0f, tween(850, easing = FastOutSlowInEasing))
+            }
+        }
+        LaunchedEffect(isVisible) {
+            if (isVisible) {
+                rightOffset.snapTo(420f)
+                rightOffset.animateTo(0f, tween(850, easing = FastOutSlowInEasing))
+            }
+        }
+        LaunchedEffect(isVisible) {
+            if (isVisible) {
+                delay(950)
+                merged = true
+            }
+        }
 
         Box(
             modifier = Modifier
@@ -141,16 +165,44 @@ private fun LoadingScreen(
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(18.dp)
             ) {
-                Image(
-                    modifier = Modifier.size(58.dp),
-                    painter = painterResource(R.drawable.img_launcher),
-                    contentDescription = stringResource(R.string.generic_loading)
-                )
+                if (!merged) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "VØID",
+                            modifier = Modifier.graphicsLayer { translationX = leftOffset.value },
+                            color = Color(0xFFB56CFF),
+                            fontSize = 34.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "LAUNCHEAR",
+                            modifier = Modifier.graphicsLayer { translationX = rightOffset.value },
+                            color = MaterialTheme.colorScheme.onBackground,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                } else {
+                    Text(
+                        text = "VØIDLAUNCHEAR",
+                        color = Color(0xFFB56CFF),
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                }
                 LinearWavyProgressIndicator(
-                    modifier = Modifier.width(128.dp),
-                    wavelength = 32.dp
+                    modifier = Modifier.width(148.dp),
+                    wavelength = 32.dp,
+                    color = Color(0xFFB56CFF)
+                )
+                Text(
+                    text = "CREATED BY GILBERT JAMINDANG",
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.68f),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium
                 )
             }
         }
