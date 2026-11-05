@@ -159,7 +159,7 @@ fun VoidCompanionStage(
                                 )
                                 dragY = offsetY.value
                                 dragX = offsetX.value
-                                if (releasedWhileAirborne) delay(900L)
+                                if (releasedWhileAirborne) delay(1450L)
                                 dropping = false
                             }
                         },
