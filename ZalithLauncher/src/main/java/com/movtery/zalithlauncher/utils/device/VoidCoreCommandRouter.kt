@@ -58,8 +58,9 @@ object VoidCoreCommandRouter {
             )
             "check gpu", "gpu" -> Result(
                 Action.OPEN_GPU_DIAGNOSTICS,
-                "GPU diagnostics",
-                "Open Renderer settings to inspect the detected graphics renderer and available Vulkan/OpenGL options. Availability depends on the device and driver."
+                "Graphics diagnostics",
+                context?.let { VoidPerformanceAdvisor.graphicsDiagnostics(it) }
+                    ?: "Open Renderer settings to inspect the available graphics APIs and renderer driver. A live report requires an Android context."
             )
             "check java", "java" -> Result(
                 Action.OPEN_JAVA_DIAGNOSTICS,
