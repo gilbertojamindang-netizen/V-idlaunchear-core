@@ -88,7 +88,7 @@ object VoidCoreCommandRouter {
             "fps", "check fps" -> Result(
                 Action.SHOW_FPS_GUIDANCE,
                 "FPS and frame pacing",
-                "The in-game floating Game Ball can display live FPS, a 15-point history chart sampled once per second, and memory usage. If FPS drops while moving, apply a lower render distance and let chunk loading settle; this launcher does not expose Minecraft frame-time percentiles yet."
+                "The in-game floating Game Ball can display live FPS, a 15-point history chart sampled once per second, and memory usage. It flags a severe one-second FPS drop against the recent baseline as a coarse stutter warning. This is not per-frame frametime, 1% lows, or a chunk-loading profiler. If FPS drops while moving, compare render distance and let chunk loading settle before changing several settings at once."
             )
             "device", "check device", "device info" -> Result(
                 Action.SHOW_DEVICE_SUMMARY,
