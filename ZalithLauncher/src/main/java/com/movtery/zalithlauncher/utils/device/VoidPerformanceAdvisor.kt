@@ -15,6 +15,8 @@ import com.movtery.zalithlauncher.game.multirt.RuntimesManager
 import com.movtery.zalithlauncher.game.version.installed.VersionsManager
 import com.movtery.zalithlauncher.setting.AllSettings
 import java.io.File
+import java.io.RandomAccessFile
+import java.nio.charset.StandardCharsets
 import kotlin.math.min
 
 /**
@@ -180,6 +182,70 @@ object VoidPerformanceAdvisor {
         return "Selected: ${version.getVersionName()} • Minecraft: ${info?.minecraftVersion ?: "unknown"} • Loader: $loader • Version folder: ${if (valid) "valid" else "missing/invalid"} • Client JAR at direct version path: ${if (clientJar.isFile) "present" else "not present (may be inherited or incomplete)"} • Game data directory: ${if (gameDirectory.isDirectory) "present" else "not found"}. This checks installation files only; it does not launch or modify the game."
     }
 
+    private data class DiagnosticLog(val file: File, val content: String)
+
+    /** Read only the tail of the newest local crash/log file to keep memory bounded. */
+    private fun latestDiagnosticLog(): DiagnosticLog? {
+        val version = VersionsManager.currentVersion.value ?: return null
+        val gameDirectory = version.getGameDir()
+        val candidates = buildList {
+            add(File(gameDirectory, "logs/latest.log"))
+            File(gameDirectory, "crash-reports").listFiles()
+                ?.filter { it.isFile && (it.extension.equals("txt", true) || it.extension.equals("log", true)) }
+                ?.let(::addAll)
+        }.filter { it.isFile }
+        val latest = candidates.maxByOrNull { it.lastModified() } ?: return null
+        return runCatching {
+            RandomAccessFile(latest, "r").use { file ->
+                val byteCount = minOf(file.length(), 512L * 1024L)
+                val bytes = ByteArray(byteCount.toInt())
+                file.seek((file.length() - byteCount).coerceAtLeast(0L))
+                file.readFully(bytes)
+                DiagnosticLog(latest, String(bytes, StandardCharsets.UTF_8))
+            }
+        }.getOrNull()
+    }
+
+    private fun classifyDiagnosticLog(log: DiagnosticLog?): String {
+        if (log == null) return "No recent Minecraft latest.log or crash report was found for the selected installation."
+        val lower = log.content.lowercase()
+        val findings = mutableListOf<String>()
+        if ("outofmemoryerror" in lower || "gc overhead limit exceeded" in lower) {
+            findings += "Memory exhaustion detected; compare the selected Java allocation with Android RAM headroom and reduce render distance if the device is under pressure."
+        }
+        if ("unsupportedclassversionerror" in lower || "class file version" in lower) {
+            findings += "Java bytecode/runtime mismatch detected; check the Minecraft version's required Java major version and the selected runtime."
+        }
+        if ("mixinapplyerror" in lower || "mixin apply failed" in lower || "modresolutionexception" in lower || "incompatible mod set" in lower) {
+            findings += "A loader or mod dependency conflict is indicated by the log; compare each mod's Minecraft and loader versions and remove recently added mods one at a time."
+        }
+        if ("noclassdeffounderror" in lower || "nosuchmethoderror" in lower || "classnotfoundexception" in lower) {
+            findings += "A missing or incompatible class/API is indicated; check mod dependencies and loader compatibility."
+        }
+        if ("glfwerror" in lower || "opengl error" in lower || "vulkan" in lower || "egl_bad_match" in lower || "lwjgl" in lower) {
+            findings += "A graphics/renderer failure is indicated; test the alternate supported renderer and update or reinstall the matching graphics driver/plugin."
+        }
+        if ("sslhandshakeexception" in lower || "unknownhostexception" in lower || "failed to download" in lower) {
+            findings += "A network/download failure is indicated; check the connection and retry the affected download."
+        }
+        if (findings.isEmpty()) {
+            findings += "No common Java, mod-loader, or renderer signature was detected in the log tail. The full report may contain details outside the scanned tail."
+        }
+        val excerpt = log.content.lineSequence()
+            .filter { line ->
+                val value = line.lowercase()
+                listOf("exception", "error", "failed", "mixin", "outofmemory", "unsupportedclass").any(value::contains)
+            }
+            .takeLast(3)
+            .joinToString(" | ")
+            .take(360)
+        return "Report: ${log.file.name} • Updated: ${log.file.lastModified()} • ${findings.joinToString(" ")}" +
+            if (excerpt.isNotBlank()) " Log clues: $excerpt" else ""
+    }
+
+    /** Read-only crash/log guidance for the selected Minecraft installation. */
+    fun crashDiagnostics(): String = classifyDiagnosticLog(latestDiagnosticLog())
+
     /** Count local mod files; compatibility still needs each mod's declared metadata. */
     fun modDiagnostics(): String {
         val version = VersionsManager.currentVersion.value
@@ -198,7 +264,7 @@ object VoidPerformanceAdvisor {
             ?: return "The mods folder exists, but its contents could not be read."
         val disabled = candidates.count { it.name.endsWith(".disabled", ignoreCase = true) }
         val enabled = candidates.size - disabled
-        return "Minecraft ${version.getVersionName()} • Mod files: ${candidates.size} • Enabled: $enabled • Disabled: $disabled. File counts do not prove version/loader compatibility; check each mod's declared Minecraft and loader support."
+        return "Minecraft ${version.getVersionName()} • Mod files: ${candidates.size} • Enabled: $enabled • Disabled: $disabled. File counts do not prove version/loader compatibility; check each mod's declared Minecraft and loader support. Latest log scan: ${classifyDiagnosticLog(latestDiagnosticLog())}"
     }
 
     /** Query Android's declared graphics capabilities without guessing a GPU model. */
