@@ -80,9 +80,44 @@ object ControlManager {
                 .filter { file ->
                     file.isFile && file.exists() && file.extension.equals("json", true)
                 }
+
+            // Install the Bedrock-inspired layout once. Preserve an existing
+            // custom layout; only switch automatically for a fresh install or
+            // the unmodified stock Zalith layout.
+            val selectedName = AllSettings.controlLayout.getValue()
+            val selectedFile = File(PathManager.DIR_CONTROL_LAYOUTS, selectedName)
+            val selectedLayout = runCatching {
+                loadLayoutFromFile(selectedFile)
+            }.getOrNull()
+            val shouldSelectBedrock = files.isEmpty() ||
+                selectedLayout == null ||
+                (
+                    selectedLayout.info.name.default.equals("default", ignoreCase = true) &&
+                    selectedLayout.info.author.default.equals("MovTery", ignoreCase = true)
+                )
+
             if (files.isEmpty()) {
                 unpackDefaultControl(context)
             }
+
+            val bedrockFile = File(PathManager.DIR_CONTROL_LAYOUTS, "void_bedrock.json")
+            val installingBedrock = !bedrockFile.isFile
+            if (installingBedrock) {
+                runCatching {
+                    context.copyAssetFile(
+                        fileName = "bedrock_layout.json",
+                        output = bedrockFile,
+                        overwrite = false
+                    )
+                }.onFailure { e ->
+                    Logger.warning(TAG, "Failed to install Bedrock control layout", e)
+                }
+            }
+
+            if (installingBedrock && shouldSelectBedrock && bedrockFile.isFile) {
+                AllSettings.controlLayout.save(bedrockFile.name)
+            }
+
             refresh()
         }
     }
