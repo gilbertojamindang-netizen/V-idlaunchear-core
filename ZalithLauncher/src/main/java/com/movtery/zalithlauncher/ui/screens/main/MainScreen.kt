@@ -344,8 +344,9 @@ private fun <E: TitledNavKey> TopBar(
                 if (parent == null) {
                     if (festivals.isEmpty()) {
                         Text(
-                            text = BuildKeys.LAUNCHER_IDENTIFIER,
+                            text = "VØIDLAUNCHEAR",
                             style = style,
+                            color = Color(0xFFB66CFF),
                             softWrap = softWarp,
                             maxLines = maxLines
                         )
