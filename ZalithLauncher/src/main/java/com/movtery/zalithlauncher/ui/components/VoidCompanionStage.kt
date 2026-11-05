@@ -49,9 +49,9 @@ import kotlin.math.roundToInt
 /**
  * A small skin-based companion that wanders inside its stage and can be picked up.
  *
- * Dragging is constrained to the stage. Releasing the companion produces a
- * lightweight Compose spring/drop response; this is visual feedback, not a
- * physics-based skeletal ragdoll simulation.
+ * Dragging is constrained to the stage. Releasing while airborne plays a
+ * damped native skeletal tumble with a Compose spring/drop response. The motion
+ * is procedural animation rather than a per-limb rigid-body physics simulation.
  */
 @Composable
 fun VoidCompanionStage(
