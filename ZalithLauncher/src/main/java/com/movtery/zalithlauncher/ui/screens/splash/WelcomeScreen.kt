@@ -574,6 +574,11 @@ private fun WelcomeIntroduction(
                     text = stringResource(R.string.welcome_screen_intro_core),
                     lineHeight = 26.sp
                 )
+                Text(
+                    text = stringResource(R.string.welcome_screen_upstream_notice),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
             if (documents.isNotEmpty()) {
