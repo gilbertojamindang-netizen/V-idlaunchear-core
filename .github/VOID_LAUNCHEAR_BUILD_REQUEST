@@ -7,3 +7,5 @@ Note: CI success confirms compilation only; physical-device testing remains sepa
 Release workflow fix: checkout source before reading app version metadata.
 
 Retry public ARM64 release after fixing checkout in publish job.
+
+Build v1.0.7 with Java-properties-safe Unicode app label.
