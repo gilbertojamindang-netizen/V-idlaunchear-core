@@ -114,7 +114,7 @@ object ControlManager {
                 }
             }
 
-            if (installingBedrock && shouldSelectBedrock && bedrockFile.isFile) {
+            if (shouldSelectBedrock && bedrockFile.isFile) {
                 AllSettings.controlLayout.save(bedrockFile.name)
             }
 
