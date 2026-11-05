@@ -41,21 +41,33 @@ object VoidPerformanceAdvisor {
             context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
         val memoryInfo = ActivityManager.MemoryInfo()
         activityManager?.getMemoryInfo(memoryInfo)
-
         val totalRamMb = if (memoryInfo.totalMem > 0L) {
             (memoryInfo.totalMem / (1024L * 1024L)).toInt()
         } else {
             2048
         }
-        val profile = if (activityManager?.isLowRamDevice == true || totalRamMb <= 4096) {
-            Profile.BALANCED
-        } else if (totalRamMb <= 6144) {
+        val detectedProfile = if (activityManager?.isLowRamDevice == true || totalRamMb <= 6144) {
             Profile.BALANCED
         } else {
             Profile.PERFORMANCE
         }
+        return recommend(totalRamMb, detectedProfile)
+    }
+
+    /** Recalculate a selected profile using the device's reported physical RAM. */
+    fun recommend(context: Context, profile: Profile): Recommendation {
+        val activityManager =
+            context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+        val memoryInfo = ActivityManager.MemoryInfo()
+        activityManager?.getMemoryInfo(memoryInfo)
+        val totalRamMb = if (memoryInfo.totalMem > 0L) {
+            (memoryInfo.totalMem / (1024L * 1024L)).toInt()
+        } else {
+            2048
+        }
         return recommend(totalRamMb, profile)
     }
+
 
     /**
      * Build an advisory profile from a RAM estimate. This overload is pure and
