@@ -19,6 +19,7 @@
 package com.movtery.zalithlauncher.path
 
 import com.movtery.zalithlauncher.BuildConfig
+import com.movtery.zalithlauncher.BuildKeys
 import com.movtery.zalithlauncher.utils.network.ResilientDns
 import com.movtery.zalithlauncher.utils.network.TLSSecurity
 import io.ktor.client.HttpClient
