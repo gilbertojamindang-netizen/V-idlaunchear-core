@@ -11,7 +11,6 @@ package com.movtery.zalithlauncher.utils.device
 import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
-import kotlin.math.max
 import kotlin.math.min
 
 /**
@@ -49,16 +48,15 @@ object VoidPerformanceAdvisor {
             2048
         }
 
-        // Leave room for Android, the launcher, graphics drivers and native
-        // Minecraft allocations. Never suggest more than half of device RAM.
-        val heapLimitMb = max(512, (Runtime.getRuntime().maxMemory() / (1024L * 1024L)).toInt())
-        val safeRamMb = min(totalRamMb / 2, heapLimitMb)
+        // Keep a large reserve for Android, the launcher, graphics drivers and
+        // native allocations. This is a suggestion, not a promise of free RAM.
+        val safeRamMb = min((totalRamMb * 0.35f).toInt(), 4096).coerceAtLeast(512)
         val lowRam = activityManager?.isLowRamDevice == true || totalRamMb <= 4096
 
         return when {
             lowRam -> Recommendation(
                 profile = Profile.BALANCED,
-                maxMemoryMb = safeRamMb.coerceIn(512, 2048),
+                maxMemoryMb = min(safeRamMb, 2048),
                 renderDistance = 6,
                 simulationDistance = 4,
                 entityDistancePercent = 75,
@@ -66,7 +64,7 @@ object VoidPerformanceAdvisor {
             )
             totalRamMb <= 6144 -> Recommendation(
                 profile = Profile.BALANCED,
-                maxMemoryMb = safeRamMb.coerceIn(1024, 3072),
+                maxMemoryMb = min(safeRamMb, 3072),
                 renderDistance = 8,
                 simulationDistance = 5,
                 entityDistancePercent = 100,
@@ -74,7 +72,7 @@ object VoidPerformanceAdvisor {
             )
             else -> Recommendation(
                 profile = Profile.PERFORMANCE,
-                maxMemoryMb = safeRamMb.coerceIn(2048, 4096),
+                maxMemoryMb = safeRamMb,
                 renderDistance = 10,
                 simulationDistance = 6,
                 entityDistancePercent = 100,
