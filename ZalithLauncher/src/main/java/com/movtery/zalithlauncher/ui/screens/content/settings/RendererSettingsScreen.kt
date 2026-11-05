@@ -80,6 +80,8 @@ import com.movtery.zalithlauncher.ui.screens.content.settings.layouts.SwitchSett
 import com.movtery.zalithlauncher.utils.animation.getAnimateTween
 import com.movtery.zalithlauncher.utils.customResolutionRange
 import com.movtery.zalithlauncher.utils.device.checkVulkanSupport
+import com.movtery.zalithlauncher.utils.device.formatVulkanApiVersion
+import com.movtery.zalithlauncher.utils.device.getVulkanApiVersion
 import com.movtery.zalithlauncher.utils.ensureCustomResolutionInitialized
 import com.movtery.zalithlauncher.utils.getRealScreenSize
 import com.movtery.zalithlauncher.utils.isAdrenoGPU
@@ -346,6 +348,15 @@ fun RendererSettingsScreen(
                     )
 
                     if (checkVulkanSupport(LocalContext.current.packageManager)) {
+                        val vulkanApiLabel = getVulkanApiVersion(LocalContext.current.packageManager)
+                            ?.let(::formatVulkanApiVersion)
+                            ?: "version not reported"
+                        Text(
+                            text = "Detected Vulkan API: $vulkanApiLabel. Android's feature declaration does not guarantee every renderer or driver plugin will work.",
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall
+                        )
                         var adrenoGPUAlert by remember { mutableStateOf(false) }
 
                         SwitchSettingsCard(
