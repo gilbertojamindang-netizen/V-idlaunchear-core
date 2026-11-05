@@ -81,20 +81,27 @@ object ControlManager {
                     file.isFile && file.exists() && file.extension.equals("json", true)
                 }
 
-            // Install the Bedrock-inspired layout once. Preserve an existing
-            // custom layout; only switch automatically for a fresh install or
-            // the unmodified stock Zalith layout.
+            // Install the Bedrock-inspired layout once. Preserve a selected
+            // custom layout, including older installs whose selection was not saved.
             val selectedName = AllSettings.controlLayout.getValue()
-            val selectedFile = File(PathManager.DIR_CONTROL_LAYOUTS, selectedName)
-            val selectedLayout = runCatching {
-                loadLayoutFromFile(selectedFile)
-            }.getOrNull()
+            val selectedFile = selectedName
+                .takeIf { it.isNotBlank() }
+                ?.let { File(PathManager.DIR_CONTROL_LAYOUTS, it) }
+            val selectedLayout = selectedFile
+                ?.takeIf { it.isFile }
+                ?.let { file -> runCatching { loadLayoutFromFile(file) }.getOrNull() }
+
+            fun ControlLayout?.isStockDefault(): Boolean =
+                this != null &&
+                    info.name.default.equals("default", ignoreCase = true) &&
+                    info.author.default.equals("MovTery", ignoreCase = true)
+
+            val stockDefaultExists = files.any { file ->
+                runCatching { loadLayoutFromFile(file) }.getOrNull().isStockDefault()
+            }
             val shouldSelectBedrock = files.isEmpty() ||
-                selectedLayout == null ||
-                (
-                    selectedLayout.info.name.default.equals("default", ignoreCase = true) &&
-                    selectedLayout.info.author.default.equals("MovTery", ignoreCase = true)
-                )
+                selectedLayout.isStockDefault() ||
+                (selectedName.isBlank() && stockDefaultExists)
 
             if (files.isEmpty()) {
                 unpackDefaultControl(context)
