@@ -263,6 +263,11 @@ class PetController(
         post { PetLibNative.nativePlayAnimation(ptr, animation.id, speed, headFollow) }
     }
 
+    /** 播放空中松手后的骨骼翻落动作 */
+    fun playRagdoll() {
+        post { PetLibNative.nativePlayRagdoll(ptr) }
+    }
+
     /** 停止动画 */
     fun stopAnimation() {
         post { PetLibNative.nativeStopAnimation(ptr) }
