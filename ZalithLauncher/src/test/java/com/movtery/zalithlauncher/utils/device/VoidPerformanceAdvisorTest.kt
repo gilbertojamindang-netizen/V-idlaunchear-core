@@ -56,6 +56,44 @@ class VoidPerformanceAdvisorTest {
     }
 
     @Test
+    fun modScanFlagsLoaderMismatchAgainstSelectedLoader() {
+        val report = VoidPerformanceAdvisor.buildModCompatibilityReport(
+            versionName = "1.21.1",
+            installedLoaders = setOf(com.movtery.zalithlauncher.game.addons.modloader.ModLoader.FORGE),
+            modFiles = listOf(
+                VoidPerformanceAdvisor.ModMetadataSnapshot(
+                    fileName = "fabric-example.jar",
+                    id = "example",
+                    loader = com.movtery.zalithlauncher.game.addons.modloader.ModLoader.FABRIC,
+                    enabled = true,
+                    recognized = true
+                )
+            )
+        )
+        assertTrue(report.contains("Loader mismatch review"))
+        assertTrue(report.contains("Fabric: fabric-example.jar"))
+    }
+
+    @Test
+    fun modScanFlagsDuplicateIdsWithoutAssumingVersionCompatibility() {
+        val loader = com.movtery.zalithlauncher.game.addons.modloader.ModLoader.FABRIC
+        val report = VoidPerformanceAdvisor.buildModCompatibilityReport(
+            versionName = "1.21.1",
+            installedLoaders = setOf(loader),
+            modFiles = listOf(
+                VoidPerformanceAdvisor.ModMetadataSnapshot("first.jar", "Example", loader, true, true),
+                VoidPerformanceAdvisor.ModMetadataSnapshot("second.jar", "example", loader, true, true),
+                VoidPerformanceAdvisor.ModMetadataSnapshot("old.jar", "disabled", loader, false, true),
+                VoidPerformanceAdvisor.ModMetadataSnapshot("notes.jar", "", com.movtery.zalithlauncher.game.addons.modloader.ModLoader.UNKNOWN, true, false)
+            )
+        )
+        assertTrue(report.contains("Duplicate mod IDs: example"))
+        assertTrue(report.contains("Disabled files: 1"))
+        assertTrue(report.contains("Unrecognized JARs: 1"))
+        assertTrue(report.contains("cannot guarantee Minecraft-version or dependency compatibility"))
+    }
+
+    @Test
     fun invalidRamEstimateIsClampedToSafeMinimum() {
         val result = VoidPerformanceAdvisor.recommend(
             0,
