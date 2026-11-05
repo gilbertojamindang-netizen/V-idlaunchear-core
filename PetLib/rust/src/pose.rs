@@ -2,7 +2,7 @@
 
 use glam::{EulerRot, Mat4, Quat, Vec2, Vec3};
 
-use crate::animation::{evaluate_sitting, evaluate_walking, AnimFrame, AnimationId, SITTING_PERIOD, WALKING_PERIOD};
+use crate::animation::{evaluate_ragdoll, evaluate_sitting, evaluate_walking, AnimFrame, AnimationId, RAGDOLL_DURATION, SITTING_PERIOD, WALKING_PERIOD};
 use crate::clip::{self, ClipPose, IdleClips};
 use crate::clip_data::{CLIP_IDLE, CLIP_INTERACT, CLIP_SUBS};
 
@@ -97,6 +97,8 @@ enum Source {
     Sub(usize),
     /// 点击反应
     Interact,
+    /// 空中松手后的骨骼翻落
+    Ragdoll,
 }
 
 /// 一条动画轨道：来源、本地时间与淡入淡出权重。
@@ -147,7 +149,7 @@ impl Track {
     }
 
     fn is_oneshot(&self) -> bool {
-        matches!(self.source, Source::Sub(_) | Source::Interact)
+        matches!(self.source, Source::Sub(_) | Source::Interact | Source::Ragdoll)
     }
 }
 
@@ -331,10 +333,9 @@ impl Skeleton {
         // 随机子动画期间头部交给剪辑演绎，不追光标
         // 结束后视线状态已清零，按 τ_gaze 重新收敛回当前光标。
         self.animation.is_some_and(|(_, _, follow)| follow)
-            && !self
-                .tracks
-                .iter()
-                .any(|t| matches!(t.source, Source::Sub(_)) && t.target == 1.)
+            && !self.tracks.iter().any(|t| {
+                matches!(t.source, Source::Sub(_) | Source::Ragdoll) && t.target == 1.
+            })
     }
 
     /// 播放动画。
@@ -352,6 +353,21 @@ impl Skeleton {
         self.tracks.push(Track::looping(source));
         self.animation = Some((id, speed.max(0.01), head_follow));
         self.idle_clips.reset();
+    }
+
+    /// 播放空中松手后的骨骼翻落动作；完成后淡回当前基础动画。
+    pub fn play_ragdoll(&mut self) {
+        if self.animation.is_none() {
+            self.animation = Some((AnimationId::Idle, 1.0, true));
+            self.tracks.push(Track::base_fade_in(Source::Idle));
+            self.idle_clips.reset();
+        }
+        for track in &mut self.tracks {
+            if track.is_oneshot() {
+                track.target = 0.0;
+            }
+        }
+        self.tracks.push(Track::oneshot(Source::Ragdoll, RAGDOLL_DURATION));
     }
 
     /// 停止动画。
@@ -492,6 +508,7 @@ impl Skeleton {
             Source::Sitting => snapshot_from_frame(evaluate_sitting(track.time), cape_z),
             Source::Sub(index) => snapshot_from_pose(clip::sample(&CLIP_SUBS[index], track.time)),
             Source::Interact => snapshot_from_pose(clip::sample(&CLIP_INTERACT, track.time)),
+            Source::Ragdoll => snapshot_from_frame(evaluate_ragdoll(track.time), cape_z),
         }
     }
 
