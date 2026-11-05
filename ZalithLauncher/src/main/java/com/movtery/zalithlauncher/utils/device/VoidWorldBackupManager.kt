@@ -31,6 +31,8 @@ import java.util.zip.ZipOutputStream
  */
 object VoidWorldBackupManager {
     private const val META_ENTRY = ".void-world-backup.properties"
+    private const val MAX_RESTORE_ENTRIES = 250_000
+    private const val MAX_RESTORE_UNCOMPRESSED_BYTES = 16L * 1024L * 1024L * 1024L
 
     data class WorldInfo(
         val name: String,
@@ -285,11 +287,17 @@ object VoidWorldBackupManager {
 
     private fun extractWorld(archive: File, destination: File) {
         val root = destination.canonicalFile
+        var extractedEntries = 0
+        var extractedBytes = 0L
         ZipInputStream(BufferedInputStream(FileInputStream(archive))).use { zip ->
             while (true) {
                 val entry = zip.nextEntry ?: break
                 try {
                     if (entry.name == META_ENTRY) continue
+                    extractedEntries++
+                    require(extractedEntries <= MAX_RESTORE_ENTRIES) {
+                        "The backup contains too many files to restore safely."
+                    }
                     require(isSafeArchiveEntryName(entry.name)) {
                         "The backup contains an unsafe file path."
                     }
@@ -309,7 +317,16 @@ object VoidWorldBackupManager {
                             error("Unable to create a folder during restore.")
                         }
                         BufferedOutputStream(FileOutputStream(target)).use { output ->
-                            zip.copyTo(output)
+                            val buffer = ByteArray(16 * 1024)
+                            while (true) {
+                                val count = zip.read(buffer)
+                                if (count < 0) break
+                                extractedBytes += count
+                                require(extractedBytes <= MAX_RESTORE_UNCOMPRESSED_BYTES) {
+                                    "The backup expands beyond the VØID restore safety limit."
+                                }
+                                output.write(buffer, 0, count)
+                            }
                         }
                     }
                 } finally {
