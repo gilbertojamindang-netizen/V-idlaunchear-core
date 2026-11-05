@@ -3055,4 +3055,11 @@
     <string name="guide_tip_blank">Tap any blank area to continue to the next step</string>
     <!-- Next-step hint shown near a screen corner during the final guide step; tapping any blank area finishes the whole guide -->
     <string name="guide_tip_finish">Tap any blank area to finish the guide</string>
+    <string name="settings_launcher_font_style_title">Launcher font</string>
+    <string name="settings_launcher_font_style_summary">Choose the font family used across launcher text.</string>
+    <string name="font_style_system">System default</string>
+    <string name="font_style_sans_serif">Sans serif</string>
+    <string name="font_style_serif">Serif</string>
+    <string name="font_style_monospace">Monospace</string>
+    <string name="font_style_cursive">Cursive</string>
 </resources>
