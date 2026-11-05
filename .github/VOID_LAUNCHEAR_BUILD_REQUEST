@@ -1,3 +1,4 @@
 Owner-requested Debug APK build trigger.
 Distribution name: Void Launchear
 Source version: 1.0.3
+Retry after compiler fixes, using the latest main commit.
