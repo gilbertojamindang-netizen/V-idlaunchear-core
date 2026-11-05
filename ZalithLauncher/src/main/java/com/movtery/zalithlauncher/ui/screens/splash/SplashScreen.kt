@@ -19,20 +19,27 @@
 package com.movtery.zalithlauncher.ui.screens.splash
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
@@ -139,44 +146,118 @@ private fun LoadingScreen(
         LaunchedEffect(isVisible) {
             if (isVisible) {
                 logoProgress.snapTo(0f)
-                delay(100)
-                logoProgress.animateTo(1f, animationSpec = tween(durationMillis = 850))
+                delay(180)
+                logoProgress.animateTo(
+                    targetValue = 1f,
+                    animationSpec = keyframes {
+                        durationMillis = 1080
+                        0f at 0
+                        1.10f at 720
+                        0.96f at 875
+                        1f at 1080
+                    }
+                )
             }
         }
+
+        val collisionGlow = (1f - kotlin.math.abs(1f - logoProgress.value) * 5f)
+            .coerceIn(0f, 1f)
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF07040D),
+                            Color(0xFF160A25),
+                            Color(0xFF080510)
+                        )
+                    )
+                )
                 .animated(ctx, from = AnimatedDirection.Bottom),
             contentAlignment = Alignment.Center
         ) {
+            // Soft central glow; all elements are vector/text based and scale with display density.
+            Box(
+                modifier = Modifier
+                    .size(280.dp)
+                    .background(
+                        Brush.radialGradient(
+                            colors = listOf(
+                                Color(0xFF8C35D6).copy(alpha = 0.22f + collisionGlow * 0.38f),
+                                Color(0xFF542080).copy(alpha = 0.10f),
+                                Color.Transparent
+                            )
+                        ),
+                        shape = RoundedCornerShape(50)
+                    )
+            )
+
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        modifier = Modifier.offset(x = (-28f * (1f - logoProgress.value)).dp),
+                        modifier = Modifier.offset(
+                            x = (-76f * (1f - logoProgress.value)).dp
+                        ),
                         text = "VØID",
-                        color = Color(0xFFD5B0FF),
-                        fontSize = 28.sp,
+                        color = Color(0xFFE0BDFF),
+                        fontSize = 38.sp,
                         fontWeight = FontWeight.Black,
-                        letterSpacing = 2.sp
+                        letterSpacing = 2.5.sp
                     )
                     Text(
-                        modifier = Modifier.offset(x = (28f * (1f - logoProgress.value)).dp),
+                        modifier = Modifier.offset(
+                            x = (76f * (1f - logoProgress.value)).dp
+                        ),
                         text = "LAUNCHER",
-                        color = Color(0xFFF4E9FF),
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
+                        color = Color(0xFFFFF8FF),
+                        fontSize = 23.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.2.sp
                     )
                 }
+
+                Box(
+                    modifier = Modifier
+                        .width(230.dp)
+                        .height(1.dp)
+                        .background(
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color(0xFFB66CFF).copy(alpha = 0.9f),
+                                    Color.Transparent
+                                )
+                            )
+                        )
+                )
+
+                Text(
+                    text = "MINECRAFT JAVA  •  VØID CORE",
+                    color = Color(0xFFBFA6D5),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 2.sp
+                )
+
                 LinearWavyProgressIndicator(
-                    modifier = Modifier.width(128.dp),
-                    wavelength = 32.dp
+                    modifier = Modifier.width(164.dp),
+                    color = Color(0xFFB66CFF),
+                    trackColor = Color(0xFF38234A),
+                    wavelength = 36.dp
+                )
+
+                Text(
+                    text = "INITIALIZING LAUNCHER",
+                    color = Color(0xFF8F7B9F),
+                    fontSize = 9.sp,
+                    letterSpacing = 1.8.sp
                 )
             }
         }
