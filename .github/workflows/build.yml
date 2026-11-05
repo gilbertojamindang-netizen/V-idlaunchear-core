@@ -173,12 +173,12 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.3
-          name: VøidLaunchear 1.0.3 — ARM64
+          tag_name: v1.0.4
+          name: VøidLaunchear 1.0.4 — ARM64
           body: |
-            Public ARM64 Debug APK for VøidLaunchear 1.0.3.
+            Public ARM64 Debug APK for VøidLaunchear 1.0.4.
 
-            Download: Void-Launchear-1.0.3-arm64-Debug.apk
+            Download: Void-Launchear-1.0.4-arm64-Debug.apk
 
             This is a successful CI build. It has not yet been verified on a physical Android device.
           files: release-assets/*.apk
