@@ -64,6 +64,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -486,15 +487,27 @@ private fun ProductBanner(
     ) {
         Image(
             modifier = Modifier.size(52.dp),
-            painter = painterResource(R.drawable.img_launcher),
+            painter = painterResource(R.drawable.ic_launcher_foreground),
             contentDescription = null
         )
 
-        Text(
-            text = BuildKeys.LAUNCHER_NAME,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
+        Column(
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Text(
+                text = "VØIDLAUNCHEAR",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color(0xFFD5B0FF),
+                letterSpacing = 1.sp
+            )
+            Text(
+                text = "MINECRAFT JAVA LAUNCHER",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.2.sp
+            )
+        }
     }
 }
 
