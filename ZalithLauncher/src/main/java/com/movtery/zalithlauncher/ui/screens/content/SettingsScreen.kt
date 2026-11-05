@@ -23,7 +23,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -36,13 +35,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
@@ -135,83 +134,123 @@ private fun TabMenu(
     navigateTo: (TitledNavKey) -> Unit
 ) {
     val ctx = rememberAnimatedContext(isVisible = isVisible)
-
     val scrollState = rememberScrollState()
+
     Column(
         modifier = modifier
+            .width(148.dp)
+            .background(Color(0xFF100D17))
             .fadeEdge(scrollState)
-            .width(IntrinsicSize.Min)
-            .padding(start = 8.dp)
             .animated(ctx, from = AnimatedDirection.Left)
-            .verticalScroll(scrollState),
+            .verticalScroll(scrollState)
+            .padding(horizontal = 9.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(14.dp))
         Column(
             modifier = Modifier
-                .padding(horizontal = 7.dp)
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color(0xFF21132F))
-                .padding(horizontal = 10.dp, vertical = 12.dp),
+                .clip(RoundedCornerShape(18.dp))
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFF38204F), Color(0xFF1B1425))
+                    )
+                )
+                .padding(vertical = 13.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(3.dp)
+            verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Text(
                 text = "Ø",
-                color = Color(0xFFE8C8FF),
-                fontSize = 25.sp,
+                color = Color(0xFFF0D8FF),
+                fontSize = 29.sp,
                 fontWeight = FontWeight.Black
             )
             Text(
-                text = "VØID",
+                text = "VØID CONTROL",
                 color = Color(0xFFE8C8FF),
-                fontSize = 11.sp,
+                fontSize = 9.sp,
                 fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 1.5.sp,
+                letterSpacing = 1.1.sp,
                 maxLines = 1
             )
             Text(
-                text = "SETTINGS",
+                text = "SYSTEM SETTINGS",
                 color = Color(0xFFB99ACD),
-                fontSize = 8.sp,
+                fontSize = 7.sp,
                 fontWeight = FontWeight.Bold,
-                letterSpacing = 0.8.sp,
+                letterSpacing = 0.7.sp,
                 maxLines = 1
             )
         }
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(13.dp))
+        Text(
+            text = "CONFIGURATION",
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 5.dp, bottom = 8.dp),
+            color = Color(0xFFB99ACD),
+            fontSize = 9.sp,
+            fontWeight = FontWeight.ExtraBold,
+            letterSpacing = 1.sp
+        )
+
         settingItems.forEach { item ->
             if (item.division) {
+                Spacer(modifier = Modifier.height(5.dp))
                 HorizontalDivider(
                     modifier = Modifier
-                        .padding(vertical = 12.dp)
-                        .fillMaxWidth(0.4f)
-                        .alpha(0.4f),
-                    color = MaterialTheme.colorScheme.onSurface
+                        .fillMaxWidth()
+                        .padding(horizontal = 9.dp, vertical = 7.dp)
+                        .alpha(0.35f),
+                    color = Color(0xFFB99ACD)
                 )
             }
-
-            NavigationRailItem(
-                selected = settingsScreenKey == item.key,
-                onClick = {
-                    navigateTo(item.key)
-                },
-                icon = {
-                    item.icon()
-                },
-                label = {
+            val selected = settingsScreenKey == item.key
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 3.dp),
+                onClick = { navigateTo(item.key) },
+                shape = RoundedCornerShape(14.dp),
+                color = if (selected) Color(0xFF653A91)
+                    else Color(0xFF211B2B),
+                contentColor = if (selected) Color.White
+                    else Color(0xFFD4C9DE),
+                tonalElevation = if (selected) 3.dp else 0.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(54.dp)
+                        .padding(horizontal = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(9.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(32.dp)
+                            .height(32.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(
+                                if (selected) Color.White.copy(alpha = 0.16f)
+                                else Color(0xFF352941)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        item.icon()
+                    }
                     Text(
-                        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
                         text = stringResource(item.textRes),
-                        maxLines = 1,
-                        style = MaterialTheme.typography.labelMedium
+                        modifier = Modifier.weight(1f),
+                        maxLines = 2,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold
                     )
                 }
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
+            }
         }
+        Spacer(modifier = Modifier.height(14.dp))
     }
 }
 
