@@ -27,6 +27,7 @@ object VoidCoreCommandRouter {
         REVIEW_MODS,
         SHOW_FPS_GUIDANCE,
         REVIEW_MINECRAFT_INSTALLATION,
+        REVIEW_CRASH_REPORT,
         SHOW_DEVICE_SUMMARY,
         CLEAN_CACHE,
         OPEN_WORLD_VAULT,
@@ -100,6 +101,11 @@ object VoidCoreCommandRouter {
                 "Minecraft installation",
                 VoidPerformanceAdvisor.minecraftDiagnostics()
             )
+            "check crash", "crash", "crash diagnostics", "java crash" -> Result(
+                Action.REVIEW_CRASH_REPORT,
+                "Crash diagnostics",
+                VoidPerformanceAdvisor.crashDiagnostics()
+            )
             "clean cache", "clear cache" -> Result(
                 Action.CLEAN_CACHE,
                 "Cache cleanup",
@@ -114,7 +120,7 @@ object VoidCoreCommandRouter {
             "help", "commands", "" -> Result(
                 Action.HELP,
                 "VØID CORE commands",
-                "Try /device, /optimize, /low-end, /check gpu, /check java, /fix settings, /restore settings, /check mods, /fps, /check minecraft, /clean cache, or /world backup."
+                "Try /device, /optimize, /low-end, /check gpu, /check java, /fix settings, /restore settings, /check mods, /fps, /check minecraft, /check crash, /clean cache, or /world backup."
             )
             else -> Result(
                 Action.HELP,
