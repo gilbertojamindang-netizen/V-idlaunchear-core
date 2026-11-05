@@ -32,12 +32,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,6 +82,9 @@ import com.movtery.zalithlauncher.ui.screens.content.settings.layouts.SettingsCa
 import com.movtery.zalithlauncher.ui.screens.content.settings.layouts.SwitchSettingsCard
 import com.movtery.zalithlauncher.utils.animation.getAnimateTween
 import com.movtery.zalithlauncher.utils.customResolutionRange
+import com.movtery.zalithlauncher.utils.device.VulkanCapabilities
+import com.movtery.zalithlauncher.utils.device.VulkanChecker
+import com.movtery.zalithlauncher.utils.device.profileSupport
 import com.movtery.zalithlauncher.utils.device.checkVulkanSupport
 import com.movtery.zalithlauncher.utils.device.formatVulkanApiVersion
 import com.movtery.zalithlauncher.utils.device.getVulkanApiVersion
@@ -87,6 +93,9 @@ import com.movtery.zalithlauncher.utils.getRealScreenSize
 import com.movtery.zalithlauncher.utils.isAdrenoGPU
 import com.movtery.zalithlauncher.viewmodel.EventViewModel
 import com.movtery.zalithlauncher.viewmodel.sendDLPlugin
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun RendererSettingsScreen(
@@ -248,6 +257,14 @@ fun RendererSettingsScreen(
             }
 
             AnimatedItem { ctx ->
+                VulkanSetupPanel(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .animated(ctx)
+                )
+            }
+
+            AnimatedItem { ctx ->
                 SettingsCardColumn(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -403,6 +420,165 @@ fun RendererSettingsScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+
+/**
+ * VØID Vulkan setup: performs a real native capability scan and exposes safe API fallbacks.
+ * A positive scan is not a guarantee that every Minecraft version, renderer, or mod will work.
+ */
+@Composable
+private fun VulkanSetupPanel(
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val systemFeatureDetected = remember(context) {
+        checkVulkanSupport(context.packageManager)
+    }
+    val declaredApiVersion = remember(context, systemFeatureDetected) {
+        if (systemFeatureDetected) {
+            getVulkanApiVersion(context.packageManager)?.let(::formatVulkanApiVersion)
+        } else null
+    }
+
+    var isScanning by remember { mutableStateOf(false) }
+    var hasScanned by remember { mutableStateOf(false) }
+    var capabilities by remember { mutableStateOf<VulkanCapabilities?>(null) }
+    val scope = rememberCoroutineScope()
+    val supportedProfiles = capabilities?.profileSupport()?.filter { it.supported }.orEmpty()
+    val unsupportedProfiles = capabilities?.profileSupport()?.filterNot { it.supported }.orEmpty()
+
+    SettingsCardColumn(
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                text = "VØID VULKAN SETUP",
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = "Check your device's Vulkan capabilities before selecting a graphics path.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall
+            )
+
+            Text(
+                text = if (systemFeatureDetected) {
+                    "Android Vulkan feature: detected"
+                } else {
+                    "Android Vulkan feature: not reported by the system"
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (systemFeatureDetected) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.error
+            )
+            declaredApiVersion?.let { api ->
+                Text(
+                    text = "System-reported Vulkan API: $api",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isScanning,
+                onClick = {
+                    isScanning = true
+                    hasScanned = false
+                    capabilities = null
+                    scope.launch {
+                        val result = runCatching {
+                            withContext(Dispatchers.IO) {
+                                VulkanChecker.checkCapabilities(
+                                    driverPath = null,
+                                    nativeDir = null,
+                                    cacheDir = null
+                                )
+                            }
+                        }.getOrNull()
+                        capabilities = result
+                        hasScanned = true
+                        isScanning = false
+                    }
+                }
+            ) {
+                Text(if (isScanning) "SCANNING VULKAN..." else "RUN COMPATIBILITY SCAN")
+            }
+
+            if (hasScanned) {
+                val result = capabilities
+                if (result == null) {
+                    Text(
+                        text = "The native Vulkan scan could not complete. Keep the OpenGL fallback selected and check your device driver.",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                } else {
+                    Text(
+                        text = "Native Vulkan API: ${result.versionString} " +
+                            if (result.isVersionSupported) "(1.2 baseline passed)" else "(below 1.2 baseline)",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = if (supportedProfiles.isNotEmpty()) {
+                            "Profiles passing required checks: " +
+                                supportedProfiles.joinToString { it.versionRangeText }
+                        } else {
+                            "No Minecraft Vulkan profile passed the required checks."
+                        },
+                        color = if (supportedProfiles.isNotEmpty()) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    if (unsupportedProfiles.isNotEmpty()) {
+                        Text(
+                            text = "Profiles not passing: " +
+                                unsupportedProfiles.joinToString { it.versionRangeText },
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    modifier = Modifier.weight(1f),
+                    enabled = supportedProfiles.isNotEmpty() && !isScanning,
+                    onClick = {
+                        AllSettings.graphicsApi.save(GraphicsApi.VULKAN)
+                    }
+                ) {
+                    Text("USE VULKAN")
+                }
+                OutlinedButton(
+                    modifier = Modifier.weight(1f),
+                    enabled = !isScanning,
+                    onClick = {
+                        AllSettings.graphicsApi.save(GraphicsApi.DEFAULT_OPENGL)
+                    }
+                ) {
+                    Text("OPENGL FALLBACK")
+                }
+            }
+
+            Text(
+                text = "Zink runs OpenGL over Vulkan; it is not the same as Minecraft's native Vulkan API. Driver and Minecraft-version compatibility still matter. A passing scan does not guarantee every modpack will work.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
 }
