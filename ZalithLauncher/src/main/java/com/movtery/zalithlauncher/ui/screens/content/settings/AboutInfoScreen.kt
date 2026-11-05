@@ -108,7 +108,7 @@ fun AboutInfoScreen(
 
                         ButtonIconItem(
                             icon = painterResource(R.drawable.img_launcher),
-                            title = BuildKeys.LAUNCHER_NAME,
+                            title = "VøidLaunchear",
                             text = stringResource(R.string.about_launcher_version, BuildConfig.VERSION_NAME),
                             button = {
                                 Button(
@@ -152,7 +152,7 @@ fun AboutInfoScreen(
                         )
                         Text("Founder & Creator • Project Owner")
                         Text("Lead Developer • UI/UX Designer")
-                        Text("Branding & Customization • Tester")
+                        Text("Branding & Customization • Tester • Project Director")
                         Text(
                             text = "VøidLaunchear is based on Zalith Launcher 2. Original developers, contributors, and their licenses remain credited below.",
                             style = MaterialTheme.typography.bodySmall,
