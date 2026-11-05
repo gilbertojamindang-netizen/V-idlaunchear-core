@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.download.assets.search
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +32,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
@@ -40,6 +42,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -280,43 +284,53 @@ private fun AssetsBrowserHeader(classes: PlatformClasses) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 10.dp),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            .padding(horizontal = 14.dp, vertical = 9.dp),
+        shape = RoundedCornerShape(22.dp),
+        color = Color.Transparent,
+        contentColor = Color.White
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 13.dp),
+            modifier = Modifier
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF171124),
+                            Color(0xFF382052),
+                            Color(0xFF221831)
+                        )
+                    )
+                )
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "VØID  /  ASSET BROWSER",
-                    color = MaterialTheme.colorScheme.primary,
+                    text = "VØID  /  CONTENT ARCHIVE",
+                    color = Color(0xFFC7A8FF),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Black
                 )
                 Text(
-                    text = stringResource(titleRes),
+                    text = stringResource(titleRes).uppercase(),
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Black
                 )
                 Text(
-                    text = "Discover content for your Minecraft setup",
+                    text = "Discover, filter and install Minecraft content",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.78f)
+                    color = Color.White.copy(alpha = 0.76f)
                 )
             }
             Surface(
                 shape = RoundedCornerShape(13.dp),
-                color = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                color = Color(0xFF8B5CF6),
+                contentColor = Color.White
             ) {
                 Text(
                     text = "BROWSE",
                     modifier = Modifier.padding(horizontal = 11.dp, vertical = 8.dp),
                     style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Black
                 )
             }
         }
