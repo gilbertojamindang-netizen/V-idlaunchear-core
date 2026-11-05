@@ -9,11 +9,11 @@
             "matchQueue": []
         },
         "description": {
-            "default": "Bedrock-inspired mobile touch layout with a left movement joystick, right-side action buttons, and compact top controls.",
+            "default": "Bedrock-inspired mobile controls: left movement joystick, right-side jump/sneak/attack, tap to use, and hold to mine.",
             "matchQueue": []
         },
-        "versionCode": 1,
-        "versionName": "1.0"
+        "versionCode": 2,
+        "versionName": "1.1"
     },
     "layers": [
         {
@@ -24,24 +24,25 @@
             "normalButtons": [
                 {
                     "text": {
-                        "default": "GUI",
+                        "default": "UI",
                         "matchQueue": []
                     },
-                    "uuid": "166b980299c8420ab8",
+                    "uuid": "voidbd-ui-001",
                     "position": {
-                        "x": 10000,
+                        "x": 9800,
                         "y": 0
                     },
                     "buttonSize": {
                         "type": "percentage",
                         "widthDp": 50,
                         "heightDp": 50,
-                        "widthPercentage": 2289,
-                        "heightPercentage": 1100,
+                        "widthPercentage": 800,
+                        "heightPercentage": 800,
                         "widthReference": "screen_height",
                         "heightReference": "screen_height"
                     },
-                    "buttonStyle": "cac8c754ffa0",
+                    "buttonStyle": "voidbedrock001",
+                    "textBold": true,
                     "visibilityType": "always",
                     "clickEvents": [
                         {
@@ -64,7 +65,7 @@
             ]
         },
         {
-            "name": "tab",
+            "name": "bedrock_top",
             "uuid": "b7859a69d0d3",
             "hide": false,
             "visibilityType": "always",
@@ -83,13 +84,14 @@
                         "type": "percentage",
                         "widthDp": 50,
                         "heightDp": 50,
-                        "widthPercentage": 900,
-                        "heightPercentage": 900,
+                        "widthPercentage": 800,
+                        "heightPercentage": 800,
                         "widthReference": "screen_height",
                         "heightReference": "screen_height"
                     },
                     "buttonStyle": "voidbedrock001",
-                    "visibilityType": "always",
+                    "textBold": true,
+                    "visibilityType": "in_game",
                     "clickEvents": [
                         {
                             "type": "key",
@@ -102,25 +104,26 @@
                 },
                 {
                     "text": {
-                        "default": "Esc",
+                        "default": "ESC",
                         "matchQueue": []
                     },
                     "uuid": "voidbd-pause-001",
                     "position": {
-                        "x": 5050,
+                        "x": 5000,
                         "y": 0
                     },
                     "buttonSize": {
                         "type": "percentage",
                         "widthDp": 50,
                         "heightDp": 50,
-                        "widthPercentage": 900,
-                        "heightPercentage": 900,
+                        "widthPercentage": 1000,
+                        "heightPercentage": 800,
                         "widthReference": "screen_height",
                         "heightReference": "screen_height"
                     },
                     "buttonStyle": "voidbedrock001",
-                    "visibilityType": "always",
+                    "textBold": true,
+                    "visibilityType": "in_game",
                     "clickEvents": [
                         {
                             "type": "key",
@@ -138,20 +141,21 @@
                     },
                     "uuid": "voidbd-ime-001",
                     "position": {
-                        "x": 6000,
+                        "x": 6150,
                         "y": 0
                     },
                     "buttonSize": {
                         "type": "percentage",
                         "widthDp": 50,
                         "heightDp": 50,
-                        "widthPercentage": 900,
-                        "heightPercentage": 900,
+                        "widthPercentage": 800,
+                        "heightPercentage": 800,
                         "widthReference": "screen_height",
                         "heightReference": "screen_height"
                     },
                     "buttonStyle": "voidbedrock001",
-                    "visibilityType": "always",
+                    "textBold": true,
+                    "visibilityType": "in_game",
                     "clickEvents": [
                         {
                             "type": "launcher_event",
@@ -169,20 +173,21 @@
                     },
                     "uuid": "voidbd-camera-001",
                     "position": {
-                        "x": 9000,
+                        "x": 8950,
                         "y": 0
                     },
                     "buttonSize": {
                         "type": "percentage",
                         "widthDp": 50,
                         "heightDp": 50,
-                        "widthPercentage": 900,
-                        "heightPercentage": 900,
+                        "widthPercentage": 800,
+                        "heightPercentage": 800,
                         "widthReference": "screen_height",
                         "heightReference": "screen_height"
                     },
                     "buttonStyle": "voidbedrock001",
-                    "visibilityType": "always",
+                    "textBold": true,
+                    "visibilityType": "in_game",
                     "clickEvents": [
                         {
                             "type": "key",
@@ -200,20 +205,21 @@
                     },
                     "uuid": "voidbd-inventory-001",
                     "position": {
-                        "x": 5050,
-                        "y": 9000
+                        "x": 6800,
+                        "y": 9300
                     },
                     "buttonSize": {
                         "type": "percentage",
                         "widthDp": 50,
                         "heightDp": 50,
-                        "widthPercentage": 1100,
-                        "heightPercentage": 1100,
+                        "widthPercentage": 900,
+                        "heightPercentage": 900,
                         "widthReference": "screen_height",
                         "heightReference": "screen_height"
                     },
                     "buttonStyle": "voidbedrock001",
-                    "visibilityType": "always",
+                    "textBold": true,
+                    "visibilityType": "in_game",
                     "clickEvents": [
                         {
                             "type": "key",
@@ -227,7 +233,7 @@
             ]
         },
         {
-            "name": "layer2",
+            "name": "bedrock_actions",
             "uuid": "81548d8b5adb",
             "hide": false,
             "visibilityType": "in_game",
@@ -239,19 +245,20 @@
                     },
                     "uuid": "voidbd-attack-001",
                     "position": {
-                        "x": 8500,
-                        "y": 5650
+                        "x": 8750,
+                        "y": 6200
                     },
                     "buttonSize": {
                         "type": "percentage",
                         "widthDp": 50,
                         "heightDp": 50,
-                        "widthPercentage": 1500,
-                        "heightPercentage": 1500,
+                        "widthPercentage": 1300,
+                        "heightPercentage": 1300,
                         "widthReference": "screen_height",
                         "heightReference": "screen_height"
                     },
                     "buttonStyle": "voidbedrock001",
+                    "textBold": true,
                     "visibilityType": "in_game",
                     "clickEvents": [
                         {
@@ -260,70 +267,8 @@
                         }
                     ],
                     "isSwipple": false,
-                    "isPenetrable": true,
-                    "isToggleable": false
-                },
-                {
-                    "text": {
-                        "default": "USE",
-                        "matchQueue": []
-                    },
-                    "uuid": "voidbd-use-001",
-                    "position": {
-                        "x": 7350,
-                        "y": 7000
-                    },
-                    "buttonSize": {
-                        "type": "percentage",
-                        "widthDp": 50,
-                        "heightDp": 50,
-                        "widthPercentage": 1500,
-                        "heightPercentage": 1500,
-                        "widthReference": "screen_height",
-                        "heightReference": "screen_height"
-                    },
-                    "buttonStyle": "voidbedrock001",
-                    "visibilityType": "in_game",
-                    "clickEvents": [
-                        {
-                            "type": "launcher_event",
-                            "key": "GLFW_MOUSE_BUTTON_RIGHT"
-                        }
-                    ],
-                    "isSwipple": false,
-                    "isPenetrable": true,
-                    "isToggleable": false
-                },
-                {
-                    "text": {
-                        "default": "▼",
-                        "matchQueue": []
-                    },
-                    "uuid": "voidbd-sneak-001",
-                    "position": {
-                        "x": 7550,
-                        "y": 8350
-                    },
-                    "buttonSize": {
-                        "type": "percentage",
-                        "widthDp": 50,
-                        "heightDp": 50,
-                        "widthPercentage": 1400,
-                        "heightPercentage": 1400,
-                        "widthReference": "screen_height",
-                        "heightReference": "screen_height"
-                    },
-                    "buttonStyle": "voidbedrock001",
-                    "visibilityType": "in_game",
-                    "clickEvents": [
-                        {
-                            "type": "key",
-                            "key": "GLFW_KEY_LEFT_SHIFT"
-                        }
-                    ],
-                    "isSwipple": false,
                     "isPenetrable": false,
-                    "isToggleable": true
+                    "isToggleable": false
                 },
                 {
                     "text": {
@@ -332,19 +277,20 @@
                     },
                     "uuid": "voidbd-jump-001",
                     "position": {
-                        "x": 8900,
-                        "y": 7450
+                        "x": 9300,
+                        "y": 8250
                     },
                     "buttonSize": {
                         "type": "percentage",
                         "widthDp": 50,
                         "heightDp": 50,
-                        "widthPercentage": 1700,
-                        "heightPercentage": 1700,
+                        "widthPercentage": 1550,
+                        "heightPercentage": 1550,
                         "widthReference": "screen_height",
                         "heightReference": "screen_height"
                     },
                     "buttonStyle": "voidbedrock001",
+                    "textBold": true,
                     "visibilityType": "in_game",
                     "clickEvents": [
                         {
@@ -355,22 +301,62 @@
                     "isSwipple": false,
                     "isPenetrable": false,
                     "isToggleable": false
+                },
+                {
+                    "text": {
+                        "default": "▼",
+                        "matchQueue": []
+                    },
+                    "uuid": "voidbd-sneak-001",
+                    "position": {
+                        "x": 8050,
+                        "y": 9050
+                    },
+                    "buttonSize": {
+                        "type": "percentage",
+                        "widthDp": 50,
+                        "heightDp": 50,
+                        "widthPercentage": 1100,
+                        "heightPercentage": 1100,
+                        "widthReference": "screen_height",
+                        "heightReference": "screen_height"
+                    },
+                    "buttonStyle": "voidbedrock001",
+                    "textBold": true,
+                    "visibilityType": "in_game",
+                    "clickEvents": [
+                        {
+                            "type": "key",
+                            "key": "GLFW_KEY_LEFT_SHIFT"
+                        }
+                    ],
+                    "isSwipple": false,
+                    "isPenetrable": false,
+                    "isToggleable": true
                 }
             ]
         },
         {
-            "name": "move",
+            "name": "bedrock_move",
             "uuid": "befebb63d5bf",
             "hide": false,
             "visibilityType": "in_game",
             "joystickButtons": [
                 {
-                    "uuid": "b581292c47294e099d",
+                    "uuid": "voidbd-joystick-001",
                     "position": {
-                        "x": 1121,
-                        "y": 7953
+                        "x": 300,
+                        "y": 9000
                     },
-                    "sizePercentage": 3417,
+                    "sizeType": "percentage",
+                    "sizeDp": 200,
+                    "sizePercentage": 2900,
+                    "visibilityType": "in_game",
+                    "joystickStyleId": "voidbedrockjoy1",
+                    "deadZoneRatio": 0.32,
+                    "lockThreshold": 0.3,
+                    "canLock": true,
+                    "triggerMode": "drag",
                     "lockEvents": [
                         {
                             "type": "key",
@@ -378,30 +364,26 @@
                         }
                     ]
                 }
-            ],
-            "position": {
-                "x": 1100,
-                "y": 7900
-            }
+            ]
         }
     ],
     "styles": [
         {
-            "name": "Bedrock touch",
+            "name": "Bedrock Touch",
             "uuid": "voidbedrock001",
             "animateSwap": false,
             "commonStyle": false,
             "lightStyle": {
                 "alpha": 1,
                 "pressedAlpha": 1,
-                "backgroundColor": 1593835520,
-                "pressedBackgroundColor": 2684354560,
-                "contentColor": 4043309055,
+                "backgroundColor": 2113929216,
+                "pressedBackgroundColor": 2852126720,
+                "contentColor": 4294967295,
                 "pressedContentColor": 4294967295,
                 "borderWidth": 1,
                 "pressedBorderWidth": 1,
-                "borderColor": 2533359615,
-                "pressedBorderColor": 3238002687,
+                "borderColor": 1778384895,
+                "pressedBorderColor": 3204448255,
                 "borderRadius": {
                     "topStart": 50,
                     "topEnd": 50,
@@ -418,14 +400,14 @@
             "darkStyle": {
                 "alpha": 1,
                 "pressedAlpha": 1,
-                "backgroundColor": 1593835520,
-                "pressedBackgroundColor": 2684354560,
-                "contentColor": 4043309055,
+                "backgroundColor": 2113929216,
+                "pressedBackgroundColor": 2852126720,
+                "contentColor": 4294967295,
                 "pressedContentColor": 4294967295,
                 "borderWidth": 1,
                 "pressedBorderWidth": 1,
-                "borderColor": 2533359615,
-                "pressedBorderColor": 3238002687,
+                "borderColor": 1778384895,
+                "pressedBorderColor": 3204448255,
                 "borderRadius": {
                     "topStart": 50,
                     "topEnd": 50,
@@ -438,6 +420,39 @@
                     "bottomEnd": 50,
                     "bottomStart": 50
                 }
+            }
+        }
+    ],
+    "joystickStyles": [
+        {
+            "name": "Bedrock Joystick",
+            "uuid": "voidbedrockjoy1",
+            "commonStyle": false,
+            "lightStyle": {
+                "alpha": 0.9,
+                "backgroundColor": 1929379840,
+                "joystickColor": 2868903935,
+                "joystickCanLockColor": 3539992575,
+                "joystickLockedColor": 4284202608,
+                "lockMarkColor": 4294967295,
+                "borderWidthRatio": 2,
+                "borderColor": 2533359615,
+                "backgroundShape": 50,
+                "joystickShape": 50,
+                "joystickSize": 0.48
+            },
+            "darkStyle": {
+                "alpha": 0.9,
+                "backgroundColor": 1929379840,
+                "joystickColor": 2868903935,
+                "joystickCanLockColor": 3539992575,
+                "joystickLockedColor": 4284202608,
+                "lockMarkColor": 4294967295,
+                "borderWidthRatio": 2,
+                "borderColor": 2533359615,
+                "backgroundShape": 50,
+                "joystickShape": 50,
+                "joystickSize": 0.48
             }
         }
     ],
