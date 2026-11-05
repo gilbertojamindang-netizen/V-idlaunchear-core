@@ -144,6 +144,8 @@
     <string name="theme_color_verdant_dawn">Silent Forest Dawn</string>
     <!-- Vøidlaunchear signature black and neon-purple theme -->
     <string name="theme_color_void">VØID — Neon Purple</string>
+    <string name="about_void_creator_title">Vøidlaunchear Creator</string>
+    <string name="about_void_creator_text">GILBERT JAMINDANG\nFounder &amp; Creator · Project Owner\nLead Developer · UI/UX Designer\nBranding &amp; Customization · Tester · Project Director</string>
     <!-- Title of the color picker dialog -->
     <string name="theme_color_picker_title">Color Picker</string>
     <!-- Button in the color picker dialog to edit the color as a hex code -->
