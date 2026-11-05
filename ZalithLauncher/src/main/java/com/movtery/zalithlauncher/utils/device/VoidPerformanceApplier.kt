@@ -27,7 +27,14 @@ object VoidPerformanceApplier {
         val simulationDistance: Int,
         val entityDistancePercent: Int,
         val backupDirectory: File,
+        val backupId: String,
         val backedUpFiles: List<String>
+    )
+
+    data class RestoreResult(
+        val minecraftVersion: String,
+        val restoredFiles: List<String>,
+        val safetyBackupDirectory: File
     )
 
     suspend fun apply(recommendation: VoidPerformanceAdvisor.Recommendation): ApplyResult =
@@ -128,7 +135,60 @@ object VoidPerformanceApplier {
                 simulationDistance = simulationDistance,
                 entityDistancePercent = entityDistance,
                 backupDirectory = backupDirectory,
+                backupId = backupId,
                 backedUpFiles = backedUp
             )
         }
+
+    /**
+     * Restore a previously saved profile snapshot. Current files are copied first,
+     * and the backup identifier is restricted to the generated timestamp format.
+     */
+    suspend fun restore(backupId: String): RestoreResult = withContext(Dispatchers.IO) {
+        require(backupId.matches(Regex("^void-settings-[0-9]+$"))) {
+            "Invalid VØID backup identifier."
+        }
+        val version = VersionsManager.currentVersion.value
+            ?: error("No Minecraft version is selected.")
+        if (!version.isValid()) error("The selected Minecraft installation is not valid.")
+
+        val gameDirectory = version.getGameDir()
+        val backupDirectory = File(gameDirectory, ".void-backups")
+        if (!backupDirectory.isDirectory) error("No VØID backup directory exists for this installation.")
+
+        val optionsBackup = File(backupDirectory, "$backupId-options.txt")
+        val configBackup = File(backupDirectory, "$backupId-version.config")
+        if (!optionsBackup.isFile && !configBackup.isFile) {
+            error("That backup was not found for the selected Minecraft installation.")
+        }
+
+        val optionsFile = File(gameDirectory, "options.txt")
+        val configFile = File(version.getZalithVersionPath(), "version.config")
+        val safetyId = "void-before-restore-${System.currentTimeMillis()}"
+        if (optionsFile.isFile && optionsBackup.isFile) {
+            optionsFile.copyTo(File(backupDirectory, "$safetyId-options.txt"), overwrite = false)
+        }
+        if (configFile.isFile && configBackup.isFile) {
+            configFile.copyTo(File(backupDirectory, "$safetyId-version.config"), overwrite = false)
+        }
+
+        val restored = mutableListOf<String>()
+        if (optionsBackup.isFile) {
+            optionsBackup.copyTo(optionsFile, overwrite = true)
+            restored.add("options.txt")
+        }
+        if (configBackup.isFile) {
+            configBackup.copyTo(configFile, overwrite = true)
+            val restoredConfig = com.movtery.zalithlauncher.game.version.installed.VersionConfig
+                .parseConfig(version.getVersionPath())
+            version.getVersionConfig().ramAllocation = restoredConfig.ramAllocation
+            restored.add("version.config")
+        }
+
+        RestoreResult(
+            minecraftVersion = version.getVersionName(),
+            restoredFiles = restored,
+            safetyBackupDirectory = backupDirectory
+        )
+    }
 }
