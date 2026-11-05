@@ -153,6 +153,9 @@ jobs:
       actions: read
       contents: write
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
       - name: Download ARM64 APK
         uses: actions/download-artifact@v4
         with:
