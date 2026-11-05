@@ -47,36 +47,61 @@ object VoidPerformanceAdvisor {
         } else {
             2048
         }
+        val profile = if (activityManager?.isLowRamDevice == true || totalRamMb <= 4096) {
+            Profile.BALANCED
+        } else if (totalRamMb <= 6144) {
+            Profile.BALANCED
+        } else {
+            Profile.PERFORMANCE
+        }
+        return recommend(totalRamMb, profile)
+    }
 
-        // Keep a large reserve for Android, the launcher, graphics drivers and
-        // native allocations. This is a suggestion, not a promise of free RAM.
-        val safeRamMb = min((totalRamMb * 0.35f).toInt(), 4096).coerceAtLeast(512)
-        val lowRam = activityManager?.isLowRamDevice == true || totalRamMb <= 4096
+    /**
+     * Build an advisory profile from a RAM estimate. This overload is pure and
+     * testable; it never applies values to Minecraft or changes Android limits.
+     */
+    fun recommend(totalRamMb: Int, profile: Profile): Recommendation {
+        val ramMb = totalRamMb.coerceAtLeast(512)
+        // Leave at least 65% of reported RAM for Android, graphics/native
+        // allocations, the launcher, and other processes.
+        val safeRamMb = min((ramMb * 0.35f).toInt(), 4096).coerceAtLeast(512)
 
-        return when {
-            lowRam -> Recommendation(
-                profile = Profile.BALANCED,
-                maxMemoryMb = min(safeRamMb, 2048),
-                renderDistance = 6,
-                simulationDistance = 4,
-                entityDistancePercent = 75,
-                explanation = "Conservative settings help leave memory and CPU time for Android and chunk loading."
+        return when (profile) {
+            Profile.BATTERY_SAVER -> Recommendation(
+                profile = profile,
+                maxMemoryMb = min(safeRamMb, 1536),
+                renderDistance = 4,
+                simulationDistance = 3,
+                entityDistancePercent = 50,
+                explanation = "Battery Saver favors lower background load and shorter view distance. These are suggestions only."
             )
-            totalRamMb <= 6144 -> Recommendation(
-                profile = Profile.BALANCED,
-                maxMemoryMb = min(safeRamMb, 3072),
-                renderDistance = 8,
-                simulationDistance = 5,
-                entityDistancePercent = 100,
-                explanation = "Balanced settings aim for steadier frame times without using most available memory."
-            )
-            else -> Recommendation(
-                profile = Profile.PERFORMANCE,
+            Profile.BALANCED -> {
+                val lowRam = ramMb <= 4096
+                Recommendation(
+                    profile = profile,
+                    maxMemoryMb = min(safeRamMb, if (lowRam) 2048 else 3072),
+                    renderDistance = if (lowRam) 6 else 8,
+                    simulationDistance = if (lowRam) 4 else 5,
+                    entityDistancePercent = if (lowRam) 75 else 100,
+                    explanation = "Balanced settings aim for steadier frame times while preserving memory headroom."
+                )
+            }
+            Profile.PERFORMANCE -> Recommendation(
+                profile = profile,
                 maxMemoryMb = safeRamMb,
-                renderDistance = 10,
-                simulationDistance = 6,
+                renderDistance = if (ramMb <= 4096) 6 else 10,
+                simulationDistance = if (ramMb <= 4096) 4 else 6,
                 entityDistancePercent = 100,
-                explanation = "Your device reports more memory headroom; increase settings gradually and monitor frame times."
+                explanation = "Performance favors higher view distance when memory headroom allows. Monitor frame times and heat."
+            )
+            Profile.EXTREME -> Recommendation(
+                profile = profile,
+                maxMemoryMb = safeRamMb,
+                renderDistance = if (ramMb < 6144) 8 else 12,
+                simulationDistance = if (ramMb < 6144) 5 else 8,
+                entityDistancePercent = 100,
+                explanation = "Extreme is an experimental recommendation, not a guaranteed FPS boost. Reduce settings if frame times or heat worsen."
             )
         }
     }
