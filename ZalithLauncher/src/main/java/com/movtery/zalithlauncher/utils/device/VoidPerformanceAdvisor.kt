@@ -151,6 +151,6 @@ object VoidPerformanceAdvisor {
         val hardware = Build.HARDWARE.takeIf { it.isNotBlank() }?.let { " • $it" }.orEmpty()
         val lowRam = if (activityManager?.isLowRamDevice == true) "yes" else "no"
 
-        return "$deviceSummary()$hardware • Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT}) • $ramLabel • $abi • Android low-RAM device: $lowRam"
+        return "${deviceSummary()}$hardware • Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT}) • $ramLabel • $abi • Android low-RAM device: $lowRam"
     }
 }
