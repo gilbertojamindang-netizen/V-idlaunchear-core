@@ -983,6 +983,30 @@ mod tests {
     }
 
     #[test]
+    fn ragdoll_one_shot_returns_to_an_idle_base() {
+        let mut s = Skeleton::new();
+        let view = Vec2::new(450., 525.);
+        let dt = 1. / 60.;
+        s.stop_animation();
+        s.play_ragdoll();
+
+        assert!(s.tracks.iter().any(|track| {
+            track.source == Source::Ragdoll && track.target == 1.
+        }));
+
+        for frame in 0..180 {
+            s.update(view, frame as f32 * dt, dt);
+            assert!(s.arms.iter().all(|joint| joint.is_finite()));
+            assert!(s.legs.iter().all(|joint| joint.is_finite()));
+        }
+
+        assert!(!s.tracks.iter().any(|track| track.source == Source::Ragdoll));
+        assert!(s.tracks.iter().any(|track| {
+            track.source == Source::Idle && track.target == 1.
+        }));
+    }
+
+    #[test]
     fn long_run_stays_finite() {
         // 10 虚拟分钟：注视持续输入、周期性 interact/压扁、待机与行走交替,
         // 宿主时钟取一年后的巨值(长 uptime 场景,精度极差),
