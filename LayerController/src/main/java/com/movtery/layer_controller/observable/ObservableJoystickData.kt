@@ -113,11 +113,6 @@ class ObservableJoystickData(data: JoystickData) : ObservableWidget() {
      */
     internal var activePointer: PointerId? = null
 
-    /**
-     * 上一次拖动的位置
-     */
-    private var lastDragPosition = Offset.Zero
-
     override val behavior: InteractionBehavior
         get() = InteractionBehavior.Press
 
@@ -162,7 +157,6 @@ class ObservableJoystickData(data: JoystickData) : ObservableWidget() {
         }
         canLockState = false
         knobOffset = Offset.Zero
-        lastDragPosition = Offset.Zero
     }
 
     override fun onCheckVisibilityType(): VisibilityType = visibilityType
@@ -283,8 +277,9 @@ class ObservableJoystickData(data: JoystickData) : ObservableWidget() {
 
         val newCanLockState =
             canLock &&
+                    !isLocked &&
                     direction == JoystickDirection.North &&
-                    lastDragPosition.y < -lockThresholdPx
+                    knobOffset.y < -lockThresholdPx
 
         if (newCanLockState && !canLockState) {
             eventHandler.onKeyPressed(lockEvents, true)
@@ -326,10 +321,11 @@ class ObservableJoystickData(data: JoystickData) : ObservableWidget() {
                                     change.consume()
                                     activePointer = pointerId
                                     onOccupiedPointer(pointerId)
-                                    lastDragPosition = pos
-                                    // 如果当前锁定中，解锁
+                                    // 再次触摸摇杆时解除前进锁定，并释放冲刺键。
                                     if (isLocked) {
+                                        eventHandler.onKeyPressed(lockEvents, false)
                                         isLocked = false
+                                        canLockState = false
                                     }
 
                                     if (triggerMode == JoystickTriggerMode.TOUCH) {
@@ -369,9 +365,11 @@ class ObservableJoystickData(data: JoystickData) : ObservableWidget() {
                             val deadZoneRadius = bgRadius * deadZoneRatio
                             val lockThresholdPx = bgRadius * lockThreshold
 
-                            lastDragPosition = localPos
-
-                            if (isLocked) isLocked = false
+                            if (isLocked) {
+                                eventHandler.onKeyPressed(lockEvents, false)
+                                isLocked = false
+                                canLockState = false
+                            }
 
                             updateJoystickState(
                                 position = localPos,
@@ -400,16 +398,12 @@ class ObservableJoystickData(data: JoystickData) : ObservableWidget() {
                             val lockThresholdPx = bgRadius * lockThreshold
 
                             if (canLockState) {
+                                // Keep the sprint event held after the finger lifts.
+                                // Do not recalculate canLockState here, or the key is
+                                // pressed a second time immediately after locking.
                                 isLocked = true
                                 canLockState = false
-                                val lockPosition = Offset(centerPoint.x, 0f)
-                                updateJoystickState(
-                                    position = lockPosition,
-                                    centerPoint = centerPoint,
-                                    deadZoneRadius = deadZoneRadius,
-                                    lockThresholdPx = lockThresholdPx,
-                                    eventHandler = eventHandler
-                                )
+                                knobOffset = Offset(0f, -centerPoint.y)
                             } else {
                                 canLockState = false
                                 isLocked = false
