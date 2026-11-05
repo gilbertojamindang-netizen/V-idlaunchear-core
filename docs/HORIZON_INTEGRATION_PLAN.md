@@ -1,58 +1,52 @@
-# Vøidlaunchear — Horizon Android Integration Assessment
+# Vøidlaunchear — Horizon Vulkan Compatibility Assessment
 
 Date: 2026-11-05
 
+## User-requested scope
+
+The only Horizon feature requested for this project is its **Vulkan compatibility rendering mode**. Do not port Horizon's game engine, UI, input system, or unrelated features as part of this request.
+
 ## Decision
 
-Keep Zalith Launcher 2 as the game-launch foundation for the Minecraft Java 1.21.11 target. Treat Horizon Android as a separate reference implementation. Do not merge its Rust game engine or replace the Zalith/Pojav launch path.
+Keep Zalith Launcher 2 as the Minecraft Java 1.21.11 foundation. Horizon Android's Vulkan compatibility mode is an engine-level rendering path, not a generic Vulkan switch. It cannot be copied into Zalith by adding a label or a preference.
 
-## Verified Horizon Android facts
+The Zalith source already contains a Vulkan-related alternative named **Kopper Zink**. This is the closest existing path to evaluate, but it is **not the same implementation** as Horizon's compatibility renderer:
 
-Reviewed repository: https://github.com/Vasysik/horizon-android (branch: android)
+- Horizon documents a Vulkan compatibility path that uses direct terrain draws to work around driver rendering issues.
+- Zalith's Kopper Zink renderer is Mesa Zink-based. Its source selects the Zink/Kopper renderer libraries and sets `needsZinkDriverOverride = true`.
+- Zalith registers Kopper Zink in its built-in renderer list and its renderer settings screen selects from that registry.
+- Zalith's renderer source also marks Kopper Zink with a maximum game-version metadata value of `26.3-snapshot-3` (displayed as `26.2`). This is not proof of tested Minecraft 1.21.11 compatibility; it must be verified on-device.
 
-- Horizon Android is a native Rust/wgpu client for Minecraft Java 26.3.
-- Its Android documentation explicitly says it does not run arbitrary Minecraft JAR versions.
-- It uses Android NativeActivity and a Rust client; the documentation says there are no project Java/Kotlin classes.
-- It offers four touch schemes (joystick or D-pad, paired with tap or crosshair aiming), editable touch layouts, orientation choices, keyboard/mouse input, screenshots, resource packs, and native .hmod packages.
-- Rendering options include Vulkan GPU batching, Vulkan compatibility, and experimental OpenGL ES.
-- It documents verified resource downloads, retryable cache entries, app-private profile/world data, and Android Keystore encryption for refresh tokens.
-- The Android build requires a Rust/Android toolchain, Android SDK platform 35, NDK, JDK and Gradle 8.14, plus generated engine tables prepared by its own scripts.
-- Horizon's Android port is actively developed; device/driver compatibility still needs testing.
+## Integration plan
 
-## What can be adapted as product/design requirements
+1. Keep the existing Zalith renderer registry and settings screen. Do not add a fake "Horizon Vulkan Compatibility" toggle.
+2. Preserve Kopper Zink as the Vulkan-backed/Mesa-Zink option exposed through Zalith's existing renderer selection, subject to its packaged native libraries and device support.
+3. Keep the normal compatible renderer available as a fallback. If Kopper Zink is missing, fails to initialize, or renders incorrectly, the user must be able to switch back.
+4. Do not force Kopper Zink as the default renderer. Vulkan support varies by Android device, GPU, and driver.
+5. Before calling this feature complete, build the APK and test Minecraft Java 1.21.11 on a real Android device: renderer discovery, launch, world load, terrain rendering, UI/textures, stability, and fallback.
+6. Only consider a true Horizon-style direct-draw compatibility mode if a future engine/backend implementation exposes the necessary rendering hooks. That would be a separate engine-level project, not a settings-only change.
 
-These are feature references, not code already integrated:
+## Important distinction
 
-1. Landscape, portrait, reversed and sensor-based orientation settings.
-2. Configurable touch layouts: joystick/D-pad, tap/crosshair aiming, button position/size/opacity and handedness.
-3. Vulkan/GLES renderer selection only where supported by the Zalith/Pojav backend and device driver.
-4. Download progress, checksum verification, retry/resume and verified cache behavior for launcher-managed files.
-5. Separate game profiles and clear per-profile storage management.
-6. Safe account-token storage using Android Keystore, subject to the authentication provider's requirements.
-7. Keyboard/mouse input and controller support, subject to Zalith's input APIs.
+**Kopper Zink is a Vulkan-backed OpenGL compatibility renderer, not Horizon's exact Vulkan compatibility mode.** It may provide a useful alternative on supported devices, but it does not guarantee better performance, fewer graphical bugs, or compatibility on every phone.
 
-## What must not be copied directly
+## Verified Zalith source locations
 
-- Horizon's Rust/wgpu game engine and its Minecraft 26.3 game path are not a drop-in replacement for Zalith's Java 1.21.11 runtime.
-- Horizon's native .hmod mods are not Fabric/Forge/NeoForge Java mods. Do not present them as interchangeable.
-- Horizon's launcher UI is part of a Rust NativeActivity application; copying its screens or build scripts into a conventional Android/Kotlin/Compose Zalith project will not make them work.
-- Do not copy game assets, prepared resource tables, APKs, credentials, signing keys or private user data from either project.
+Upstream repository inspected: https://github.com/ZalithLauncher/ZalithLauncher2
 
-## Proposed integration sequence
+- `ZalithLauncher/src/main/java/com/movtery/zalithlauncher/game/renderer/Renderers.kt` — built-in renderer registration includes Kopper Zink.
+- `ZalithLauncher/src/main/java/com/movtery/zalithlauncher/game/renderer/renderers/KopperZinkRenderer.kt` — renderer ID, Mesa/Zink flags, environment and native library names.
+- `ZalithLauncher/src/main/java/com/movtery/zalithlauncher/game/renderer/RendererInterface.kt` — renderer contract, including the Zink driver override flag.
+- `ZalithLauncher/src/main/java/com/movtery/zalithlauncher/ui/screens/content/settings/RendererSettingsScreen.kt` — renderer selection UI backed by the registry.
+- `ZalithLauncher/libs/kopper-zink-release.aar` — packaged Kopper Zink Android library exists in the upstream source tree.
 
-1. Preserve the current Zalith-based branch and confirm its exact upstream revision, license and build setup.
-2. Audit Zalith's existing APIs for orientation, touch controls, renderer selection, profiles, downloads and account storage.
-3. Implement only compatible features through Zalith's existing Android/native interfaces.
-4. Keep Horizon-specific Rust engine code isolated; do not add it to the 1.21.11 launch path.
-5. Build and test on a real Android device before marking any feature complete.
+## Horizon reference
+
+Horizon Android documents three rendering choices: Vulkan/GPU batching, Vulkan/compatibility, and experimental OpenGL ES. Its compatibility mode is a separate engine rendering path. Horizon Android is a native Rust/wgpu client targeting Minecraft 26.3, not a drop-in renderer library for Zalith's Java 1.21.11 launch path.
+
+- https://github.com/Vasysik/horizon-android/blob/android/docs/android.md
+- https://github.com/Vasysik/horizon-android/blob/android/docs/android-features.md
 
 ## Status
 
-This document records source inspection and an integration decision only. It does not claim that Horizon code has been ported, that an APK has been built, or that gameplay has been tested.
-
-## Source references
-
-- Horizon Android README: https://github.com/Vasysik/horizon-android/blob/android/README.md
-- Android build, launcher, controls and rendering documentation: https://github.com/Vasysik/horizon-android/blob/android/docs/android.md
-- Horizon Android feature support: https://github.com/Vasysik/horizon-android/blob/android/docs/android-features.md
-- Horizon Android license and third-party notices: https://github.com/Vasysik/horizon-android/blob/android/LICENSE
+Source inspection confirms that Zalith already has a Kopper Zink renderer entry and a renderer-selection UI. This update records the closest available Vulkan-backed option and the required validation plan. It does **not** claim that Minecraft 1.21.11 has been tested with Kopper Zink, that Horizon's exact compatibility path has been ported, or that an APK has been built.
