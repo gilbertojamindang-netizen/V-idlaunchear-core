@@ -241,38 +241,67 @@ fun LauncherScreen(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .fillMaxWidth()
-                    .height(44.dp)
-                    .padding(horizontal = 14.dp, vertical = 2.dp)
-                    .clip(MaterialTheme.shapes.large)
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.52f))
-                    .padding(horizontal = 14.dp),
+                    .height(56.dp)
+                    .padding(horizontal = 12.dp, vertical = 3.dp)
+                    .clip(MaterialTheme.shapes.extraLarge)
+                    .background(
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.72f)
+                    )
+                    .padding(horizontal = 13.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy((-2).dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(MaterialTheme.shapes.medium)
+                            .background(Color(0xFF4A2070)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Ø",
+                            color = Color(0xFFF2DFFF),
+                            fontSize = 23.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                    }
+                    Column(verticalArrangement = Arrangement.spacedBy((-2).dp)) {
+                        Text(
+                            text = "VøidLaunchear",
+                            color = Color(0xFFE4C9FF),
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 0.35.sp,
+                            maxLines = 1
+                        )
+                        Text(
+                            text = "MINECRAFT JAVA CONTROL DECK",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 8.sp,
+                            letterSpacing = 1.05.sp,
+                            maxLines = 1
+                        )
+                    }
+                }
+                Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        text = "VØIDLAUNCHEAR",
-                        color = Color(0xFFD5B0FF),
-                        fontSize = 17.sp,
+                        text = "VØID CORE",
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 1.5.sp,
-                        maxLines = 1
+                        letterSpacing = 1.1.sp
                     )
                     Text(
-                        text = "MINECRAFT JAVA • CONTROL CENTER",
+                        text = "VERSION 1.0.3",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 8.sp,
-                        letterSpacing = 1.1.sp,
-                        maxLines = 1
+                        letterSpacing = 0.7.sp
                     )
                 }
-                Text(
-                    text = "VØID CORE",
-                    color = MaterialTheme.colorScheme.primary,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                )
             }
 
             val isActionMenuTaller = maxHeight >= 600.dp
