@@ -104,16 +104,21 @@ fun PetModelView(
     LaunchedEffect(petController, cape) {
         petController.setCape(cape)
     }
-    LaunchedEffect(petController, animation, animationSpeed, autonomousIdle) {
+    LaunchedEffect(petController, animation, animationSpeed, autonomousIdle, yaw) {
         if (autonomousIdle) {
-            // Light idle/walk cycle for the launcher companion. This animates in place;
-            // it does not pretend to provide physical dragging or ragdoll physics.
+            // Alternate idle and walking while turning relative to the caller's base yaw.
+            // setModelYaw prevents small random turns from accumulating into an endless spin.
             while (true) {
+                petController.setModelYaw(yaw)
                 petController.playAnimation(PetAnimation.Idle, animationSpeed)
                 delay(kotlin.random.Random.nextLong(2800L, 5200L))
-                petController.rotateYaw(if (kotlin.random.Random.nextBoolean()) 0.65f else -0.65f)
+
+                val lookYaw = yaw + if (kotlin.random.Random.nextBoolean()) 0.65f else -0.65f
+                petController.setModelYaw(lookYaw)
                 petController.playAnimation(PetAnimation.Walking, animationSpeed)
                 delay(kotlin.random.Random.nextLong(1400L, 2300L))
+
+                petController.setModelYaw(yaw)
                 petController.playAnimation(PetAnimation.Idle, animationSpeed)
             }
         } else if (animation != null) {
