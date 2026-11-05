@@ -354,7 +354,7 @@
                     "visibilityType": "in_game",
                     "joystickStyleId": "voidbedrockjoy1",
                     "deadZoneRatio": 0.32,
-                    "lockThreshold": 0.3,
+                    "lockThreshold": 0.9,
                     "canLock": true,
                     "triggerMode": "drag",
                     "lockEvents": [
