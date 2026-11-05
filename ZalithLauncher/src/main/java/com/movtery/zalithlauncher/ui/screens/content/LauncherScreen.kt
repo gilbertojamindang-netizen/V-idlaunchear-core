@@ -82,6 +82,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.movtery.cardgrid.state.rememberCardGridState
 import com.movtery.guide.GuideSide
 import com.movtery.guide.guideNode
+import com.movtery.zalithlauncher.BuildConfig
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.game.account.Account
 import com.movtery.zalithlauncher.game.account.AccountsManager
@@ -294,7 +295,7 @@ fun LauncherScreen(
                         letterSpacing = 1.1.sp
                     )
                     Text(
-                        text = "VERSION 1.0.3",
+                        text = "VERSION ${BuildConfig.VERSION_NAME}",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 8.sp,
                         letterSpacing = 0.7.sp
