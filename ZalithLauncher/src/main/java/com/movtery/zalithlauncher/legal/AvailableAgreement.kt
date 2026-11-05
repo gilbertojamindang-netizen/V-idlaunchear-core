@@ -52,3 +52,9 @@ data class AvailableAgreement(
         )
     }
 }
+/** Brand-facing title for upstream agreement documents in this modified launcher. */
+fun AvailableAgreement.DocumentFile.Data.displayTitle(): String = when {
+    path.endsWith("user_agreement.md", ignoreCase = true) -> "VøidLaunchear User Agreement"
+    path.endsWith("privacy_policy.md", ignoreCase = true) -> "VøidLaunchear Privacy Policy"
+    else -> title
+}
