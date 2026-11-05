@@ -53,19 +53,14 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.movtery.zalithlauncher.BuildConfig
-import com.movtery.zalithlauncher.BuildKeys
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.game.plugin.ApkPlugin
 import com.movtery.zalithlauncher.game.plugin.PluginLoader
 import com.movtery.zalithlauncher.game.plugin.appCacheIcon
-import com.movtery.zalithlauncher.launcherName
 import com.movtery.zalithlauncher.library.LibraryInfo
 import com.movtery.zalithlauncher.library.libraryData
-import com.movtery.zalithlauncher.path.URL_COMMUNITY
-import com.movtery.zalithlauncher.path.URL_MCMOD
 import com.movtery.zalithlauncher.path.URL_PROJECT
 import com.movtery.zalithlauncher.path.URL_SUPPORT
-import com.movtery.zalithlauncher.path.URL_WEBLATE
 import com.movtery.zalithlauncher.ui.base.BaseScreen
 import com.movtery.zalithlauncher.ui.components.AnimatedLazyColumn
 import com.movtery.zalithlauncher.ui.components.CardTitleLayout
@@ -142,111 +137,9 @@ fun AboutInfoScreen(
                         Text("Lead Developer • UI/UX Designer")
                         Text("Branding & Customization • Tester • Project Director")
                         Text(
-                            text = "VøidLaunchear is based on Zalith Launcher 2. Original developers, contributors, and their licenses remain credited below.",
+                            text = "Built on Zalith Launcher 2. Upstream copyright notices and required open-source license terms are preserved in the source and license files.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-
-            animatedItem { ctx ->
-                ChunkLayout(
-                    modifier = Modifier.animated(ctx),
-                    title = stringResource(R.string.about_acknowledgements_title)
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        val launcherName = remember { launcherName() }
-
-                        ButtonIconItem(
-                            icon = painterResource(R.drawable.img_sponsor),
-                            title = stringResource(R.string.about_sponsors_title),
-                            text = stringResource(R.string.about_sponsors_summary, launcherName),
-                            button = {
-                                Button(
-                                    onClick = onViewSponsors
-                                ) {
-                                    Text(text = stringResource(R.string.generic_view))
-                                }
-                            }
-                        )
-
-                        ButtonIconItem(
-                            icon = painterResource(R.drawable.img_avatar_bangbang93),
-                            title = "bangbang93",
-                            text = stringResource(R.string.about_acknowledgements_bangbang93_text, BuildKeys.LAUNCHER_SHORT_NAME),
-                            button = {
-                                Button(
-                                    onClick = { openLink("https://ifdian.net/a/bangbang93") }
-                                ) {
-                                    Text(text = stringResource(R.string.about_sponsor))
-                                }
-                            }
-                        )
-                        LinkIconItem(
-                            icon = painterResource(R.drawable.img_launcher_fcl),
-                            title = "Fold Craft Launcher",
-                            text = stringResource(R.string.about_acknowledgements_fcl_text, BuildKeys.LAUNCHER_SHORT_NAME),
-                            openLicense = { openLicense(R.raw.fcl_license) },
-                            openLink = { openLink("https://github.com/FCL-Team/FoldCraftLauncher") }
-                        )
-                        LinkIconItem(
-                            icon = painterResource(R.drawable.img_launcher_hmcl),
-                            title = "Hello Minecraft! Launcher",
-                            text = stringResource(R.string.about_acknowledgements_hmcl_text, BuildKeys.LAUNCHER_SHORT_NAME),
-                            openLicense = { openLicense(R.raw.hmcl_license) },
-                            openLink = { openLink("https://github.com/HMCL-dev/HMCL") }
-                        )
-                        LinkIconItem(
-                            icon = painterResource(R.drawable.img_platform_mcmod),
-                            title = stringResource(R.string.about_acknowledgements_mcmod),
-                            text = stringResource(R.string.about_acknowledgements_mcmod_text, BuildKeys.LAUNCHER_SHORT_NAME),
-                            openLink = { openLink(URL_MCMOD) }
-                        )
-                        ButtonIconItem(
-                            icon = painterResource(R.drawable.img_avatar_mcim),
-                            title = "mcmod-info-mirror",
-                            text = stringResource(R.string.about_acknowledgements_mcim_text, BuildKeys.LAUNCHER_SHORT_NAME),
-                            button = {
-                                Button(
-                                    onClick = { openLink("https://www.mcimirror.top/sponsor") }
-                                ) {
-                                    Text(text = stringResource(R.string.about_sponsor))
-                                }
-                            }
-                        )
-                        LinkIconItem(
-                            icon = painterResource(R.drawable.img_platform_modrinth),
-                            title = "Modrinth App",
-                            text = stringResource(R.string.about_acknowledgements_modrinth_text, BuildKeys.LAUNCHER_SHORT_NAME),
-                            openLicense = { openLicense(PetLibR.raw.modrinth_license) },
-                            openLink = { openLink("https://github.com/modrinth/code") },
-                        )
-                        LinkIconItem(
-                            icon = painterResource(R.drawable.img_launcher_pcl2),
-                            title = "Plain Craft Launcher 2",
-                            text = stringResource(R.string.about_acknowledgements_pcl_text, BuildKeys.LAUNCHER_SHORT_NAME),
-                            openLink = { openLink("https://github.com/Meloong-Git/PCL") }
-                        )
-                        LinkIconItem(
-                            icon = painterResource(R.drawable.img_launcher_pojav),
-                            title = "PojavLauncher",
-                            text = stringResource(R.string.about_acknowledgements_pojav_text, BuildKeys.LAUNCHER_SHORT_NAME),
-                            openLicense = { openLicense(R.raw.lgpl_3_license) },
-                            openLink = { openLink("https://github.com/PojavLauncherTeam/PojavLauncher") }
-                        )
-                        LinkIconItem(
-                            icon = painterResource(R.drawable.ic_github),
-                            title = stringResource(R.string.about_acknowledgements_github_community),
-                            text = stringResource(R.string.about_acknowledgements_github_community_text),
-                            openLink = { openLink(URL_COMMUNITY) },
-                            useImage = false
-                        )
-                        LinkIconItem(
-                            icon = painterResource(R.drawable.img_platform_weblate),
-                            title = stringResource(R.string.about_acknowledgements_weblate_community),
-                            text = stringResource(R.string.about_acknowledgements_weblate_community_text),
-                            openLink = { openLink(URL_WEBLATE) }
                         )
                     }
                 }
@@ -256,7 +149,7 @@ fun AboutInfoScreen(
             animatedItem { ctx ->
                 ChunkLayout(
                     modifier = Modifier.animated(ctx),
-                    title = stringResource(R.string.about_library_title)
+                    title = "Open-Source Licenses & Dependencies"
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         libraryData.forEach { info ->
