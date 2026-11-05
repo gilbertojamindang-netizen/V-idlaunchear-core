@@ -169,18 +169,50 @@ fun ResultListLayout(
                     }
                 }
 
-                Box(modifier = Modifier.fillMaxSize()) {
-                    ResultList(
-                        modifier = Modifier.fillMaxSize(),
-                        state = listState,
-                        contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 60.dp, bottom = 6.dp),
-                        classes = classes,
-                        data = page.data,
-                        swapToDownload = swapToDownload,
-                        installedInfo = installedInfo
-                    )
+                if (page.data.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = "No results found",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = "Try another keyword or adjust the Minecraft version and filters.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = "Tap to retry",
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .clickable(onClick = onReload)
+                                    .padding(horizontal = 14.dp, vertical = 9.dp),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                } else {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        ResultList(
+                            modifier = Modifier.fillMaxSize(),
+                            state = listState,
+                            contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 60.dp, bottom = 6.dp),
+                            classes = classes,
+                            data = page.data,
+                            swapToDownload = swapToDownload,
+                            installedInfo = installedInfo
+                        )
 
-                    val targetScale = 1f - (1f - controllerMinScale) * fraction
+                        val targetScale = 1f - (1f - controllerMinScale) * fraction
                     val animatedScale by animateFloatAsState(targetScale)
                     val targetAlpha = 1f - (1f - controllerMinAlpha) * fraction
                     val animatedAlpha by animateFloatAsState(targetAlpha)
@@ -208,6 +240,7 @@ fun ResultListLayout(
                             },
                             onNavigatePage = onNavigatePage,
                         )
+                    }
                     }
                 }
             }
