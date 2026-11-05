@@ -1,10 +1,14 @@
 name: Build CI
 
-# APK builds are intentionally manual while VØID features are still in development.
-# Run this workflow from Actions only after the feature-complete review is approved.
+# APK builds are intentionally blocked until the feature-complete review is approved.
 on:
   workflow_dispatch:
     inputs:
+      confirm_feature_complete:
+        description: Confirm all requested VØID features are complete and reviewed
+        required: true
+        type: boolean
+        default: false
       variant:
         description: Build variant
         required: true
@@ -16,6 +20,7 @@ on:
 
 jobs:
   Build:
+    if: inputs.confirm_feature_complete == true
     uses: ./.github/workflows/build.yml
     with:
       variant: ${{ inputs.variant }}
