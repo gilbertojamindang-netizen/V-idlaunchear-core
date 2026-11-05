@@ -176,7 +176,7 @@ fun LauncherScreen(
 
             //卡片尺寸与停泊槽内容区保持一致
             val cardWidth = maxWidth * (ActionMenuWeight / (ActionMenuWeight + ContentWeight)) - ActionMenuOuterPadding
-            val brandHeaderHeight = 48.dp
+            val brandHeaderHeight = 60.dp
             val cardHeight = maxHeight - ActionMenuOuterPadding * 2 - brandHeaderHeight
 
             val toAccountManageScreen: () -> Unit = {
