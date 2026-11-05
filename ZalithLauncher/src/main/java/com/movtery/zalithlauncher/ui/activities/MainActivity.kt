@@ -86,6 +86,7 @@ import com.movtery.zalithlauncher.ui.toAndroidString
 import com.movtery.zalithlauncher.ui.vulkan_checker.VCOperation
 import com.movtery.zalithlauncher.ui.vulkan_checker.VulkanChecker
 import com.movtery.zalithlauncher.upgrade.TooFrequentOperationException
+import com.movtery.zalithlauncher.utils.device.PhysicalMouseChecker
 import com.movtery.zalithlauncher.utils.compareLangTag
 import com.movtery.zalithlauncher.utils.copyText
 import com.movtery.zalithlauncher.utils.festival.getTodayFestivals
@@ -209,6 +210,8 @@ class MainActivity : BaseAppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Detect USB/Bluetooth mice that were already connected when the launcher started.
+        PhysicalMouseChecker.initChecker(this)
         //处理外部导入
         val isImporting = handleImportIfNeeded(intent)
 
