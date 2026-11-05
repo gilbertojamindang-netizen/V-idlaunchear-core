@@ -136,6 +136,13 @@ fun AboutInfoScreen(
                                 }
                             }
                         )
+
+                        ButtonIconItem(
+                            icon = painterResource(R.drawable.img_launcher),
+                            title = stringResource(R.string.about_void_creator_title),
+                            text = stringResource(R.string.about_void_creator_text),
+                            button = {}
+                        )
                     }
                 }
             }
