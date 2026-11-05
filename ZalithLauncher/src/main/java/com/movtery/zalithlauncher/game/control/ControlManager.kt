@@ -91,16 +91,17 @@ object ControlManager {
                 ?.takeIf { it.isFile }
                 ?.let { file -> runCatching { loadLayoutFromFile(file) }.getOrNull() }
 
-            fun ControlLayout?.isStockDefault(): Boolean =
-                this != null &&
-                    info.name.default.equals("default", ignoreCase = true) &&
-                    info.author.default.equals("MovTery", ignoreCase = true)
+            fun isStockDefault(layout: ControlLayout?): Boolean =
+                layout?.let {
+                    it.info.name.default.equals("default", ignoreCase = true) &&
+                        it.info.author.default.equals("MovTery", ignoreCase = true)
+                } == true
 
             val stockDefaultExists = files.any { file ->
-                runCatching { loadLayoutFromFile(file) }.getOrNull().isStockDefault()
+                isStockDefault(runCatching { loadLayoutFromFile(file) }.getOrNull())
             }
             val shouldSelectBedrock = files.isEmpty() ||
-                selectedLayout.isStockDefault() ||
+                isStockDefault(selectedLayout) ||
                 (selectedName.isBlank() && stockDefaultExists)
 
             if (files.isEmpty()) {
