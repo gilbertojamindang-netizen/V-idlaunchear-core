@@ -174,7 +174,20 @@ fun HomeGrid(
     var operation by remember { mutableStateOf<HomeCardOperation>(HomeCardOperation.None) }
     var showVoidCore by remember { mutableStateOf(false) }
     var voidCoreInput by remember { mutableStateOf("") }
-    val voidCoreHistory = remember { mutableStateListOf<String>() }
+    val voidCorePreferences = remember(appContext) {
+        appContext.getSharedPreferences("void_core", android.content.Context.MODE_PRIVATE)
+    }
+    val voidCoreHistory = remember(appContext) {
+        mutableStateListOf<String>().apply {
+            addAll(
+                voidCorePreferences.getString("history", null)
+                    .orEmpty()
+                    .split("\n--VOID-CORE-ENTRY--\n")
+                    .filter { it.isNotBlank() }
+                    .takeLast(20)
+            )
+        }
+    }
 
     // 播种持久化的用户卡片布局
     LaunchedEffect(Unit) {
@@ -619,8 +632,12 @@ fun HomeGrid(
                 Button(onClick = {
                     val command = voidCoreInput.trim()
                     if (command.isNotEmpty()) {
-                        val response = VoidCoreCommandRouter.route(command)
+                        val response = VoidCoreCommandRouter.route(command, appContext)
                         voidCoreHistory.add("> " + command + "\n" + response.title + ": " + response.message + if (response.requiresConfirmation) "\nConfirmation required before this action." else "")
+                        while (voidCoreHistory.size > 20) voidCoreHistory.removeAt(0)
+                        voidCorePreferences.edit()
+                            .putString("history", voidCoreHistory.joinToString("\n--VOID-CORE-ENTRY--\n"))
+                            .apply()
                         voidCoreInput = ""
                     }
                 }, enabled = voidCoreInput.isNotBlank()) { Text("RUN") }
