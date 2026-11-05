@@ -159,30 +159,49 @@ suspend fun searchAssets(
         var lastException: Exception? = null
         for (query in queries) {
             try {
-                val r = when (searchPlatform) {
-                    Platform.CURSEFORGE -> mirroredPlatformSearcher(
-                        searchers = mirroredCurseForgeSource(),
-                        printLog = false
-                    ) { searcher ->
-                        searcher.searchAssets(
-                            query = query,
-                            searchFilter = searchFilterForQuery,
-                            platformClasses = platformClasses
-                        )
-                    }
-                    Platform.MODRINTH -> mirroredPlatformSearcher(
-                        searchers = mirroredModrinthSource(),
-                        printLog = false
-                    ) { searcher ->
-                        searcher.searchAssets(
-                            query = query,
-                            searchFilter = searchFilterForQuery,
-                            platformClasses = platformClasses
-                        )
+                // Try the user's preferred provider first, then automatically fall back
+                // to the other public catalog. This also handles old installations that
+                // still have CurseForge saved as their preferred provider.
+                val platformCandidates = listOf(
+                    searchPlatform,
+                    if (searchPlatform == Platform.MODRINTH) Platform.CURSEFORGE else Platform.MODRINTH
+                )
+                var queryResult: PlatformSearchResult? = null
+                for (candidatePlatform in platformCandidates) {
+                    try {
+                        val candidateResult = when (candidatePlatform) {
+                            Platform.CURSEFORGE -> mirroredPlatformSearcher(
+                                searchers = mirroredCurseForgeSource(),
+                                printLog = false
+                            ) { searcher ->
+                                searcher.searchAssets(
+                                    query = query,
+                                    searchFilter = searchFilterForQuery,
+                                    platformClasses = platformClasses
+                                )
+                            }
+                            Platform.MODRINTH -> mirroredPlatformSearcher(
+                                searchers = mirroredModrinthSource(),
+                                printLog = false
+                            ) { searcher ->
+                                searcher.searchAssets(
+                                    query = query,
+                                    searchFilter = searchFilterForQuery,
+                                    platformClasses = platformClasses
+                                )
+                            }
+                        }
+                        queryResult = candidateResult
+                        if (candidateResult.getAssetsPage(platformClasses).data.isNotEmpty()) break
+                    } catch (providerError: Exception) {
+                        if (providerError is CancellationException) throw providerError
+                        lastException = providerError
                     }
                 }
-                lastResult = r
-                if (r.getAssetsPage(platformClasses).data.isNotEmpty()) break
+                if (queryResult != null) {
+                    lastResult = queryResult
+                    if (queryResult.getAssetsPage(platformClasses).data.isNotEmpty()) break
+                }
             } catch (e: Exception) {
                 //当前关键词搜索失败，记录异常并继续尝试下一个
                 lastException = e
