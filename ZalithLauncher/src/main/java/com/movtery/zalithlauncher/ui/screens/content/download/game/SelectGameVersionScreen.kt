@@ -557,7 +557,7 @@ private fun VersionItemLayout(
     version: MinecraftVersion,
     onClick: () -> Unit = {},
     onAccessWiki: (String) -> Unit = {},
-    shape: Shape = MaterialTheme.shapes.large,
+    shape: Shape = RoundedCornerShape(20.dp),
     influencedByBackground: Boolean = true,
     color: Color = cardColor(influencedByBackground),
     contentColor: Color = onCardColor(),
@@ -575,13 +575,18 @@ private fun VersionItemLayout(
         onClick = onClick,
         shape = shape,
         color = color,
-        contentColor = contentColor
+        contentColor = contentColor,
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
+        ),
+        tonalElevation = 1.dp
     ) {
         Row(
             modifier = Modifier
                 .clip(shape = shape)
                 .backgroundGlass(blur, color, influencedByBackground)
-                .padding(all = 12.dp),
+                .padding(all = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             icon?.let { versionIcon ->
