@@ -171,6 +171,7 @@ fun LauncherScreen(
             val parentWidthPx = constraints.maxWidth.toFloat()
             dragState.parentWidthPx = parentWidthPx
             dragState.outerPaddingPx = with(LocalDensity.current) { ActionMenuOuterPadding.toPx() }
+            dragState.topContentOffsetPx = with(LocalDensity.current) { brandHeaderHeight.toPx() }
             dragState.menuSpanPx = parentWidthPx * (ActionMenuWeight / (ActionMenuWeight + ContentWeight))
 
             var isBackgroundOnly by remember { mutableStateOf(false) }
