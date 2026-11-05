@@ -13,3 +13,8 @@ Owner-requested Debug APK build after Bedrock controller implementation.
 Source version: 1.0.5
 Controller: Bedrock-style joystick, jump/sneak/attack layout, tap-to-use and hold-to-mine gestures.
 Use latest main commit; publish ARM64 Debug APK as configured in build.yml.
+
+Retry owner-requested Debug APK build after Kotlin compile fixes.
+Fixes: restore tall main-menu Column wrapper; add missing Material3 Surface import.
+Include Bedrock controller preset and touch gesture integration.
+Build latest main commit for all supported architectures; publish ARM64 Debug APK.
