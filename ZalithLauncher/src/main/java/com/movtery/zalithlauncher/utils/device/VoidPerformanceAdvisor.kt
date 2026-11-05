@@ -11,6 +11,9 @@ package com.movtery.zalithlauncher.utils.device
 import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
+import android.app.ActivityManager
+import android.content.Context
+import com.movtery.zalithlauncher.utils.device.checkVulkanSupport
 import kotlin.math.min
 
 /**
@@ -132,6 +135,24 @@ object VoidPerformanceAdvisor {
             .filter { it.isNotBlank() }
             .joinToString(" ")
             .ifBlank { "Android device" }
+
+
+    /** Query Android's declared graphics capabilities without guessing a GPU model. */
+    fun graphicsDiagnostics(context: Context): String {
+        val vulkan = runCatching {
+            checkVulkanSupport(context.packageManager)
+        }.getOrDefault(false)
+        val activityManager =
+            context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+        val glVersion = activityManager?.deviceConfigurationInfo?.reqGlEsVersion ?: 0
+        val glLabel = if (glVersion > 0) {
+            "${glVersion shr 16}.${glVersion and 0xFFFF}"
+        } else {
+            "not reported"
+        }
+        val hardware = Build.HARDWARE.takeIf { it.isNotBlank() } ?: "not reported"
+        return "OpenGL ES: $glLabel • Vulkan system feature flags: ${if (vulkan) "present" else "not both present"} • Android hardware identifier: $hardware. Exact GPU/driver capabilities depend on the selected renderer and driver; check Renderer settings for the live renderer."
+    }
 
     /** Read basic Android memory and ABI details for a real local device report. */
     fun deviceDiagnostics(context: Context): String {
