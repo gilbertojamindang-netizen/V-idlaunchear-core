@@ -612,6 +612,10 @@ fun ZalithLauncherTheme(
     val customColorInt = AllSettings.launcherCustomColor.state
     val customColor = Color(customColorInt)
     val customPaletteStyle = AllSettings.launcherCustomPaletteStyle.state
+    val launcherFontStyle = AllSettings.launcherFontStyle.state
+    val appTypography = remember(launcherFontStyle) {
+        createAppTypography(launcherFontStyle)
+    }
 
     val context = LocalContext.current
 
@@ -680,7 +684,7 @@ fun ZalithLauncherTheme(
         MaterialExpressiveTheme(
             colorScheme = currentDisplayScheme,
             motionScheme = MotionScheme.expressive(),
-            typography = AppTypography,
+            typography = appTypography,
             content = content
         )
     }
