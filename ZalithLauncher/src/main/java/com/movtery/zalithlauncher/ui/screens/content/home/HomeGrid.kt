@@ -108,8 +108,18 @@ fun HomeGrid(
 ) {
     val scrollState = rememberScrollState()
     val appContext = LocalContext.current
-    var selectedPerformanceProfile by remember {
-        mutableStateOf(VoidPerformanceAdvisor.recommend(appContext).profile)
+    val performancePreferences = remember(appContext) {
+        appContext.getSharedPreferences("void_performance", android.content.Context.MODE_PRIVATE)
+    }
+    var selectedPerformanceProfile by remember(appContext) {
+        mutableStateOf(
+            runCatching {
+                VoidPerformanceAdvisor.Profile.valueOf(
+                    performancePreferences.getString("profile", null)
+                        ?: VoidPerformanceAdvisor.recommend(appContext).profile.name
+                )
+            }.getOrDefault(VoidPerformanceAdvisor.recommend(appContext).profile)
+        )
     }
     val performanceAdvice = remember(appContext, selectedPerformanceProfile) {
         VoidPerformanceAdvisor.recommend(appContext, selectedPerformanceProfile)
@@ -356,7 +366,12 @@ fun HomeGrid(
                                         if (selected) Color(0xFF65358D) else Color.White.copy(alpha = 0.055f),
                                         RoundedCornerShape(9.dp)
                                     )
-                                    .clickable { selectedPerformanceProfile = profile }
+                                    .clickable {
+                                        selectedPerformanceProfile = profile
+                                        performancePreferences.edit()
+                                            .putString("profile", profile.name)
+                                            .apply()
+                                    }
                                     .padding(horizontal = 5.dp, vertical = 9.dp),
                                 color = if (selected) Color.White else Color(0xFFBCA7C8),
                                 style = MaterialTheme.typography.labelSmall,
