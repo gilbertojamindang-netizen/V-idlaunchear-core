@@ -51,6 +51,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -88,6 +89,8 @@ import com.movtery.zalithlauncher.game.account.Account
 import com.movtery.zalithlauncher.game.account.AccountsManager
 import com.movtery.zalithlauncher.game.account.getAccountTypeName
 import com.movtery.zalithlauncher.game.account.wardrobe.toArmModel
+import com.movtery.petlib.PetAnimation
+import com.movtery.petlib.PetTapReaction
 import com.movtery.zalithlauncher.game.version.installed.Version
 import com.movtery.zalithlauncher.game.version.installed.VersionsManager
 import com.movtery.zalithlauncher.setting.AllSettings
@@ -96,6 +99,7 @@ import com.movtery.zalithlauncher.ui.base.BaseScreen
 import com.movtery.zalithlauncher.ui.components.AnimatedDirection
 import com.movtery.zalithlauncher.ui.components.BackgroundCard
 import com.movtery.zalithlauncher.ui.components.MarqueeText
+import com.movtery.zalithlauncher.ui.components.PetModelView
 import com.movtery.zalithlauncher.ui.components.ScalingActionButton
 import com.movtery.zalithlauncher.ui.components.animated
 import com.movtery.zalithlauncher.ui.components.rememberAnimatedContext
@@ -114,6 +118,8 @@ import com.movtery.zalithlauncher.ui.screens.content.home.server.LocalServerCard
 import com.movtery.zalithlauncher.ui.screens.content.home.version.LocalHomeCardLauncher
 import com.movtery.zalithlauncher.ui.screens.content.home.version.LocalHomeCardVersionSettings
 import com.movtery.zalithlauncher.viewmodel.ScreenBackStackViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 
 private const val ContentWeight = 7f
@@ -460,17 +466,46 @@ private fun AccountAvatarRow(
     account: Account?,
     refreshKey: Any? = null,
 ) {
+    val refreshWardrobe by AccountsManager.refreshWardrobe.collectAsStateWithLifecycle()
+    val armModel = account?.skinModelType?.toArmModel()
+    val skinStamp = account?.getSkinFile()?.lastModified()
+    val capeStamp = account?.getCapeFile()?.lastModified()
+    val skinBytes by produceState<ByteArray?>(
+        null, account, refreshWardrobe, skinStamp, armModel
+    ) {
+        value = withContext(Dispatchers.IO) {
+            account?.getSkinFile()?.takeIf { it.exists() }
+                ?.inputStream()?.use { it.readBytes() }
+        }
+    }
+    val capeBytes by produceState<ByteArray?>(
+        null, account, refreshWardrobe, capeStamp
+    ) {
+        value = withContext(Dispatchers.IO) {
+            account?.getCapeFile()?.takeIf { it.exists() }
+                ?.inputStream()?.use { it.readBytes() }
+        }
+    }
+
     Row(
-        modifier = modifier.padding(all = 12.dp),
+        modifier = modifier.padding(all = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         if (account != null) {
-            PlayerFace(
-                modifier = Modifier.padding(start = 4.dp),
-                account = account,
-                avatarSize = 48.dp,
-                refreshKey = refreshKey
+            PetModelView(
+                modifier = Modifier
+                    .width(104.dp)
+                    .height(142.dp),
+                skin = skinBytes,
+                cape = capeBytes,
+                arm = armModel,
+                yaw = Math.toRadians(35.0).toFloat(),
+                animation = PetAnimation.Idle,
+                animationSpeed = 1.05f,
+                tapReaction = PetTapReaction.Interact,
+                dragYaw = true,
+                autonomousIdle = true
             )
         } else {
             Icon(
@@ -493,6 +528,11 @@ private fun AccountAvatarRow(
                 Text(
                     text = getAccountTypeName(account),
                     style = MaterialTheme.typography.labelSmall
+                )
+                Text(
+                    text = "PLAYER MODEL",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }
