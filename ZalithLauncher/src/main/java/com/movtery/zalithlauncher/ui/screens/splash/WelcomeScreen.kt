@@ -576,8 +576,10 @@ private fun WelcomeIntroduction(
                 )
                 Text(
                     text = stringResource(R.string.welcome_screen_upstream_notice),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    fontSize = 9.sp,
+                    lineHeight = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f),
+                    modifier = Modifier.padding(top = 4.dp)
                 )
             }
 
