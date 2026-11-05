@@ -39,6 +39,17 @@ class VoidCoreCommandRouterTest {
     }
 
     @Test
+    fun minecraftAndModChecksReportWhenNoVersionIsSelected() {
+        val minecraft = VoidCoreCommandRouter.route("/check minecraft")
+        assertEquals(VoidCoreCommandRouter.Action.REVIEW_MINECRAFT_INSTALLATION, minecraft.action)
+        assertTrue(minecraft.message.contains("No Minecraft version"))
+
+        val mods = VoidCoreCommandRouter.route("/check mods")
+        assertEquals(VoidCoreCommandRouter.Action.REVIEW_MODS, mods.action)
+        assertTrue(mods.message.contains("No Minecraft version"))
+    }
+
+    @Test
     fun unknownCommandReturnsHelp() {
         assertEquals(
             VoidCoreCommandRouter.Action.HELP,
