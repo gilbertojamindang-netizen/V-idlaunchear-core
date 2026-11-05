@@ -5,3 +5,4 @@ Retry after compiler fixes, using the latest main commit.
 Public ARM64 release upload enabled. Build and publish v1.0.3.
 Source version: 1.0.4
 Download Hub + game catalog + asset browser redesign.
+Rebuild 1.0.4 with the redesigned VØID Download Lab, library channels, asset archive header and filter console.
