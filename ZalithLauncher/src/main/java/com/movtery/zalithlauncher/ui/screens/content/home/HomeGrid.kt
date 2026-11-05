@@ -54,6 +54,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -127,8 +128,47 @@ fun HomeGrid(
             }.getOrDefault(VoidPerformanceAdvisor.recommend(appContext).profile)
         )
     }
-    val performanceAdvice = remember(appContext, selectedPerformanceProfile) {
-        VoidPerformanceAdvisor.recommend(appContext, selectedPerformanceProfile)
+    val safeCustomMemoryMb = remember(appContext) {
+        VoidPerformanceAdvisor.recommend(
+            appContext,
+            VoidPerformanceAdvisor.Profile.CUSTOM
+        ).maxMemoryMb
+    }
+    var customMemoryMb by remember(appContext) {
+        mutableStateOf(
+            performancePreferences.getInt("custom_memory", safeCustomMemoryMb)
+                .coerceIn(512, safeCustomMemoryMb)
+        )
+    }
+    var customRenderDistance by remember(appContext) {
+        mutableStateOf(performancePreferences.getInt("custom_render", 8).coerceIn(2, 24))
+    }
+    var customSimulationDistance by remember(appContext) {
+        mutableStateOf(performancePreferences.getInt("custom_simulation", 5).coerceIn(2, 16))
+    }
+    var customEntityDistance by remember(appContext) {
+        mutableStateOf(performancePreferences.getInt("custom_entities", 100).coerceIn(25, 150))
+    }
+    val performanceAdvice = remember(
+        appContext,
+        selectedPerformanceProfile,
+        customMemoryMb,
+        customRenderDistance,
+        customSimulationDistance,
+        customEntityDistance
+    ) {
+        val base = VoidPerformanceAdvisor.recommend(appContext, selectedPerformanceProfile)
+        if (selectedPerformanceProfile == VoidPerformanceAdvisor.Profile.CUSTOM) {
+            base.copy(
+                maxMemoryMb = customMemoryMb.coerceIn(512, base.maxMemoryMb),
+                renderDistance = customRenderDistance.coerceIn(2, 24),
+                simulationDistance = customSimulationDistance.coerceIn(2, 16),
+                entityDistancePercent = customEntityDistance.coerceIn(25, 150),
+                explanation = "Custom profile uses your saved values while keeping the memory recommendation within the device-safe limit."
+            )
+        } else {
+            base
+        }
     }
     //长按调整工具栏触发的卡片操作
     var operation by remember { mutableStateOf<HomeCardOperation>(HomeCardOperation.None) }
@@ -386,6 +426,63 @@ fun HomeGrid(
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
                                 maxLines = 1
+                            )
+                        }
+                    }
+                    if (selectedPerformanceProfile == VoidPerformanceAdvisor.Profile.CUSTOM) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White.copy(alpha = 0.045f), RoundedCornerShape(12.dp))
+                                .padding(horizontal = 11.dp, vertical = 10.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = "CUSTOM ENGINE TUNING",
+                                color = Color(0xFFDAB9FF),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text("JAVA MEMORY • ${performanceAdvice.maxMemoryMb} MB", color = Color(0xFFBFA9D2), style = MaterialTheme.typography.labelSmall)
+                            Slider(
+                                value = customMemoryMb.toFloat().coerceIn(512f, safeCustomMemoryMb.toFloat()),
+                                onValueChange = {
+                                    customMemoryMb = it.toInt().coerceIn(512, safeCustomMemoryMb)
+                                    performancePreferences.edit().putInt("custom_memory", customMemoryMb).apply()
+                                },
+                                valueRange = 512f..safeCustomMemoryMb.toFloat(),
+                                steps = if (safeCustomMemoryMb > 512) 6 else 0,
+                                enabled = safeCustomMemoryMb > 512
+                            )
+                            Text("RENDER DISTANCE • $customRenderDistance CHUNKS", color = Color(0xFFBFA9D2), style = MaterialTheme.typography.labelSmall)
+                            Slider(
+                                value = customRenderDistance.toFloat(),
+                                onValueChange = {
+                                    customRenderDistance = it.toInt().coerceIn(2, 24)
+                                    performancePreferences.edit().putInt("custom_render", customRenderDistance).apply()
+                                },
+                                valueRange = 2f..24f,
+                                steps = 10
+                            )
+                            Text("SIMULATION DISTANCE • $customSimulationDistance CHUNKS", color = Color(0xFFBFA9D2), style = MaterialTheme.typography.labelSmall)
+                            Slider(
+                                value = customSimulationDistance.toFloat(),
+                                onValueChange = {
+                                    customSimulationDistance = it.toInt().coerceIn(2, 16)
+                                    performancePreferences.edit().putInt("custom_simulation", customSimulationDistance).apply()
+                                },
+                                valueRange = 2f..16f,
+                                steps = 6
+                            )
+                            Text("ENTITY DISTANCE • $customEntityDistance%", color = Color(0xFFBFA9D2), style = MaterialTheme.typography.labelSmall)
+                            Slider(
+                                value = customEntityDistance.toFloat(),
+                                onValueChange = {
+                                    customEntityDistance = it.toInt().coerceIn(25, 150)
+                                    performancePreferences.edit().putInt("custom_entities", customEntityDistance).apply()
+                                },
+                                valueRange = 25f..150f,
+                                steps = 4
                             )
                         }
                     }
