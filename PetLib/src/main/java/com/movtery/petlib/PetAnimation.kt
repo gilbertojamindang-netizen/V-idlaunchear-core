@@ -24,4 +24,6 @@ enum class PetAnimation(internal val id: Int) {
     Idle(0),
     /** 行走动画 */
     Walking(1),
+    /** 坐下姿态 */
+    Sitting(2),
 }
