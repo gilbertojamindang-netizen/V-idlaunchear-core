@@ -11,8 +11,11 @@ package com.movtery.zalithlauncher.utils.device
 import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
+import com.movtery.zalithlauncher.game.addons.modloader.ModLoader
 import com.movtery.zalithlauncher.game.multirt.RuntimesManager
 import com.movtery.zalithlauncher.game.version.installed.VersionsManager
+import com.movtery.zalithlauncher.game.version.mod.AllModReader
+import com.movtery.zalithlauncher.game.version.mod.isEnabled
 import com.movtery.zalithlauncher.setting.AllSettings
 import java.io.File
 import java.io.RandomAccessFile
@@ -265,6 +268,96 @@ object VoidPerformanceAdvisor {
         val disabled = candidates.count { it.name.endsWith(".disabled", ignoreCase = true) }
         val enabled = candidates.size - disabled
         return "Minecraft ${version.getVersionName()} • Mod files: ${candidates.size} • Enabled: $enabled • Disabled: $disabled. File counts do not prove version/loader compatibility; check each mod's declared Minecraft and loader support. Latest log scan: ${classifyDiagnosticLog(latestDiagnosticLog())}"
+    }
+
+    internal data class ModMetadataSnapshot(
+        val fileName: String,
+        val id: String,
+        val loader: ModLoader,
+        val enabled: Boolean,
+        val recognized: Boolean
+    )
+
+    /**
+     * Compare parsed local mod loader metadata with the selected profile.
+     * This is an offline review, not a guarantee of Minecraft-version or dependency compatibility.
+     */
+    internal fun buildModCompatibilityReport(
+        versionName: String,
+        installedLoaders: Set<ModLoader>?,
+        modFiles: List<ModMetadataSnapshot>
+    ): String {
+        val enabled = modFiles.filter { it.enabled && it.recognized }
+        val disabled = modFiles.count { !it.enabled }
+        val unrecognized = modFiles.count { it.enabled && !it.recognized }
+
+        val mismatched = if (installedLoaders == null) {
+            emptyList()
+        } else {
+            enabled.filter { mod ->
+                mod.loader.isLoader &&
+                    mod.loader !in installedLoaders &&
+                    !(mod.loader == ModLoader.FABRIC && ModLoader.QUILT in installedLoaders)
+            }
+        }
+        val duplicates = enabled
+            .filter { it.id.isNotBlank() }
+            .groupBy { it.id.lowercase(Locale.ROOT) }
+            .filterValues { it.size > 1 }
+            .map { (id, entries) ->
+                "$id (${entries.joinToString { it.fileName }})"
+            }
+
+        val loaderLabel = when {
+            installedLoaders == null -> "metadata unavailable"
+            installedLoaders.isEmpty() -> "Vanilla"
+            else -> installedLoaders.joinToString { it.displayName }
+        }
+        val mismatchLabel = if (mismatched.isEmpty()) {
+            "No obvious loader mismatch found."
+        } else {
+            "Loader mismatch review: " + mismatched.joinToString { "${it.loader.displayName}: ${it.fileName}" } + "."
+        }
+        val duplicateLabel = if (duplicates.isEmpty()) {
+            "No duplicate mod IDs found."
+        } else {
+            "Duplicate mod IDs: ${duplicates.joinToString()}."
+        }
+        return "Minecraft $versionName • Installed loader: $loaderLabel • Parsed enabled mods: ${enabled.size} • Disabled files: $disabled • Unrecognized JARs: $unrecognized. $mismatchLabel $duplicateLabel This offline scan checks declared loader metadata and duplicate IDs only; it cannot guarantee Minecraft-version or dependency compatibility."
+    }
+
+    /** Read mod JAR metadata locally and compare loader IDs against the selected install. */
+    suspend fun modCompatibilityDiagnostics(): String {
+        val version = VersionsManager.currentVersion.value
+            ?: return "No Minecraft version is selected. Select an installed version before checking mod compatibility."
+        val directory = File(version.getGameDir(), "mods")
+        if (!directory.isDirectory) {
+            return "No mods folder exists for ${version.getVersionName()}. There are no local mod files to inspect."
+        }
+
+        val parsed = runCatching { AllModReader(directory).readAllLocals() }
+            .getOrElse { error ->
+                return "Unable to read local mod metadata: ${error.message ?: "unknown error"}"
+            }
+        val snapshots = parsed.map { mod ->
+            ModMetadataSnapshot(
+                fileName = mod.file.name,
+                id = mod.id,
+                loader = mod.loader,
+                enabled = mod.file.isEnabled(),
+                recognized = !mod.notMod && mod.loader != ModLoader.UNKNOWN
+            )
+        }
+        val installedLoaders = version.getVersionInfo()?.loaderInfos
+            ?.map { it.loader }
+            ?.filter { it.isLoader }
+            ?.toSet()
+        val report = buildModCompatibilityReport(
+            versionName = version.getVersionName(),
+            installedLoaders = installedLoaders,
+            modFiles = snapshots
+        )
+        return "$report Crash log: ${classifyDiagnosticLog(latestDiagnosticLog())}".take(2400)
     }
 
     /** Query Android's declared graphics capabilities without guessing a GPU model. */
