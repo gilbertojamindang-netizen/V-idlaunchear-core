@@ -79,6 +79,11 @@ suspend fun <E: AbstractPlatformSearcher, T> mirroredPlatformSearcher(
             }
             return block(searcher)
         } catch (e: Exception) {
+            // Cancellation is control flow, not a provider failure. Never swallow it:
+            // otherwise an obsolete search can keep running after the user changes filters
+            // or leaves the screen.
+            if (e is CancellationException) throw e
+
             Log.w("PlatformSearcher", "Failed to perform the operation on source: {${searcher.source}}", e)
             lastException = e
 
