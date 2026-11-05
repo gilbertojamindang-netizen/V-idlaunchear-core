@@ -82,8 +82,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.movtery.cardgrid.state.rememberCardGridState
 import com.movtery.guide.GuideSide
 import com.movtery.guide.guideNode
-import com.movtery.petlib.PetAnimation
-import com.movtery.petlib.PetTapReaction
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.game.account.Account
 import com.movtery.zalithlauncher.game.account.AccountsManager
@@ -97,8 +95,8 @@ import com.movtery.zalithlauncher.ui.base.BaseScreen
 import com.movtery.zalithlauncher.ui.components.AnimatedDirection
 import com.movtery.zalithlauncher.ui.components.BackgroundCard
 import com.movtery.zalithlauncher.ui.components.MarqueeText
-import com.movtery.zalithlauncher.ui.components.PetModelView
 import com.movtery.zalithlauncher.ui.components.ScalingActionButton
+import com.movtery.zalithlauncher.ui.components.VoidCompanionStage
 import com.movtery.zalithlauncher.ui.components.animated
 import com.movtery.zalithlauncher.ui.components.rememberAnimatedContext
 import com.movtery.zalithlauncher.ui.guide.GuideKeys
@@ -636,9 +634,6 @@ private fun ActionMenuTallerContent(
     toVersionSettingsScreen: () -> Unit,
 ) {
     val refreshWardrobe by AccountsManager.refreshWardrobe.collectAsStateWithLifecycle()
-    // The skin preview can be picked up and repositioned within its display area.
-    var companionOffset by remember { mutableStateOf(IntOffset.Zero) }
-
     Column(
         modifier = Modifier
             .actionMenuDragAnchor()
@@ -688,30 +683,14 @@ private fun ActionMenuTallerContent(
                 fontWeight = FontWeight.ExtraBold,
                 letterSpacing = 1.2.sp
             )
-            PetModelView(
+            VoidCompanionStage(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 18.dp)
-                    .offset { companionOffset }
-                    .pointerInput(Unit) {
-                        detectDragGestures { change, dragAmount ->
-                            change.consume()
-                            val maxX = (size.width / 3).coerceAtLeast(1)
-                            val maxY = (size.height / 4).coerceAtLeast(1)
-                            companionOffset = IntOffset(
-                                (companionOffset.x + dragAmount.x.roundToInt()).coerceIn(-maxX, maxX),
-                                (companionOffset.y + dragAmount.y.roundToInt()).coerceIn(-maxY, maxY)
-                            )
-                        }
-                    },
+                    .padding(top = 18.dp),
                 skin = skinBytes,
                 cape = capeBytes,
                 arm = armModel,
-                yaw = yaw,
-                animation = PetAnimation.Idle,
-                tapReaction = PetTapReaction.Interact,
-                dragYaw = false,
-                autonomousIdle = true
+                yaw = yaw
             )
         }
 
