@@ -25,6 +25,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -61,6 +62,7 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
@@ -605,6 +607,8 @@ private fun ActionMenuTallerContent(
     toVersionSettingsScreen: () -> Unit,
 ) {
     val refreshWardrobe by AccountsManager.refreshWardrobe.collectAsStateWithLifecycle()
+    // The skin preview can be picked up and repositioned within its display area.
+    var companionOffset by remember { mutableStateOf(IntOffset.Zero) }
 
     Column(
         modifier = Modifier
@@ -641,7 +645,19 @@ private fun ActionMenuTallerContent(
         PetModelView(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .offset { companionOffset }
+                .pointerInput(Unit) {
+                    detectDragGestures { change, dragAmount ->
+                        change.consume()
+                        val maxX = (size.width / 3).coerceAtLeast(1)
+                        val maxY = (size.height / 4).coerceAtLeast(1)
+                        companionOffset = IntOffset(
+                            (companionOffset.x + dragAmount.x.roundToInt()).coerceIn(-maxX, maxX),
+                            (companionOffset.y + dragAmount.y.roundToInt()).coerceIn(-maxY, maxY)
+                        )
+                    }
+                },
             skin = skinBytes,
             cape = capeBytes,
             arm = armModel,
