@@ -169,13 +169,20 @@ object VoidWorldBackupManager {
         return directory.canonicalFile
     }
 
-    private fun isSafeWorldName(name: String): Boolean =
+    internal fun isSafeWorldName(name: String): Boolean =
         name.isNotBlank() &&
             name != "." &&
             name != ".." &&
             '/' !in name &&
             '\\' !in name &&
             '\u0000' !in name
+
+    internal fun isSafeArchiveEntryName(name: String): Boolean =
+        name.isNotBlank() &&
+            !name.startsWith('/') &&
+            '\\' !in name &&
+            '\u0000' !in name &&
+            name.split('/').none { it == ".." || it == "." }
 
     private fun safeChild(parent: File, childName: String): File {
         require(isSafeWorldName(childName)) { "Invalid world folder name." }
@@ -274,12 +281,7 @@ object VoidWorldBackupManager {
                 val entry = zip.nextEntry ?: break
                 try {
                     if (entry.name == META_ENTRY) continue
-                    require(
-                        entry.name.isNotBlank() &&
-                            !entry.name.startsWith('/') &&
-                            '\\' !in entry.name &&
-                            entry.name.split('/').none { it == ".." || it == "." }
-                    ) {
+                    require(isSafeArchiveEntryName(entry.name)) {
                         "The backup contains an unsafe file path."
                     }
 
