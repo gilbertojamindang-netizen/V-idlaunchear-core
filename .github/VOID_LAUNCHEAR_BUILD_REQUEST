@@ -3,3 +3,5 @@ Distribution name: Void Launchear
 Source version: 1.0.3
 Retry after compiler fixes, using the latest main commit.
 Public ARM64 release upload enabled. Build and publish v1.0.3.
+Source version: 1.0.4
+Download Hub + game catalog + asset browser redesign.
