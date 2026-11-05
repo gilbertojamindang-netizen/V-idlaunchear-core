@@ -31,6 +31,14 @@ class VoidCoreCommandRouterTest {
     }
 
     @Test
+    fun deviceCommandReturnsBasicDeviceAndAndroidSummary() {
+        val result = VoidCoreCommandRouter.route("/device")
+        assertEquals(VoidCoreCommandRouter.Action.SHOW_DEVICE_SUMMARY, result.action)
+        assertTrue(result.message.contains("Android"))
+        assertTrue(result.message.contains("API"))
+    }
+
+    @Test
     fun unknownCommandReturnsHelp() {
         assertEquals(
             VoidCoreCommandRouter.Action.HELP,
