@@ -96,8 +96,10 @@ object ControlManager {
                 file.isFile && stockDefaultBytes != null &&
                     runCatching { file.readBytes().contentEquals(stockDefaultBytes) }.getOrDefault(false)
             } == true
+            val selectedLayoutMissing = selectedFile == null || !selectedFile.isFile
             val shouldSelectBedrock = files.isEmpty() ||
                 selectedName.isBlank() ||
+                selectedLayoutMissing ||
                 selectedIsUnmodifiedDefault
 
             if (files.isEmpty()) {
@@ -118,7 +120,9 @@ object ControlManager {
                 }
             }
 
-            if (installingBedrock && shouldSelectBedrock && bedrockFile.isFile) {
+            // Select the installed preset even when it was copied by an earlier
+            // app version. Keep an existing user-selected custom layout intact.
+            if (shouldSelectBedrock && bedrockFile.isFile) {
                 AllSettings.controlLayout.save(bedrockFile.name)
             }
 
