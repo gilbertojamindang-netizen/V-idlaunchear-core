@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "app": {
+    "id": "com.movtery.zalithlauncher",
+    "name": "VøidLaunchear",
+    "latestVersion": "1.0.5",
+    "releaseTag": "v1.0.5",
+    "releasePage": "https://github.com/gilbertojamindang-netizen/V-idlaunchear-core/releases"
+  },
+  "announcements": [
+    {
+      "id": "welcome-void",
+      "title": "Welcome to VøidLaunchear",
+      "message": "The VøidLaunchear update feed is ready for live announcements. New notices will appear here when the in-app feed is connected.",
+      "category": "INFO",
+      "publishedAt": "2026-11-06T00:00:00Z",
+      "active": true
+    }
+  ],
+  "maintenance": {
+    "active": false,
+    "title": "",
+    "message": ""
+  }
+}
