@@ -61,6 +61,8 @@ final class PetLibNative {
 
     static native void nativeStopAnimation(long ptr);
 
+    static native void nativePlayRagdoll(long ptr);
+
     static native void nativeSquashTap(long ptr, float now);
 
     static native void nativePlaySwing(long ptr, float now);
