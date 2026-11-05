@@ -962,7 +962,7 @@ fun HomeGrid(
             title = { Text("VØID CORE") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
-                    Text("Offline command console. Try /help, /device, /optimize, /low-end, /check gpu, /check java, /check mods, /check minecraft, /restore settings, /clean cache, or /fps.", style = MaterialTheme.typography.bodySmall)
+                    Text("Offline command console. Try /help, /device, /optimize, /low-end, /check gpu, /check java, /check mods, /check minecraft, /restore settings, /clean cache, /worlds, or /fps.", style = MaterialTheme.typography.bodySmall)
                     voidCoreHistory.takeLast(4).forEach { Text(it, style = MaterialTheme.typography.bodySmall) }
                     OutlinedTextField(value = voidCoreInput, onValueChange = { voidCoreInput = it }, modifier = Modifier.fillMaxWidth(), singleLine = true, label = { Text("Enter a command") })
                 }
@@ -978,6 +978,16 @@ fun HomeGrid(
                                 showVoidCore = false
                                 showCacheCleanupConfirmation = true
                                 saveVoidCoreEntry(historyEntry)
+                            }
+                            VoidCoreCommandRouter.Action.OPEN_WORLD_VAULT -> {
+                                showVoidCore = false
+                                showWorldVault = true
+                                saveVoidCoreEntry(historyEntry)
+                                worldVaultScope.launch {
+                                    isWorldOperationRunning = true
+                                    refreshWorldVault()
+                                    isWorldOperationRunning = false
+                                }
                             }
                             VoidCoreCommandRouter.Action.RESTORE_BACKUP -> {
                                 if (latestPerformanceBackupId.isNullOrBlank()) {
