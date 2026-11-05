@@ -132,4 +132,25 @@ object VoidPerformanceAdvisor {
             .filter { it.isNotBlank() }
             .joinToString(" ")
             .ifBlank { "Android device" }
+
+    /** Read basic Android memory and ABI details for a real local device report. */
+    fun deviceDiagnostics(context: Context): String {
+        val activityManager =
+            context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+        val memoryInfo = ActivityManager.MemoryInfo()
+        activityManager?.getMemoryInfo(memoryInfo)
+
+        val totalRamMb = (memoryInfo.totalMem / (1024L * 1024L)).toInt().coerceAtLeast(0)
+        val availableRamMb = (memoryInfo.availMem / (1024L * 1024L)).toInt().coerceAtLeast(0)
+        val ramLabel = if (totalRamMb > 0) {
+            "$totalRamMb MB RAM • $availableRamMb MB available"
+        } else {
+            "RAM information unavailable"
+        }
+        val abi = Build.SUPPORTED_ABIS.firstOrNull() ?: "unknown ABI"
+        val hardware = Build.HARDWARE.takeIf { it.isNotBlank() }?.let { " • $it" }.orEmpty()
+        val lowRam = if (activityManager?.isLowRamDevice == true) "yes" else "no"
+
+        return "$deviceSummary()$hardware • Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT}) • $ramLabel • $abi • Android low-RAM device: $lowRam"
+    }
 }
