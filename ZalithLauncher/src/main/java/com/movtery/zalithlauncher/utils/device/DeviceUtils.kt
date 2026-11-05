@@ -20,7 +20,37 @@ package com.movtery.zalithlauncher.utils.device
 
 import android.content.pm.PackageManager
 
-fun checkVulkanSupport(packageManager: PackageManager): Boolean {
-    return packageManager.hasSystemFeature(PackageManager.FEATURE_VULKAN_HARDWARE_LEVEL) &&
-            packageManager.hasSystemFeature(PackageManager.FEATURE_VULKAN_HARDWARE_VERSION)
+private const val VULKAN_API_VERSION_1_1_0 = 0x00401000
+
+/** Return Android's declared highest Vulkan API version, or null when absent. */
+fun getVulkanApiVersion(packageManager: PackageManager): Int? {
+    if (!packageManager.hasSystemFeature(PackageManager.FEATURE_VULKAN_HARDWARE_LEVEL)) {
+        return null
+    }
+    return packageManager.systemAvailableFeatures
+        .firstOrNull { it.name == PackageManager.FEATURE_VULKAN_HARDWARE_VERSION }
+        ?.version
+        ?.takeIf { it > 0 }
 }
+
+/** Format the Vulkan version fields using the Vulkan 10/10/12-bit encoding. */
+internal fun formatVulkanApiVersion(encodedVersion: Int): String? {
+    if (encodedVersion <= 0) return null
+    val major = (encodedVersion ushr 22) and 0x3FF
+    val minor = (encodedVersion ushr 12) and 0x3FF
+    val patch = encodedVersion and 0xFFF
+    if (major == 0) return null
+    return "$major.$minor.$patch"
+}
+
+/** Whether Android declares hardware-level Vulkan API 1.1.0 or newer. */
+fun checkVulkan11Support(packageManager: PackageManager): Boolean =
+    packageManager.hasSystemFeature(PackageManager.FEATURE_VULKAN_HARDWARE_LEVEL) &&
+        packageManager.hasSystemFeature(
+            PackageManager.FEATURE_VULKAN_HARDWARE_VERSION,
+            VULKAN_API_VERSION_1_1_0
+        )
+
+/** Whether Android declares any hardware-level Vulkan API version. */
+fun checkVulkanSupport(packageManager: PackageManager): Boolean =
+    getVulkanApiVersion(packageManager) != null
