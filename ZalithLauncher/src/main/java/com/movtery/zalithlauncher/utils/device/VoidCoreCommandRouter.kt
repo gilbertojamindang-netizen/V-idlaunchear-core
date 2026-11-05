@@ -29,6 +29,7 @@ object VoidCoreCommandRouter {
         REVIEW_MINECRAFT_INSTALLATION,
         SHOW_DEVICE_SUMMARY,
         CLEAN_CACHE,
+        OPEN_WORLD_VAULT,
         HELP
     }
 
@@ -105,10 +106,15 @@ object VoidCoreCommandRouter {
                 "This clears only disposable launcher app-icon, remote-homepage, and image caches after confirmation. It does not touch downloads, modpacks, worlds, saves, mods, accounts, Java runtimes, or Minecraft libraries.",
                 requiresConfirmation = true
             )
+            "worlds", "world backup", "world backups", "backup world", "backup worlds" -> Result(
+                Action.OPEN_WORLD_VAULT,
+                "World backup manager",
+                "Open VØID WORLD VAULT to list local saves, create a ZIP backup, or restore an archive. Restoring an existing world creates a safety backup first."
+            )
             "help", "commands", "" -> Result(
                 Action.HELP,
                 "VØID CORE commands",
-                "Try /device, /optimize, /low-end, /check gpu, /check java, /fix settings, /restore settings, /check mods, /fps, /check minecraft, or /clean cache."
+                "Try /device, /optimize, /low-end, /check gpu, /check java, /fix settings, /restore settings, /check mods, /fps, /check minecraft, /clean cache, or /worlds."
             )
             else -> Result(
                 Action.HELP,
