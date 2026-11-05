@@ -24,6 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,6 +64,7 @@ fun VoidCompanionStage(
         contentAlignment = Alignment.Center
     ) {
         val density = LocalDensity.current
+        val dragScope = rememberCoroutineScope()
         val modelWidth = 132.dp
         val modelHeight = 190.dp
         val maxX = with(density) { ((maxWidth - modelWidth) / 2).coerceAtLeast(0.dp).toPx() }
@@ -84,8 +86,8 @@ fun VoidCompanionStage(
                     val targetX = if (maxX <= 0f) 0f else Random.nextFloat() * maxX * 2f - maxX
                     val targetY = if (maxY <= 0f) 0f else (Random.nextFloat() * 1.5f - 0.45f) * maxY
                     val duration = Random.nextInt(850, 1650)
-                    launch { offsetX.animateTo(targetX, tween(duration)) }
-                    launch { offsetY.animateTo(targetY.coerceIn(-maxY, maxY), tween(duration)) }
+                    dragScope.launch { offsetX.animateTo(targetX, tween(duration)) }
+                    dragScope.launch { offsetY.animateTo(targetY.coerceIn(-maxY, maxY), tween(duration)) }
                     launch {
                         rotation.animateTo(
                             if (targetX >= offsetX.value) 5f else -5f,
@@ -115,7 +117,7 @@ fun VoidCompanionStage(
                             dragging = true
                             dragX = offsetX.value
                             dragY = offsetY.value
-                            launch {
+                            dragScope.launch {
                                 offsetX.stop()
                                 offsetY.stop()
                                 rotation.stop()
@@ -125,17 +127,17 @@ fun VoidCompanionStage(
                         onDragEnd = {
                             dropping = true
                             dragging = false
-                            launch {
+                            dragScope.launch {
                                 val lean = if (offsetX.value >= 0f) 18f else -18f
                                 offsetY.animateTo(maxY, tween(220))
                                 dragY = maxY
-                                launch { rotation.animateTo(lean, tween(130)) }
-                                launch { squash.animateTo(0.84f, tween(100)) }
+                                dragScope.launch { rotation.animateTo(lean, tween(130)) }
+                                dragScope.launch { squash.animateTo(0.84f, tween(100)) }
                                 offsetY.animateTo(
                                     (maxY - 13f).coerceAtLeast(-maxY),
                                     spring(dampingRatio = 0.38f, stiffness = Spring.StiffnessMedium)
                                 )
-                                launch {
+                                dragScope.launch {
                                     rotation.animateTo(
                                         0f,
                                         spring(dampingRatio = 0.42f, stiffness = Spring.StiffnessLow)
