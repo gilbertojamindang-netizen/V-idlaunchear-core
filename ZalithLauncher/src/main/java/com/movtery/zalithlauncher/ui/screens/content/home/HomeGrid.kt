@@ -25,6 +25,12 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -209,6 +215,48 @@ fun HomeGrid(
                 .padding(6.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
+            // VØID home identity panel: intentionally distinct from the upstream launcher layout.
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 6.dp, vertical = 4.dp)
+                    .background(
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                Color(0xFF25103D),
+                                Color(0xFF120A20),
+                                Color(0xFF32164D)
+                            )
+                        ),
+                        shape = RoundedCornerShape(22.dp)
+                    )
+                    .padding(horizontal = 20.dp, vertical = 15.dp)
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    Text(
+                        text = "WELCOME TO VØID",
+                        color = Color(0xFFCFA5FF),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.sp
+                    )
+                    Text(
+                        text = "YOUR WORLD. YOUR RULES.",
+                        color = Color(0xFFF7F0FF),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 0.6.sp
+                    )
+                    Text(
+                        text = "A custom Minecraft Java launcher experience",
+                        color = Color(0xFFD0C1DE),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+
             val systemCards = HomeCards.systemCards()
             if (!systemCards.isEmpty()) {
                 Column(
