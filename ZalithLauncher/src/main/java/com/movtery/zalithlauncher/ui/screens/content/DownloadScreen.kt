@@ -18,12 +18,17 @@
 
 package com.movtery.zalithlauncher.ui.screens.content
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material3.HorizontalDivider
@@ -33,6 +38,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -157,41 +164,100 @@ fun DownloadScreen(
 
 @Composable
 private fun DownloadHubHeader() {
-    Row(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 18.dp, end = 18.dp, top = 18.dp, bottom = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 14.dp, top = 14.dp, bottom = 9.dp),
+        shape = RoundedCornerShape(26.dp),
+        color = Color.Transparent,
+        contentColor = Color.White
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = "VØID  /  DOWNLOAD LAB",
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "Download Hub",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "Build your next Minecraft setup",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        Surface(
-            shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        Column(
+            modifier = Modifier
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF100C1D),
+                            Color(0xFF352052),
+                            Color(0xFF211632)
+                        )
+                    )
+                )
+                .padding(horizontal = 18.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(11.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("VØID", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black)
-                Text("LAB", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = "VØID  /  CONTENT SYSTEM",
+                        color = Color(0xFFC7A8FF),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black
+                    )
+                    Text(
+                        text = "DOWNLOAD LAB",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Black
+                    )
+                    Text(
+                        text = "Build your Minecraft setup from one control hub",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White.copy(alpha = 0.76f)
+                    )
+                }
+                Surface(
+                    shape = RoundedCornerShape(18.dp),
+                    color = Color(0xFF8B5CF6),
+                    contentColor = Color.White
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 13.dp, vertical = 11.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "VØID",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Black
+                        )
+                        Text(
+                            text = "LAB  /  08",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = Color.White.copy(alpha = 0.12f),
+                    contentColor = Color.White
+                ) {
+                    Text(
+                        text = "LIVE CATALOG",
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = Color.White.copy(alpha = 0.12f),
+                    contentColor = Color.White
+                ) {
+                    Text(
+                        text = "8 CONTENT CHANNELS",
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }
@@ -217,38 +283,79 @@ private fun TabMenu(
 
     val ctx = rememberAnimatedContext(isVisible = isVisible)
     val scrollState = rememberScrollState()
-    Row(
-        modifier = modifier
-            .padding(horizontal = 12.dp, vertical = 4.dp)
-            .fadeEdge(scrollState)
-            .horizontalScroll(scrollState)
-            .animated(ctx, from = AnimatedDirection.Left),
-        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        downloadsList.forEach { item ->
-            val selected = backScreenViewModel.downloadScreen.currentKey == item.key
-            Surface(
-                onClick = { backStack.navigateOnce(item.key) },
-                shape = RoundedCornerShape(15.dp),
-                color = if (selected) MaterialTheme.colorScheme.primaryContainer
-                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.58f),
-                contentColor = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                tonalElevation = if (selected) 2.dp else 0.dp
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 13.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(7.dp)
+    Column(modifier = modifier) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 17.dp, end = 17.dp, top = 1.dp, bottom = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "LIBRARY CHANNELS",
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Black
+            )
+            Text(
+                text = "01 — 08",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 3.dp)
+                .fadeEdge(scrollState)
+                .horizontalScroll(scrollState)
+                .animated(ctx, from = AnimatedDirection.Left),
+            horizontalArrangement = Arrangement.spacedBy(9.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            downloadsList.forEachIndexed { index, item ->
+                val selected = backScreenViewModel.downloadScreen.currentKey == item.key
+                Surface(
+                    onClick = { backStack.navigateOnce(item.key) },
+                    shape = RoundedCornerShape(17.dp),
+                    color = if (selected) Color(0xFF7042B8)
+                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.62f),
+                    contentColor = if (selected) Color.White
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                    tonalElevation = if (selected) 3.dp else 0.dp
                 ) {
-                    item.icon()
-                    Text(
-                        text = stringResource(item.textRes),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                        maxLines = 1
-                    )
+                    Column(
+                        modifier = Modifier
+                            .width(132.dp)
+                            .height(76.dp)
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            item.icon()
+                            Spacer(modifier = Modifier.weight(1f))
+                            Text(
+                                text = (index + 1).toString().padStart(2, '0'),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = if (selected) Color.White.copy(alpha = 0.76f)
+                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.68f)
+                            )
+                        }
+                        Text(
+                            text = stringResource(item.textRes),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1
+                        )
+                        Text(
+                            text = if (selected) "ACTIVE CHANNEL" else "OPEN CHANNEL",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (selected) Color.White.copy(alpha = 0.78f)
+                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f)
+                        )
+                    }
                 }
             }
         }
