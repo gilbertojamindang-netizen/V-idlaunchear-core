@@ -9,11 +9,11 @@
             "matchQueue": []
         },
         "description": {
-            "default": "Bedrock-inspired mobile controls: left movement joystick, right-side jump/sneak/attack, tap to use, and hold to mine.",
+            "default": "Bedrock-inspired mobile controls: left movement joystick with forward auto-sprint, jump and toggle-sneak on the right, a dedicated attack button, and tap/hold interaction in the look area.",
             "matchQueue": []
         },
-        "versionCode": 2,
-        "versionName": "1.1"
+        "versionCode": 3,
+        "versionName": "1.2"
     },
     "layers": [
         {
@@ -245,8 +245,8 @@
                     },
                     "uuid": "voidbd-attack-001",
                     "position": {
-                        "x": 8750,
-                        "y": 6200
+                        "x": 8650,
+                        "y": 6400
                     },
                     "buttonSize": {
                         "type": "percentage",
@@ -277,15 +277,15 @@
                     },
                     "uuid": "voidbd-jump-001",
                     "position": {
-                        "x": 9300,
-                        "y": 8250
+                        "x": 9280,
+                        "y": 8150
                     },
                     "buttonSize": {
                         "type": "percentage",
                         "widthDp": 50,
                         "heightDp": 50,
-                        "widthPercentage": 1550,
-                        "heightPercentage": 1550,
+                        "widthPercentage": 1600,
+                        "heightPercentage": 1600,
                         "widthReference": "screen_height",
                         "heightReference": "screen_height"
                     },
@@ -309,15 +309,15 @@
                     },
                     "uuid": "voidbd-sneak-001",
                     "position": {
-                        "x": 8050,
-                        "y": 9050
+                        "x": 8460,
+                        "y": 9100
                     },
                     "buttonSize": {
                         "type": "percentage",
                         "widthDp": 50,
                         "heightDp": 50,
-                        "widthPercentage": 1100,
-                        "heightPercentage": 1100,
+                        "widthPercentage": 1050,
+                        "heightPercentage": 1050,
                         "widthReference": "screen_height",
                         "heightReference": "screen_height"
                     },
@@ -345,15 +345,15 @@
                 {
                     "uuid": "voidbd-joystick-001",
                     "position": {
-                        "x": 300,
-                        "y": 9000
+                        "x": 1000,
+                        "y": 8000
                     },
                     "sizeType": "percentage",
                     "sizeDp": 200,
                     "sizePercentage": 2900,
                     "visibilityType": "in_game",
                     "joystickStyleId": "voidbedrockjoy1",
-                    "deadZoneRatio": 0.32,
+                    "deadZoneRatio": 0.2,
                     "lockThreshold": 0.9,
                     "canLock": true,
                     "triggerMode": "drag",
