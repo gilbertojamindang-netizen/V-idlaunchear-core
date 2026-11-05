@@ -677,6 +677,10 @@ private fun ActionMenuTallerContent(
     toVersionManageScreen: () -> Unit,
     toVersionSettingsScreen: () -> Unit,
 ) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
         BackgroundCard(
             modifier = Modifier
                 .guideNode(
