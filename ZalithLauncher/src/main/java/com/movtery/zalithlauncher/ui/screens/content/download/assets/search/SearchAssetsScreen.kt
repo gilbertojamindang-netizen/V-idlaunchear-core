@@ -19,6 +19,17 @@
 package com.movtery.zalithlauncher.ui.screens.content.download.assets.search
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.Alignment
+import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.lazy.LazyListScope
@@ -256,6 +267,62 @@ private fun rememberSearchAssetsViewModel(
  * @param extraFilter 额外的过滤器UI
  */
 @Composable
+private fun AssetsBrowserHeader(classes: PlatformClasses) {
+    val titleRes = when (classes) {
+        PlatformClasses.MOD -> R.string.download_category_mod
+        PlatformClasses.MOD_PACK -> R.string.download_category_modpack
+        PlatformClasses.RESOURCE_PACK -> R.string.download_category_resource_pack
+        PlatformClasses.SAVES -> R.string.download_category_saves
+        PlatformClasses.SHADERS -> R.string.download_category_shaders
+    }
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 13.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "VØID  /  ASSET BROWSER",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Black
+                )
+                Text(
+                    text = stringResource(titleRes),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Discover content for your Minecraft setup",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.78f)
+                )
+            }
+            Surface(
+                shape = RoundedCornerShape(13.dp),
+                color = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            ) {
+                Text(
+                    text = "BROWSE",
+                    modifier = Modifier.padding(horizontal = 11.dp, vertical = 8.dp),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun SearchAssetsScreen(
     mainScreenKey: TitledNavKey?,
     parentScreenKey: TitledNavKey,
@@ -295,7 +362,9 @@ fun SearchAssetsScreen(
         Triple(parentScreenKey, parentCurrentKey, false),
         Triple(screenKey, currentKey, false)
     ) { isVisible ->
-        Row {
+        Column(modifier = Modifier.fillMaxSize()) {
+            AssetsBrowserHeader(classes = platformClasses)
+            Row(modifier = Modifier.weight(1f)) {
             val resultCtx = rememberAnimatedContext(isVisible = isVisible)
             ResultListLayout(
                 modifier = Modifier
@@ -410,6 +479,7 @@ fun SearchAssetsScreen(
                 },
                 extraFilter = extraFilter
             )
+            }
         }
     }
 }
