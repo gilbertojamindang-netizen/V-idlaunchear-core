@@ -62,6 +62,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
@@ -84,6 +85,7 @@ import com.movtery.zalithlauncher.ui.screens.content.home.server.ServerCardSetti
 import com.movtery.zalithlauncher.ui.screens.content.home.version.VersionCardManager
 import com.movtery.zalithlauncher.ui.theme.cardColor
 import com.movtery.zalithlauncher.ui.theme.onCardColor
+import com.movtery.zalithlauncher.utils.device.VoidPerformanceAdvisor
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 /** 主页网格的卡片操作 */
@@ -104,6 +106,10 @@ fun HomeGrid(
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
+    val appContext = LocalContext.current
+    val performanceAdvice = remember(appContext) {
+        VoidPerformanceAdvisor.recommend(appContext)
+    }
     //长按调整工具栏触发的卡片操作
     var operation by remember { mutableStateOf<HomeCardOperation>(HomeCardOperation.None) }
 
@@ -253,6 +259,44 @@ fun HomeGrid(
                     Text(
                         text = "A custom Minecraft Java launcher experience",
                         color = Color(0xFFD0C1DE),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+
+            // Advisory-only performance card. It never changes Minecraft settings automatically.
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 6.dp)
+                    .background(
+                        color = Color(0xFF171020),
+                        shape = RoundedCornerShape(18.dp)
+                    )
+                    .padding(horizontal = 16.dp, vertical = 13.dp)
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        text = "VØID PERFORMANCE ENGINE",
+                        color = Color(0xFFD5B0FF),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.3.sp
+                    )
+                    Text(
+                        text = "${performanceAdvice.profile.name.replace('_', ' ')} PROFILE  •  ${performanceAdvice.maxMemoryMb} MB SUGGESTED RAM",
+                        color = Color(0xFFF4E9FF),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = "Suggested render distance: ${performanceAdvice.renderDistance} chunks  •  Simulation: ${performanceAdvice.simulationDistance}",
+                        color = Color(0xFFBFA6D5),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Text(
+                        text = performanceAdvice.explanation,
+                        color = Color(0xFF9F90AC),
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
