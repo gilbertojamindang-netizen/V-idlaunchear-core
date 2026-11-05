@@ -94,6 +94,7 @@ import com.movtery.zalithlauncher.ui.screens.content.home.version.VersionCardMan
 import com.movtery.zalithlauncher.ui.theme.cardColor
 import com.movtery.zalithlauncher.ui.theme.onCardColor
 import com.movtery.zalithlauncher.utils.device.VoidCoreCommandRouter
+import com.movtery.zalithlauncher.utils.device.VoidCacheCleaner
 import com.movtery.zalithlauncher.utils.device.VoidPerformanceApplier
 import com.movtery.zalithlauncher.utils.device.VoidPerformanceAdvisor
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -179,6 +180,8 @@ fun HomeGrid(
     var voidCoreInput by remember { mutableStateOf("") }
     var showPerformanceApply by remember { mutableStateOf(false) }
     var showPerformanceRestore by remember { mutableStateOf(false) }
+    var showCacheCleanupConfirmation by remember { mutableStateOf(false) }
+    var isCleaningCache by remember { mutableStateOf(false) }
     var isApplyingPerformance by remember { mutableStateOf(false) }
     var performanceApplyMessage by remember { mutableStateOf<String?>(null) }
     var latestPerformanceBackupId by remember(appContext) {
@@ -198,6 +201,13 @@ fun HomeGrid(
                     .takeLast(20)
             )
         }
+    }
+    fun saveVoidCoreEntry(entry: String) {
+        voidCoreHistory.add(entry)
+        while (voidCoreHistory.size > 20) voidCoreHistory.removeAt(0)
+        voidCorePreferences.edit()
+            .putString("history", voidCoreHistory.joinToString("\n--VOID-CORE-ENTRY--\n"))
+            .apply()
     }
 
     // 播种持久化的用户卡片布局
@@ -729,6 +739,45 @@ fun HomeGrid(
             }
         )
     }
+    if (showCacheCleanupConfirmation) {
+        AlertDialog(
+            onDismissRequest = { if (!isCleaningCache) showCacheCleanupConfirmation = false },
+            title = { Text("CLEAR VØID APP CACHES?") },
+            text = {
+                Text(
+                    "Only disposable app-icon, remote-homepage, and image caches will be cleared. Downloads, modpacks, worlds, saves, mods, accounts, Java runtimes, and Minecraft libraries are not touched. Cached images and homepage content can be downloaded again."
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showCacheCleanupConfirmation = false
+                        isCleaningCache = true
+                        performanceScope.launch {
+                            val outcome = runCatching { VoidCacheCleaner.cleanKnownCaches() }
+                            val message = outcome.fold(
+                                onSuccess = { result ->
+                                    "Cache cleanup completed: ${result.removedBytes / (1024L * 1024L)} MB cleared from ${result.clearedDirectories} folders."
+                                },
+                                onFailure = { error ->
+                                    "Cache cleanup was incomplete: ${error.message ?: "unknown error"}"
+                                }
+                            )
+                            saveVoidCoreEntry(message)
+                            isCleaningCache = false
+                        }
+                    },
+                    enabled = !isCleaningCache
+                ) { Text(if (isCleaningCache) "CLEARING…" else "CLEAR SAFE CACHES") }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showCacheCleanupConfirmation = false },
+                    enabled = !isCleaningCache
+                ) { Text("CANCEL") }
+            }
+        )
+    }
     if (showVoidCore) {
         AlertDialog(
             onDismissRequest = { showVoidCore = false },
@@ -745,11 +794,28 @@ fun HomeGrid(
                     val command = voidCoreInput.trim()
                     if (command.isNotEmpty()) {
                         val response = VoidCoreCommandRouter.route(command, appContext)
-                        voidCoreHistory.add("> " + command + "\n" + response.title + ": " + response.message + if (response.requiresConfirmation) "\nConfirmation required before this action." else "")
-                        while (voidCoreHistory.size > 20) voidCoreHistory.removeAt(0)
-                        voidCorePreferences.edit()
-                            .putString("history", voidCoreHistory.joinToString("\n--VOID-CORE-ENTRY--\n"))
-                            .apply()
+                        val historyEntry = "> " + command + "\n" + response.title + ": " + response.message
+                        when (response.action) {
+                            VoidCoreCommandRouter.Action.CLEAN_CACHE -> {
+                                showVoidCore = false
+                                showCacheCleanupConfirmation = true
+                                saveVoidCoreEntry(historyEntry)
+                            }
+                            VoidCoreCommandRouter.Action.RESTORE_BACKUP -> {
+                                if (latestPerformanceBackupId.isNullOrBlank()) {
+                                    saveVoidCoreEntry(historyEntry + "\nNo saved VØID profile backup is available yet.")
+                                } else {
+                                    showVoidCore = false
+                                    showPerformanceRestore = true
+                                    saveVoidCoreEntry(historyEntry)
+                                }
+                            }
+                            else -> {
+                                saveVoidCoreEntry(
+                                    historyEntry + if (response.requiresConfirmation) "\nConfirmation required before this action." else ""
+                                )
+                            }
+                        }
                         voidCoreInput = ""
                     }
                 }, enabled = voidCoreInput.isNotBlank()) { Text("RUN") }
