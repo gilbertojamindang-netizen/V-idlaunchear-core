@@ -56,6 +56,7 @@ import com.movtery.zalithlauncher.game.plugin.driver.DriverPluginManager
 import com.movtery.zalithlauncher.game.renderer.ConfigurableRenderer
 import com.movtery.zalithlauncher.game.renderer.RendererInterface
 import com.movtery.zalithlauncher.game.renderer.Renderers
+import com.movtery.zalithlauncher.game.renderer.renderers.KopperZinkRenderer
 import com.movtery.zalithlauncher.game.version.installed.GraphicsApi
 import com.movtery.zalithlauncher.path.URL_CLOUD_DRIVE_DRIVER_PLUGINS
 import com.movtery.zalithlauncher.path.URL_CLOUD_RENDERER_PLUGINS
@@ -550,6 +551,10 @@ private fun VulkanSetupPanel(
                 }
             }
 
+            val zinkRendererAvailable = Renderers.getRenderers().any {
+                it.getUniqueIdentifier() == KopperZinkRenderer.getUniqueIdentifier()
+            }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -561,17 +566,28 @@ private fun VulkanSetupPanel(
                         AllSettings.graphicsApi.save(GraphicsApi.VULKAN)
                     }
                 ) {
-                    Text("USE VULKAN")
+                    Text("NATIVE VULKAN")
                 }
                 OutlinedButton(
                     modifier = Modifier.weight(1f),
-                    enabled = !isScanning,
+                    enabled = zinkRendererAvailable && supportedProfiles.isNotEmpty() && !isScanning,
                     onClick = {
+                        AllSettings.renderer.save(KopperZinkRenderer.getUniqueIdentifier())
                         AllSettings.graphicsApi.save(GraphicsApi.DEFAULT_OPENGL)
                     }
                 ) {
-                    Text("OPENGL FALLBACK")
+                    Text("KOPPER ZINK")
                 }
+            }
+
+            OutlinedButton(
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isScanning,
+                onClick = {
+                    AllSettings.graphicsApi.save(GraphicsApi.DEFAULT_OPENGL)
+                }
+            ) {
+                Text("OPENGL FALLBACK")
             }
 
             Text(
