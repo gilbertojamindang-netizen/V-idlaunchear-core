@@ -178,8 +178,12 @@ fun HomeGrid(
     var showVoidCore by remember { mutableStateOf(false) }
     var voidCoreInput by remember { mutableStateOf("") }
     var showPerformanceApply by remember { mutableStateOf(false) }
+    var showPerformanceRestore by remember { mutableStateOf(false) }
     var isApplyingPerformance by remember { mutableStateOf(false) }
     var performanceApplyMessage by remember { mutableStateOf<String?>(null) }
+    var latestPerformanceBackupId by remember(appContext) {
+        mutableStateOf(performancePreferences.getString("last_backup", null))
+    }
     val performanceScope = rememberCoroutineScope()
     val voidCorePreferences = remember(appContext) {
         appContext.getSharedPreferences("void_core", android.content.Context.MODE_PRIVATE)
@@ -550,6 +554,15 @@ fun HomeGrid(
                     ) {
                         Text(if (isApplyingPerformance) "APPLYING VØID PROFILE…" else "APPLY PROFILE TO CURRENT VERSION")
                     }
+                    if (!latestPerformanceBackupId.isNullOrBlank()) {
+                        TextButton(
+                            onClick = { showPerformanceRestore = true },
+                            enabled = !isApplyingPerformance,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("RESTORE LAST VØID BACKUP")
+                        }
+                    }
                     performanceApplyMessage?.let { message ->
                         Text(
                             text = message,
@@ -659,7 +672,11 @@ fun HomeGrid(
                             }
                             performanceApplyMessage = outcome.fold(
                                 onSuccess = { result ->
-                                    "Applied to ${result.minecraftVersion}: ${result.memoryMb} MB RAM • Render ${result.renderDistance} • Simulation ${result.simulationDistance} • Entity ${result.entityDistancePercent}%. Backup folder: .void-backups."
+                                    latestPerformanceBackupId = result.backupId
+                                    performancePreferences.edit()
+                                        .putString("last_backup", result.backupId)
+                                        .apply()
+                                    "Applied to ${result.minecraftVersion}: ${result.memoryMb} MB RAM • Render ${result.renderDistance} • Simulation ${result.simulationDistance} • Entity ${result.entityDistancePercent}%. Backup saved in .void-backups."
                                 },
                                 onFailure = { error ->
                                     "Profile was not applied: ${error.message ?: "unknown error"}"
@@ -672,6 +689,43 @@ fun HomeGrid(
             },
             dismissButton = {
                 TextButton(onClick = { showPerformanceApply = false }) { Text("CANCEL") }
+            }
+        )
+    }
+    if (showPerformanceRestore && !latestPerformanceBackupId.isNullOrBlank()) {
+        AlertDialog(
+            onDismissRequest = { showPerformanceRestore = false },
+            title = { Text("RESTORE LAST VØID BACKUP?") },
+            text = {
+                Text(
+                    "This will restore the saved options.txt and version.config files for the currently selected Minecraft installation. The current files are copied first as a safety snapshot. Continue?"
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val backupId = latestPerformanceBackupId
+                        showPerformanceRestore = false
+                        isApplyingPerformance = true
+                        performanceScope.launch {
+                            val outcome = runCatching {
+                                VoidPerformanceApplier.restore(backupId.orEmpty())
+                            }
+                            performanceApplyMessage = outcome.fold(
+                                onSuccess = { result ->
+                                    "Restored ${result.minecraftVersion}: ${result.restoredFiles.joinToString()}. A safety snapshot was saved in .void-backups."
+                                },
+                                onFailure = { error ->
+                                    "Restore was not completed: ${error.message ?: "unknown error"}"
+                                }
+                            )
+                            isApplyingPerformance = false
+                        }
+                    }
+                ) { Text("RESTORE") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPerformanceRestore = false }) { Text("CANCEL") }
             }
         )
     }
