@@ -6,6 +6,7 @@
  */
 package com.movtery.zalithlauncher.utils.device
 
+import android.content.Context
 import android.os.Build
 
 /**
@@ -38,7 +39,7 @@ object VoidCoreCommandRouter {
         val requiresConfirmation: Boolean = false
     )
 
-    fun route(rawCommand: String): Result {
+    fun route(rawCommand: String, context: Context? = null): Result {
         val command = rawCommand.trim()
             .lowercase()
             .replace(Regex("\\s+"), " ")
@@ -89,7 +90,8 @@ object VoidCoreCommandRouter {
             "device", "check device", "device info" -> Result(
                 Action.SHOW_DEVICE_SUMMARY,
                 "Device summary",
-                "${VoidPerformanceAdvisor.deviceSummary()} • Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT}). This is a basic device identification check, not a live GPU benchmark."
+                context?.let(VoidPerformanceAdvisor::deviceDiagnostics)
+                    ?: "${VoidPerformanceAdvisor.deviceSummary()} • Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT}). Basic device identification only; live memory details require an Android context."
             )
             "check minecraft", "minecraft" -> Result(
                 Action.REVIEW_MINECRAFT_INSTALLATION,
