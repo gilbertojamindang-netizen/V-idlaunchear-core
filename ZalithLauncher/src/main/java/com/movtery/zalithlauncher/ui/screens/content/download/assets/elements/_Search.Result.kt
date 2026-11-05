@@ -25,6 +25,7 @@ import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -238,7 +239,7 @@ fun ResultListLayout(
 private fun PageController(
     modifier: Modifier = Modifier,
     page: AssetsPage,
-    shape: Shape = MaterialTheme.shapes.large,
+    shape: Shape = RoundedCornerShape(19.dp),
     influencedByBackground: Boolean = true,
     color: Color = cardColor(influencedByBackground),
     contentColor: Color = onCardColor(),
@@ -459,6 +460,8 @@ fun ResultProjectLayout(
         shape = shape,
         color = color,
         contentColor = contentColor,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.20f)),
+        tonalElevation = 1.dp,
         onClick = onClick
     ) {
         Row(
