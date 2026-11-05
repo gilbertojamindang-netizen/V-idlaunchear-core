@@ -143,6 +143,28 @@ fun AboutInfoScreen(
             animatedItem { ctx ->
                 ChunkLayout(
                     modifier = Modifier.animated(ctx),
+                    title = "VøidLaunchear — Project Credits"
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            text = "Gilbert Jamindang",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text("Founder & Creator • Project Owner")
+                        Text("Lead Developer • UI/UX Designer")
+                        Text("Branding & Customization • Tester")
+                        Text(
+                            text = "VøidLaunchear is based on Zalith Launcher 2. Original developers, contributors, and their licenses remain credited below.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            animatedItem { ctx ->
+                ChunkLayout(
+                    modifier = Modifier.animated(ctx),
                     title = stringResource(R.string.about_acknowledgements_title)
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
