@@ -26,7 +26,6 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -63,9 +62,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -484,17 +483,34 @@ private fun ProductBanner(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Image(
-            modifier = Modifier.size(52.dp),
-            painter = painterResource(R.drawable.img_launcher),
-            contentDescription = null
-        )
+        Box(
+            modifier = Modifier
+                .size(52.dp)
+                .background(Color(0xFF10091B), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Ø",
+                color = Color(0xFFC084FC),
+                fontSize = 38.sp,
+                fontWeight = FontWeight.Black
+            )
+        }
 
-        Text(
-            text = BuildKeys.LAUNCHER_NAME,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
+        Column(
+            verticalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            Text(
+                text = BuildKeys.LAUNCHER_NAME,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Unofficial Modified Version",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.secondary
+            )
+        }
     }
 }
 
