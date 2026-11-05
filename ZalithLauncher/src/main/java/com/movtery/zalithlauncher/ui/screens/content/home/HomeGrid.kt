@@ -799,7 +799,6 @@ fun HomeGrid(
             confirmButton = {
                 Button(
                     onClick = {
-                        showCacheCleanupConfirmation = false
                         isCleaningCache = true
                         performanceScope.launch {
                             val outcome = runCatching { VoidCacheCleaner.cleanKnownCaches() }
