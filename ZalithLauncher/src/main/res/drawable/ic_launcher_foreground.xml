@@ -5,23 +5,36 @@
     android:viewportHeight="192">
     <path
         android:fillColor="#00000000"
-        android:strokeColor="#5D2A91"
-        android:strokeWidth="5"
-        android:strokeLineCap="round"
+        android:strokeColor="#64239C"
+        android:strokeWidth="7"
         android:pathData="M96,19 A77,77 0,1 1,95.9 19" />
     <path
-        android:fillColor="#B66CFF"
-        android:strokeColor="#E6CCFF"
+        android:fillColor="#00000000"
+        android:strokeColor="#A94DFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:pathData="M23,111 C49,151 139,149 169,78" />
+    <path
+        android:fillColor="#5B248C"
+        android:strokeColor="#B86CFF"
         android:strokeWidth="2.5"
         android:strokeLineJoin="round"
-        android:pathData="M39,49 L67,49 L96,118 L125,49 L153,49 L108,151 L84,151 Z" />
+        android:pathData="M48,58 L59,29 L79,45 L96,18 L113,45 L133,29 L144,58 L125,65 L67,65 Z" />
     <path
-        android:fillColor="#F3E8FF"
-        android:pathData="M96,69 L109,91 L96,113 L83,91 Z" />
+        android:fillColor="#00000000"
+        android:strokeColor="#F0E6FF"
+        android:strokeWidth="12"
+        android:pathData="M96,53 A48,48 0,1 1,95.9 53" />
     <path
-        android:fillColor="#7A35C2"
-        android:pathData="M96,80 L103,91 L96,102 L89,91 Z" />
+        android:fillColor="#DCC5FF"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:strokeLineJoin="round"
+        android:pathData="M57,143 L133,52 L150,38 L145,58 L69,150 L54,159 Z" />
     <path
-        android:fillColor="#D9B3FF"
-        android:pathData="M30,96 L42,96 L42,100 L30,100 Z M150,96 L162,96 L162,100 L150,100 Z" />
+        android:fillColor="#B65BFF"
+        android:pathData="M27,89 L39,89 L39,101 L27,101 Z M153,111 L165,111 L165,123 L153,123 Z M139,25 L147,25 L147,33 L139,33 Z M39,132 L47,132 L47,140 L39,140 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M74,165 L86,165 L86,169 L74,169 Z M106,165 L118,165 L118,169 L106,169 Z" />
 </vector>
