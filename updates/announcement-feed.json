@@ -9,18 +9,10 @@
   },
   "announcements": [
     {
-      "id": "v107-release",
+      "id": "v1-0-7-release",
       "title": "VøidLaunchear 1.0.7 is available",
-      "message": "The ARM64 build is published. This release was built successfully by GitHub Actions; device-level testing is still required. More launcher improvements are planned for the next update.",
+      "message": "Version 1.0.7 is the latest published ARM64 build. Download Lab improvements and the in-app announcement display are still being worked on for a future update.",
       "category": "UPDATE",
-      "publishedAt": "2026-11-06T00:00:00Z",
-      "active": true
-    },
-    {
-      "id": "welcome-void",
-      "title": "Welcome to VøidLaunchear",
-      "message": "Check this feed for launcher updates, service notices, and maintenance announcements.",
-      "category": "INFO",
       "publishedAt": "2026-11-06T00:00:00Z",
       "active": true
     }
