@@ -67,6 +67,11 @@ class BatchDownloader(
      */
     var onFailureFilter: ((DownloadRequest, Throwable) -> Boolean)? = null
 
+    init {
+        require(maxConnections > 0) { "maxConnections must be greater than 0" }
+        require(retryRounds >= 0) { "retryRounds must not be negative" }
+    }
+
     private val files = Semaphore(maxConnections)
 
     /** 连续永久失败计数，任何文件成功即清零；与零成功条件共同判定系统性故障 */
