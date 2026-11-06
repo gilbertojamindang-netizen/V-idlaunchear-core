@@ -140,6 +140,7 @@ import kotlinx.coroutines.withContext
 import org.apache.commons.io.FileUtils
 import java.io.File
 import java.util.Date
+import kotlin.coroutines.coroutineContext
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -236,7 +237,9 @@ private class SavesManageViewModel(
             } catch (th: Exception) {
                 Logger.error(TAG, "Failed to refresh the world save list.", th)
             } finally {
-                savesState = LoadingState.None
+                if (job === coroutineContext[Job]) {
+                    savesState = LoadingState.None
+                }
             }
         }
     }
