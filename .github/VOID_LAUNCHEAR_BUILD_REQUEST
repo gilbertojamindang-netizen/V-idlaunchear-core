@@ -20,3 +20,6 @@ Changes: Download hub navigation fix; remove walking Steve from launcher home; a
 1.0.10 rebuild after fixing missing Material Icons dependency: 2026-11-06
 
 In-app updater flow: DownloadManager APK transfer, progress/error display, and explicit Android package-installer handoff. Rebuild requested 2026-11-06.
+
+VøidLaunchear 1.0.10 rebuild request: 2026-11-06
+Fix: replace unresolved Icons reference in DownloadScreen back button with Compose Text arrow.
