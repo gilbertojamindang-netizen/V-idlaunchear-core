@@ -18,3 +18,5 @@ VøidLaunchear 1.0.10 test build request: 2026-11-06
 Changes: Download hub navigation fix; remove walking Steve from launcher home; add 1.0.10 update announcement feed and version metadata.
 
 1.0.10 rebuild after fixing missing Material Icons dependency: 2026-11-06
+
+In-app updater flow: DownloadManager APK transfer, progress/error display, and explicit Android package-installer handoff. Rebuild requested 2026-11-06.
