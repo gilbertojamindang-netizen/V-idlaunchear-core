@@ -114,6 +114,8 @@ class LaunchGameViewModel : ViewModel() {
         version: Version,
         saveName: String
     ) {
+        // Do not turn an empty/missing world target into a normal game launch.
+        if (saveName.isBlank()) return
         if (launchGameOperation.value == LaunchGameOperation.None && _launchFlow.value == null) {
             updateOperation(
                 LaunchGameOperation.TryLaunch(
@@ -141,11 +143,14 @@ class LaunchGameViewModel : ViewModel() {
         version: Version,
         address: String
     ) {
+        // Avoid silently starting the game without a server target when the
+        // saved address is empty or consists only of whitespace.
+        if (address.isBlank()) return
         if (launchGameOperation.value == LaunchGameOperation.None && _launchFlow.value == null) {
             updateOperation(
                 LaunchGameOperation.TryLaunch(
                     version = version,
-                    quickPlay = QuickPlay.Server(address),
+                    quickPlay = QuickPlay.Server(address.trim()),
                 )
             )
         }
