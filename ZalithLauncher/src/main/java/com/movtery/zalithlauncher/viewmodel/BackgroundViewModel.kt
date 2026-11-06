@@ -173,13 +173,51 @@ class BackgroundViewModel: ViewModel() {
 
     suspend fun import(context: Context, result: Uri) {
         withContext(Dispatchers.IO) {
-            FileUtils.deleteQuietly(backgroundFile)
-            context.copyLocalFile(result, backgroundFile)
-            if (!backgroundFile.isImageFile() && !backgroundFile.isVideoFile()) {
-                //不是媒体类文件
-                FileUtils.deleteQuietly(backgroundFile)
-                error("The selected file is not an image or a video!")
+            // Copy and validate the replacement before touching the active background.
+            // A failed/unsupported import must leave the current background intact.
+            val parent = backgroundFile.parentFile
+                ?: error("Unable to locate the launcher background directory.")
+            if (!parent.exists() && !parent.mkdirs()) {
+                error("Unable to create the launcher background directory.")
             }
+
+            val stagedFile = File.createTempFile(
+                "launcher-background-",
+                ".import",
+                parent
+            )
+
+            try {
+                context.copyLocalFile(result, stagedFile)
+                if (!stagedFile.isImageFile() && !stagedFile.isVideoFile()) {
+                    error("The selected file is not an image or a video!")
+                }
+
+                // Keep the old file as a rollback copy until the staged file is installed.
+                val backupFile = File(parent, "${backgroundFile.name}.import-backup")
+                FileUtils.deleteQuietly(backupFile)
+                val hadPreviousBackground = backgroundFile.exists()
+                if (hadPreviousBackground && !backgroundFile.renameTo(backupFile)) {
+                    error("Unable to preserve the current launcher background.")
+                }
+
+                try {
+                    if (!stagedFile.renameTo(backgroundFile)) {
+                        stagedFile.copyTo(backgroundFile, overwrite = true)
+                        stagedFile.delete()
+                    }
+                    FileUtils.deleteQuietly(backupFile)
+                } catch (failure: Throwable) {
+                    FileUtils.deleteQuietly(backgroundFile)
+                    if (hadPreviousBackground && backupFile.exists()) {
+                        backupFile.renameTo(backgroundFile)
+                    }
+                    throw failure
+                }
+            } finally {
+                FileUtils.deleteQuietly(stagedFile)
+            }
+
             updateState()
         }
     }
