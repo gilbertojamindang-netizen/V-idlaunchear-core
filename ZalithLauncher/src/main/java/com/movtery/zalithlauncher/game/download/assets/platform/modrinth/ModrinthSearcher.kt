@@ -100,7 +100,7 @@ class ModrinthSearcher(
         var offset = 0
         var page = 1
 
-        while (true) {
+        while (page <= MODRINTH_MAX_VERSION_PAGES + 1) {
             val versions = getVersionsChunk(
                 projectID = projectID,
                 pageSize = pageSize,
@@ -119,7 +119,7 @@ class ModrinthSearcher(
             }
 
             if (versions.size < pageSize || addedCount == 0) break
-            check(page < MODRINTH_MAX_VERSION_PAGES) {
+            check(page <= MODRINTH_MAX_VERSION_PAGES) {
                 "Modrinth returned more than $MODRINTH_MAX_VERSION_PAGES full version pages; stopping to avoid an unbounded request loop."
             }
 
