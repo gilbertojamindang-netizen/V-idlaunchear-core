@@ -78,7 +78,10 @@ object PhysicalMouseChecker {
  */
 private fun Int.isMouseId(): Boolean {
     return InputDevice.getDevice(this)?.let { device ->
-        device.sources and InputDevice.SOURCE_MOUSE == InputDevice.SOURCE_MOUSE
+        // Virtual mouse devices can be exposed by Android/remote-input layers;
+        // do not treat them as a physically attached mouse.
+        !device.isVirtual &&
+            device.sources and InputDevice.SOURCE_MOUSE == InputDevice.SOURCE_MOUSE
     } ?: false
 }
 
