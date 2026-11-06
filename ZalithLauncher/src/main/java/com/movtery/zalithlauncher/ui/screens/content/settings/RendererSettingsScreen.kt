@@ -99,6 +99,7 @@ import com.movtery.zalithlauncher.utils.getRealScreenSize
 import com.movtery.zalithlauncher.utils.isAdrenoGPU
 import com.movtery.zalithlauncher.viewmodel.EventViewModel
 import com.movtery.zalithlauncher.viewmodel.sendDLPlugin
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -527,7 +528,7 @@ private fun VulkanSetupPanel(
                         } else {
                             File(PathManager.DIR_CACHE, "vulkan_setup_temp")
                         }
-                        val result = runCatching {
+                        val result = try {
                             withContext(Dispatchers.IO) {
                                 VulkanChecker.checkCapabilities(
                                     driverPath = null,
@@ -535,7 +536,12 @@ private fun VulkanSetupPanel(
                                     cacheDir = tempDir?.absolutePath
                                 )
                             }
-                        }.getOrNull()
+                        } catch (cancelled: CancellationException) {
+                            // Never turn coroutine cancellation into a failed compatibility scan.
+                            throw cancelled
+                        } catch (_: Exception) {
+                            null
+                        }
                         if (AllSettings.vulkanDriver.state == driverIdForScan) {
                             capabilities = result
                             hasScanned = true
