@@ -571,6 +571,7 @@ class MainActivity : BaseAppCompatActivity() {
     override fun onDestroy() {
         fmEventRegistrar?.stop()
         fmEventRegistrar = null
+        PhysicalMouseChecker.releaseChecker(this)
         super.onDestroy()
     }
 
