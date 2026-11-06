@@ -23,6 +23,7 @@ import android.content.Context
 import android.hardware.input.InputManager
 import android.view.InputDevice
 import com.movtery.zalithlauncher.utils.logging.Logger
+import java.lang.ref.WeakReference
 
 private const val TAG = "PhysicalMouseChecker"
 
@@ -36,6 +37,7 @@ object PhysicalMouseChecker {
 
     private var registeredInputManager: InputManager? = null
     private var registeredListener: InputManager.InputDeviceListener? = null
+    private var registeredActivity = WeakReference<Activity>(null)
 
     @Synchronized
     fun initChecker(activity: Activity) {
@@ -67,9 +69,31 @@ object PhysicalMouseChecker {
 
         registeredInputManager = inputManager
         registeredListener = listener
+        registeredActivity = WeakReference(activity)
         refreshConnectionState()
         inputManager.registerInputDeviceListener(listener, null)
         Logger.info(TAG, "Input device listener registered.")
+    }
+
+    /**
+     * Release only the listener owned by this Activity. The identity check
+     * prevents an older Activity being destroyed during recreation from
+     * unregistering the newer Activity's listener.
+     */
+    @Synchronized
+    fun releaseChecker(activity: Activity) {
+        if (registeredActivity.get() !== activity) return
+
+        val manager = registeredInputManager
+        val listener = registeredListener
+        if (manager != null && listener != null) {
+            manager.unregisterInputDeviceListener(listener)
+        }
+        registeredInputManager = null
+        registeredListener = null
+        registeredActivity.clear()
+        physicalMouseConnected = false
+        Logger.info(TAG, "Input device listener released.")
     }
 }
 
