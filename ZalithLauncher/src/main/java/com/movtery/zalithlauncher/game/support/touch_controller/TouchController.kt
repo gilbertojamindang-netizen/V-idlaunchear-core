@@ -588,8 +588,12 @@ private class TouchControllerInputConnection(
 
     override fun setSelection(start: Int, end: Int): Boolean {
         updateState { currentState ->
+            val safeStart = start.coerceIn(0, currentState.text.length)
+            val safeEnd = end.coerceIn(0, currentState.text.length)
+            val rangeStart = minOf(safeStart, safeEnd)
+            val rangeEnd = maxOf(safeStart, safeEnd)
             currentState.copy(
-                selection = TextRange(start, end - start)
+                selection = TextRange(rangeStart, rangeEnd - rangeStart)
             )
         }
         return true
