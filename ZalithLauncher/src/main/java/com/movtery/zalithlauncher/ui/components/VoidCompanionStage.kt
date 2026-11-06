@@ -120,6 +120,7 @@ fun VoidCompanionStage(
                         isDragging = false
                     },
                     onDragCancel = {
+                        wasLifted = false
                         dragX = 0f
                         dragY = 0f
                         isDragging = false
