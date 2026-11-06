@@ -55,6 +55,8 @@ because their side effects may not be idempotent. Provider failover remains
 available where the platform search layer already uses configured mirrors;
 this change does not promise that every provider supports mirror fallback.
 
-Unit coverage for retry success, non-retryable errors, and cancellation was
-added in commit `7efdba33ba8f326e1a1d0a0b240761bf491b1247`. Tests have not yet
-been executed.
+Unit coverage for retry success, non-retryable errors, cancellation, and
+overflow-safe exponential delay calculation was added/extended in commits
+`7efdba33ba8f326e1a1d0a0b240761bf491b1247` and
+`f6f4fe88db025bb045ceee0a66c73228258f8f20`. Tests have not yet been
+executed.
