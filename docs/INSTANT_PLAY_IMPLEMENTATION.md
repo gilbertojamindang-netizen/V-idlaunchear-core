@@ -68,3 +68,16 @@ Make the path from tapping **Play** to entering Minecraft as direct as the Minec
 ## Verification status
 
 Source inspection only. No Gradle build, APK build, or device test was run. Existing-world/server Quick Play argument construction is present in source, but feature-level behavior is not yet verified. New-world automatic entry remains outstanding.
+
+## New-world source-tree audit (2026-11-06)
+
+A repository-wide Kotlin/Java source-tree scan found the save metadata/parser
+and existing-save manager screens, but no launcher-owned Create New World
+screen or world-creation form to connect to Quick Play. The actual Create New
+World interface is therefore currently the Minecraft runtime's own UI, not a
+launcher screen exposed by this repository. A safe one-tap creation handoff
+cannot be implemented by adding an unverified CLI flag or fabricating a
+`level.dat`; doing so risks corrupt or incompatible worlds. Keep the native
+Minecraft creation flow until a supported, version-aware integration exists.
+This is an identified product gap, not a completed Instant Create World
+feature.
