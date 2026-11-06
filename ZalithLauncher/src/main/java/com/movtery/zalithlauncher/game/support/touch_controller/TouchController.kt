@@ -609,12 +609,17 @@ private class TouchControllerInputModifierNode(
             inputStateChannel.trySend(textInputState)
         }
 
-        private fun FloatRect.toIntRect() = IntRect(
-            left = (this.left * screenSize.width).toInt(),
-            top = (this.top * screenSize.height).toInt(),
-            right = ((this.left + this.width) * screenSize.width).toInt(),
-            bottom = ((this.top + this.height) * screenSize.height).toInt(),
-        )
+        private fun FloatRect.toIntRect(): IntRect {
+            // Ignore invalid/zero-sized layouts until the game surface is measured.
+            val width = screenSize.width.coerceAtLeast(1)
+            val height = screenSize.height.coerceAtLeast(1)
+            return IntRect(
+                left = (this.left * width).toInt().coerceIn(0, width),
+                top = (this.top * height).toInt().coerceIn(0, height),
+                right = ((this.left + this.width) * width).toInt().coerceIn(0, width),
+                bottom = ((this.top + this.height) * height).toInt().coerceIn(0, height),
+            )
+        }
 
         override fun updateCursor(cursorRect: FloatRect?) {
             val rect = cursorRect?.toIntRect()
@@ -712,8 +717,12 @@ fun Modifier.touchControllerTouchModifier(
         var nextPointerId = 1
 
         fun PointerInputChange.toProxyOffset(): Pair<Float, Float> {
-            val normalizedX = position.x / screenSize.width
-            val normalizedY = position.y / screenSize.height
+            // A surface can briefly report 0x0 during startup or rotation.
+            // Clamp normalized coordinates to keep the proxy input valid.
+            val width = screenSize.width.coerceAtLeast(1).toFloat()
+            val height = screenSize.height.coerceAtLeast(1).toFloat()
+            val normalizedX = (position.x / width).coerceIn(0f, 1f)
+            val normalizedY = (position.y / height).coerceIn(0f, 1f)
             return Pair(normalizedX, normalizedY)
         }
 
