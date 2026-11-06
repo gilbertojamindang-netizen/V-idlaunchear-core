@@ -3,17 +3,17 @@
   "app": {
     "id": "com.movtery.zalithlauncher.v2",
     "name": "VøidLaunchear",
-    "latestVersion": "1.0.7",
-    "releaseTag": "v1.0.7",
+    "latestVersion": "1.0.8",
+    "releaseTag": "v1.0.8",
     "releasePage": "https://github.com/gilbertojamindang-netizen/V-idlaunchear-core/releases"
   },
   "announcements": [
     {
-      "id": "v1-0-7-release",
-      "title": "VøidLaunchear 1.0.7 is available",
-      "message": "Version 1.0.7 is the latest published ARM64 build. Download Lab improvements and the in-app announcement display are still being worked on for a future update.",
+      "id": "v1-0-8-release",
+      "title": "VøidLaunchear 1.0.8 is available",
+      "message": "This release includes launcher stability improvements, safer Minecraft version-manifest caching, download handling fixes, and input lifecycle improvements. Open the release page for the APK and full release details.",
       "category": "UPDATE",
-      "publishedAt": "2026-11-06T00:00:00Z",
+      "publishedAt": "2026-11-05T23:10:41Z",
       "active": true
     }
   ],
