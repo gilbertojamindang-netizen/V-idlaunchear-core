@@ -107,6 +107,9 @@ object VoidWorldBackupManager {
 
         val saves = savesDirectory()
         val destination = safeChild(saves, metadata.worldName)
+        require(!destination.exists() || destination.isDirectory) {
+            "The target world path exists but is not a folder. Nothing was changed."
+        }
         val safetyBackup = if (destination.isDirectory) {
             createBackupInternal(destination)
         } else {
