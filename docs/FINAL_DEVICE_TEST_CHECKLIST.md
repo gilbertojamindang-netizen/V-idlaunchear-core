@@ -21,9 +21,9 @@ This checklist is for the next APK test pass. It deliberately separates implemen
 5. Server Quick Play: test hostname, hostname with port, IPv4 with port, IPv6 if supported, and malformed/blank input. Confirm malformed input does not silently become an ordinary launch.
 6. New World: no launcher-owned Create New World screen exists in the current Kotlin/Java source tree. Use Minecraft's native Create New World screen for now. Automatic launcher creation-to-entry remains an open feature gap; do not add undocumented command-line flags or fabricate world metadata.
 7. Mods: search and install one Modrinth mod and one CurseForge mod; test no results, pagination, cancellation, rate limiting, and retry after network restoration. JSON GET calls now retry transient I/O/DNS, Ktor request timeouts, HTTP 408, 429 and 5xx with bounded backoff; POST is not automatically retried. Modrinth and CurseForge pagination also have upper safety bounds. Retry unit tests were added but not executed.
-8. Renderer: test OpenGL on a known-compatible device. Test Vulkan only when the device/driver capability check reports support; confirm unsupported Vulkan falls back safely.
+8. Renderer: test OpenGL on a known-compatible device. Run the Vulkan scan for the currently selected driver and change drivers before scanning again; stale results must not enable Vulkan for a different driver. Native Minecraft Vulkan is only for versions with the native backend (26.2+ in the current profile); for 1.21.11 use OpenGL or Kopper Zink (OpenGL over Vulkan), subject to driver compatibility.
 9. Low-end profile: apply the low-memory profile, launch, check memory allocation and render/simulation distances, then restore balanced settings.
-10. Companion: drag, release after lifting, observe walk/sit/idle and roaming. Current ragdoll is an animation trigger, not a full rigid-body physics simulation.
+10. Companion: drag, release after lifting, confirm the model stays at the release point while PetLib plays the fall animation, then returns to the home position. Observe walk/sit/idle and roaming. Current ragdoll is an animation trigger, not a full rigid-body physics simulation.
 11. Controls: verify touch layout editing, on-screen controls, keyboard, mouse, rotation, and landscape orientation in an actual game session.
 12. Branding: verify app label and navigation title both read VøidLaunchear, launcher icon, splash/loading collision animation, credits, APK filename Vøidlaunchear, and version label on a clean install and upgrade install.
 
@@ -44,3 +44,5 @@ Do not dispatch an APK build until the feature work is reviewed and the project 
 - `350102e8e88c8e603969cc08ba1d5343ea362e81` through `a8e412bf47c4eac1f8ad29730c70dbef5a77c706` — world backup metadata, archive-entry, and restore-target hardening.
 - `dd0bf9d2a43e204e10843e6e0bb486f3002aa776` — VøidLaunchear navigation-title branding.
 - `dc8f9aad0a467b0b633c23c68c371715088d5820` and `e6cab2bfc22ae0962cfb516e1c586ddd4a88e7dd` — Vøidlaunchear APK artifact filename and labels.
+- `535a0d31b56afc4a08eecdc1b5c262a254a2484c` — discard stale Vulkan compatibility results after driver changes.
+- `02065066f6934d79fde1c6e550b0e4096680b2bc` — retain companion drop position during the ragdoll animation.
