@@ -135,9 +135,16 @@ fun VoidCompanionStage(
                         isDragging = false
                     },
                     onDragCancel = {
+                        // A gesture can be cancelled by navigation or pointer loss.
+                        // Treat an already-lifted companion like a normal airborne release
+                        // so it does not snap back without playing its fall animation.
+                        if (wasLifted || dragY < -12f) {
+                            ragdollTrigger++
+                        } else {
+                            dragX = 0f
+                            dragY = 0f
+                        }
                         wasLifted = false
-                        dragX = 0f
-                        dragY = 0f
                         isDragging = false
                     },
                     onDrag = { change, amount ->
