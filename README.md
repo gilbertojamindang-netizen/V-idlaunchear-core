@@ -1,8 +1,8 @@
 # VøidLaunchear
 
 <p align="center">
-  <strong>A customized Android launcher experience for Minecraft: Java Edition.</strong><br>
-  Built around a clean interface, flexible controls, and configurable gameplay options.
+  <strong>An independent Android launcher project for Minecraft: Java Edition.</strong><br>
+  A custom identity, interface, and configurable gameplay experience.
 </p>
 
 <p align="center">
@@ -13,17 +13,17 @@
 
 ## About
 
-**VøidLaunchear** is an Android Minecraft: Java Edition launcher project focused on giving players a distinctive launcher experience with its own identity, interface, and configuration options.
+**VøidLaunchear** is an Android launcher project focused on a distinctive design, flexible controls, and configurable Minecraft: Java Edition gameplay.
 
-This repository contains the project source code. Features and compatibility may change as development continues.
+This repository contains the project's source code. Features and compatibility may change as development continues.
 
 ## Project goals
 
-- A custom VøidLaunchear home screen, branding, and startup experience.
+- Custom VøidLaunchear home screen, branding, and startup experience.
 - Minecraft version selection and game-file management.
 - Mod discovery and download integrations.
 - Configurable keyboard, mouse, and touch controls.
-- Graphics and renderer options, including Vulkan-related compatibility where supported by the device.
+- Graphics and renderer options, including Vulkan-related compatibility where supported.
 - Runtime and game configuration management.
 - Performance settings for a range of Android devices.
 
@@ -33,8 +33,8 @@ This repository contains the project source code. Features and compatibility may
 
 - **Platform:** Android
 - **Game:** Minecraft: Java Edition
-- **Version range targeted by the project:** 1.18.2 and newer, subject to launcher and runtime compatibility.
-- **Graphics:** Renderer support depends on the selected renderer, Android device, drivers, and GPU.
+- **Target version range:** 1.18.2 and newer, subject to launcher and runtime compatibility.
+- **Graphics:** Renderer support depends on the selected renderer, device, drivers, and GPU.
 
 Minecraft: Java Edition is distributed by Mojang/Microsoft. This project is not an official Minecraft product and is not affiliated with or endorsed by Mojang or Microsoft.
 
@@ -47,23 +47,22 @@ The project uses Gradle and Kotlin/Android tooling.
 3. Allow Gradle to sync and download the required dependencies.
 4. Build the Android application using the project's Gradle wrapper and configured build tasks.
 
-Build requirements and available variants may change as the project evolves. Check the Gradle configuration and GitHub Actions workflows for the current setup.
+Build requirements and available variants may change. Check the Gradle configuration and GitHub Actions workflows for the current setup.
 
-## Credits and acknowledgements
+## Credits
 
 - **Project customization and direction:** Gilbert Jamindang
-- **Original launcher foundation and upstream contributors:** Zalith Launcher 2 contributors
-- **Libraries and third-party components:** Their respective authors and maintainers
+- **Open-source components and libraries:** Their respective authors and maintainers.
 
-VøidLaunchear builds on existing open-source work. Original notices, licenses, and required attributions must remain with the components they cover. See [LICENSE](LICENSE) and the relevant component directories for details.
+This project incorporates existing open-source components. Their original copyright notices, license texts, and required attributions are retained in the relevant source files and component directories.
 
 ## Disclaimer
 
-This is an independent community project. Minecraft, Mojang, and Microsoft names and marks belong to their respective owners. You are responsible for complying with the terms and licenses of Minecraft and any third-party software you use.
+This is an independent community project. Minecraft, Mojang, and Microsoft names and marks belong to their respective owners. You are responsible for complying with the terms and licenses that apply to Minecraft and third-party software.
 
 ---
 
 <p align="center">
   <strong>VøidLaunchear</strong><br>
-  Made to give the launcher its own identity.
+  Built with its own identity.
 </p>
