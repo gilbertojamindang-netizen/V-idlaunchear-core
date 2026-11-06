@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -185,53 +186,53 @@ private fun fetchAnnouncement(context: Context): LauncherAnnouncement? {
 
 private fun parseAnnouncement(body: String): LauncherAnnouncement? {
     return try {
-    if (body.toByteArray(Charsets.UTF_8).size > MAX_FEED_BYTES) return null
-    val root = JSONObject(body)
-    val app = root.optJSONObject("app") ?: return null
-    if (app.optString("name") != "VøidLaunchear") return null
+        if (body.toByteArray(Charsets.UTF_8).size > MAX_FEED_BYTES) return null
+        val root = JSONObject(body)
+        val app = root.optJSONObject("app") ?: return null
+        if (app.optString("name") != "VøidLaunchear") return null
 
-    val releaseUri = Uri.parse(app.optString("releasePage", RELEASES_URL))
-    val releasePage = if (
-        releaseUri.scheme == "https" && releaseUri.host == "github.com"
-    ) releaseUri.toString() else RELEASES_URL
-    val latestVersion = app.optString("latestVersion").take(32)
-    val maintenance = root.optJSONObject("maintenance")
+        val releaseUri = Uri.parse(app.optString("releasePage", RELEASES_URL))
+        val releasePage = if (
+            releaseUri.scheme == "https" && releaseUri.host == "github.com"
+        ) releaseUri.toString() else RELEASES_URL
+        val latestVersion = app.optString("latestVersion").take(32)
+        val maintenance = root.optJSONObject("maintenance")
 
-    if (maintenance?.optBoolean("active", false) == true) {
-        val title = maintenance.optString("title").ifBlank { "Scheduled Maintenance" }
-        val message = maintenance.optString("message").take(1200)
-        if (message.isNotBlank()) {
-            return LauncherAnnouncement(
-                id = "maintenance-${title.hashCode()}-${message.hashCode()}",
-                title = title.take(120),
-                message = message,
-                category = "MAINTENANCE",
-                releasePage = releasePage,
-                latestVersion = latestVersion
-            )
+        if (maintenance?.optBoolean("active", false) == true) {
+            val title = maintenance.optString("title").ifBlank { "Scheduled Maintenance" }
+            val message = maintenance.optString("message").take(1200)
+            if (message.isNotBlank()) {
+                return LauncherAnnouncement(
+                    id = "maintenance-${title.hashCode()}-${message.hashCode()}",
+                    title = title.take(120),
+                    message = message,
+                    category = "MAINTENANCE",
+                    releasePage = releasePage,
+                    latestVersion = latestVersion
+                )
+            }
         }
-    }
 
-    val items = root.optJSONArray("announcements") ?: return null
-    (0 until items.length())
-        .mapNotNull { items.optJSONObject(it) }
-        .filter { it.optBoolean("active", false) }
-        .maxByOrNull { it.optString("publishedAt") }
-        ?.let { item ->
-            val message = item.optString("message").take(1200)
-            if (message.isBlank()) return@let null
-            LauncherAnnouncement(
-                id = item.optString("id")
-                    .takeIf(String::isNotBlank)
-                    ?.take(100)
-                    ?: "announcement-${item.optString("publishedAt").hashCode()}",
-                title = item.optString("title").ifBlank { "VøidLaunchear Update" }.take(120),
-                message = message,
-                category = item.optString("category").ifBlank { "UPDATE" }.take(32),
-                releasePage = releasePage,
-                latestVersion = latestVersion
-            )
-        }
+        val items = root.optJSONArray("announcements") ?: return null
+        (0 until items.length())
+            .mapNotNull { items.optJSONObject(it) }
+            .filter { it.optBoolean("active", false) }
+            .maxByOrNull { it.optString("publishedAt") }
+            ?.let { item ->
+                val message = item.optString("message").take(1200)
+                if (message.isBlank()) return@let null
+                LauncherAnnouncement(
+                    id = item.optString("id")
+                        .takeIf(String::isNotBlank)
+                        ?.take(100)
+                        ?: "announcement-${item.optString("publishedAt").hashCode()}",
+                    title = item.optString("title").ifBlank { "VøidLaunchear Update" }.take(120),
+                    message = message,
+                    category = item.optString("category").ifBlank { "UPDATE" }.take(32),
+                    releasePage = releasePage,
+                    latestVersion = latestVersion
+                )
+            }
     } catch (_: Exception) {
         null
     }
