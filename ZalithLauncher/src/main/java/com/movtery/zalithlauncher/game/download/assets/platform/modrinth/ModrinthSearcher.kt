@@ -32,6 +32,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.io.File
 
+private const val MODRINTH_VERSION_PAGE_SIZE = 100
+private const val MODRINTH_MAX_VERSION_PAGES = 100
+
 class ModrinthSearcher(
     val api: String = MODRINTH_API,
     source: String = "Official Modrinth"
@@ -91,7 +94,7 @@ class ModrinthSearcher(
         // Modrinth's versions endpoint is paginated. Requesting it without
         // limit/offset can silently return only the default first page.
         // Fetch bounded pages so projects with many releases are complete.
-        val pageSize = 100
+        val pageSize = MODRINTH_VERSION_PAGE_SIZE
         val allVersions = mutableListOf<ModrinthVersion>()
         val seenVersionIds = HashSet<String>()
         var offset = 0
@@ -116,6 +119,9 @@ class ModrinthSearcher(
             }
 
             if (versions.size < pageSize || addedCount == 0) break
+            check(page < MODRINTH_MAX_VERSION_PAGES) {
+                "Modrinth returned more than $MODRINTH_MAX_VERSION_PAGES full version pages; stopping to avoid an unbounded request loop."
+            }
 
             // Advance by the number returned by the API, not by the number
             // retained after de-duplication, so normal pagination stays aligned.
