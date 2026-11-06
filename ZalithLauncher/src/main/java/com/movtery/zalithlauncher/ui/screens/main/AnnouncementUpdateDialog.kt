@@ -28,6 +28,7 @@ import com.movtery.zalithlauncher.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -150,8 +151,21 @@ private fun fetchAnnouncement(context: Context): LauncherAnnouncement? {
             setRequestProperty("User-Agent", "VoidLaunchear-Android/${BuildConfig.VERSION_NAME}")
         }
         if (connection.responseCode !in 200..299) null
-        else connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
-            .takeIf { it.toByteArray(Charsets.UTF_8).size <= MAX_FEED_BYTES }
+        else {
+            val output = ByteArrayOutputStream()
+            val buffer = ByteArray(4096)
+            connection.inputStream.use { input ->
+                while (true) {
+                    val count = input.read(buffer)
+                    if (count < 0) break
+                    if (output.size() + count > MAX_FEED_BYTES) {
+                        throw IllegalStateException("Announcement feed exceeds size limit")
+                    }
+                    output.write(buffer, 0, count)
+                }
+            }
+            output.toString(Charsets.UTF_8.name())
+        }
     } catch (_: Exception) {
         null
     } finally {
