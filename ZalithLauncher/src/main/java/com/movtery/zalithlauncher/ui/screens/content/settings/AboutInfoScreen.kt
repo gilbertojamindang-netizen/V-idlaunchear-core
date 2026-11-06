@@ -131,9 +131,9 @@ fun AboutInfoScreen(
                             text = "Gilbert Jamindang",
                             style = MaterialTheme.typography.titleMedium
                         )
-                        Text("Founder & Creator • Project Owner")
-                        Text("Lead Developer • UI/UX Designer")
-                        Text("Branding & Customization • Tester • Project Director")
+                        Text("Credit • Project Creator")
+                        Text("Code and Assistance • Project Development")
+                        Text("Tester • Quality Checks")
                         Text(
                             text = "Built on Zalith Launcher 2. Upstream copyright notices and required open-source license terms are preserved in the source and license files.",
                             style = MaterialTheme.typography.bodySmall,
