@@ -52,7 +52,12 @@ class DownloadStats {
         // Failed/restarted download attempts report negative deltas when their
         // temporary bytes are discarded. Keep the public progress counter valid.
         downloaded.updateAndGet { current ->
-            (current + count).coerceAtLeast(0L)
+            when {
+                count > 0L && current > Long.MAX_VALUE - count -> Long.MAX_VALUE
+                count == Long.MIN_VALUE -> 0L
+                count < 0L && current < -count -> 0L
+                else -> (current + count).coerceAtLeast(0L)
+            }
         }
     }
 
