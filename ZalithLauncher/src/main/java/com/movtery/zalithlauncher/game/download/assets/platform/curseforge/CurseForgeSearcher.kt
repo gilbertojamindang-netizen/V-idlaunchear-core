@@ -175,6 +175,8 @@ private data class CurseForgeFingerprintsRequest(
     val fingerprints: List<Long>
 )
 
+private const val CURSEFORGE_MAX_VERSION_PAGES = 1_000
+
 /**
  * 持续分页获取项目的所有版本文件，直到全部加载完成
  * @param pageSize 每页请求数量
@@ -210,6 +212,9 @@ private suspend fun <E, T> getAllVersions(
         val semaphore = Semaphore(maxConcurrent)
 
         while (!reachedEnd) {
+            check(startPage < CURSEFORGE_MAX_VERSION_PAGES) {
+                "CurseForge returned more than $CURSEFORGE_MAX_VERSION_PAGES pages; stopping to avoid an unbounded request loop."
+            }
             //创建当前区间的任务列表
             val jobs = (0 until chunkSize).map { offset ->
                 val pageIndex = startPage + offset
