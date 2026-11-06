@@ -4,8 +4,12 @@
  */
 package com.movtery.zalithlauncher.ui.screens.main
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -20,9 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import com.movtery.zalithlauncher.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -34,6 +35,10 @@ private const val ANNOUNCEMENT_FEED_URL =
     "https://raw.githubusercontent.com/gilbertojamindang-netizen/V-idlaunchear-core/main/updates/announcement-feed.json"
 private const val ANNOUNCEMENT_PREFS = "void_announcement_state"
 private const val LAST_SHOWN_ID = "last_shown_announcement"
+private const val CACHED_FEED = "cached_announcement_feed"
+private const val MAX_FEED_BYTES = 64 * 1024
+private const val RELEASES_URL =
+    "https://github.com/gilbertojamindang-netizen/V-idlaunchear-core/releases"
 
 private data class LauncherAnnouncement(
     val id: String,
@@ -41,8 +46,7 @@ private data class LauncherAnnouncement(
     val message: String,
     val category: String,
     val releasePage: String,
-    val latestVersion: String,
-    val maintenance: Boolean = false
+    val latestVersion: String
 )
 
 @Composable
@@ -52,9 +56,9 @@ internal fun AnnouncementUpdateDialog() {
     var dismissed by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        val result = withContext(Dispatchers.IO) { fetchAnnouncement() }
+        val result = withContext(Dispatchers.IO) { fetchAnnouncement(context) }
         if (result != null) {
-            val prefs = context.getSharedPreferences(ANNOUNCEMENT_PREFS, 0)
+            val prefs = context.getSharedPreferences(ANNOUNCEMENT_PREFS, Context.MODE_PRIVATE)
             if (prefs.getString(LAST_SHOWN_ID, null) != result.id) {
                 announcement = result
             }
@@ -66,7 +70,7 @@ internal fun AnnouncementUpdateDialog() {
         val isUpdateAvailable = isNewerVersion(item.latestVersion, BuildConfig.VERSION_NAME)
         AlertDialog(
             onDismissRequest = {
-                context.getSharedPreferences(ANNOUNCEMENT_PREFS, 0)
+                context.getSharedPreferences(ANNOUNCEMENT_PREFS, Context.MODE_PRIVATE)
                     .edit().putString(LAST_SHOWN_ID, item.id).apply()
                 dismissed = true
             },
@@ -104,7 +108,7 @@ internal fun AnnouncementUpdateDialog() {
                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             )
                         }
-                        context.getSharedPreferences(ANNOUNCEMENT_PREFS, 0)
+                        context.getSharedPreferences(ANNOUNCEMENT_PREFS, Context.MODE_PRIVATE)
                             .edit().putString(LAST_SHOWN_ID, item.id).apply()
                         dismissed = true
                     },
@@ -116,7 +120,7 @@ internal fun AnnouncementUpdateDialog() {
             dismissButton = {
                 OutlinedButton(
                     onClick = {
-                        context.getSharedPreferences(ANNOUNCEMENT_PREFS, 0)
+                        context.getSharedPreferences(ANNOUNCEMENT_PREFS, Context.MODE_PRIVATE)
                             .edit().putString(LAST_SHOWN_ID, item.id).apply()
                         dismissed = true
                     }
@@ -129,62 +133,98 @@ internal fun AnnouncementUpdateDialog() {
     }
 }
 
-private fun fetchAnnouncement(): LauncherAnnouncement? {
+/**
+ * Uses the newest feed when online and the last validated feed when offline.
+ * The cache is bounded so a malformed or unexpectedly large response is ignored.
+ */
+private fun fetchAnnouncement(context: Context): LauncherAnnouncement? {
+    val prefs = context.getSharedPreferences(ANNOUNCEMENT_PREFS, Context.MODE_PRIVATE)
     var connection: HttpURLConnection? = null
-    return try {
+    val fresh = try {
         connection = (URL(ANNOUNCEMENT_FEED_URL).openConnection() as HttpURLConnection).apply {
             requestMethod = "GET"
             connectTimeout = 8_000
             readTimeout = 8_000
+            instanceFollowRedirects = true
             setRequestProperty("Accept", "application/json")
             setRequestProperty("User-Agent", "VoidLaunchear-Android/${BuildConfig.VERSION_NAME}")
         }
-        if (connection.responseCode !in 200..299) return null
-        val body = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
-        val root = JSONObject(body)
-        val app = root.optJSONObject("app") ?: return null
-        if (app.optString("name") != "VøidLaunchear") return null
-        val releasePage = app.optString(
-            "releasePage",
-            "https://github.com/gilbertojamindang-netizen/V-idlaunchear-core/releases"
-        )
-        val latestVersion = app.optString("latestVersion")
-        val maintenance = root.optJSONObject("maintenance")
-        if (maintenance?.optBoolean("active", false) == true) {
-            return LauncherAnnouncement(
-                id = "maintenance-${maintenance.optString("title").hashCode()}",
-                title = maintenance.optString("title", "Scheduled Maintenance"),
-                message = maintenance.optString("message"),
-                category = "MAINTENANCE",
-                releasePage = releasePage,
-                latestVersion = latestVersion,
-                maintenance = true
-            )
-        }
-        val items = root.optJSONArray("announcements") ?: return null
-        (0 until items.length())
-            .mapNotNull { items.optJSONObject(it) }
-            .filter { it.optBoolean("active", false) }
-            .maxByOrNull { it.optString("publishedAt") }
-            ?.let {
-                LauncherAnnouncement(
-                    id = it.optString("id").takeIf(String::isNotBlank) ?: "announcement-${it.optString("publishedAt")}",
-                    title = it.optString("title", "VøidLaunchear Update"),
-                    message = it.optString("message"),
-                    category = it.optString("category", "UPDATE"),
-                    releasePage = releasePage,
-                    latestVersion = latestVersion
-                )
-            }
+        if (connection.responseCode !in 200..299) null
+        else connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+            .takeIf { it.toByteArray(Charsets.UTF_8).size <= MAX_FEED_BYTES }
     } catch (_: Exception) {
         null
     } finally {
         connection?.disconnect()
     }
+
+    if (fresh != null) {
+        val parsed = parseAnnouncement(fresh)
+        if (parsed != null) {
+            prefs.edit().putString(CACHED_FEED, fresh).apply()
+            return parsed
+        }
+    }
+
+    return prefs.getString(CACHED_FEED, null)?.let(::parseAnnouncement)
+}
+
+private fun parseAnnouncement(body: String): LauncherAnnouncement? = try {
+    if (body.toByteArray(Charsets.UTF_8).size > MAX_FEED_BYTES) return null
+    val root = JSONObject(body)
+    val app = root.optJSONObject("app") ?: return null
+    if (app.optString("name") != "VøidLaunchear") return null
+
+    val releaseUri = Uri.parse(app.optString("releasePage", RELEASES_URL))
+    val releasePage = if (
+        releaseUri.scheme == "https" && releaseUri.host == "github.com"
+    ) releaseUri.toString() else RELEASES_URL
+    val latestVersion = app.optString("latestVersion").take(32)
+    val maintenance = root.optJSONObject("maintenance")
+
+    if (maintenance?.optBoolean("active", false) == true) {
+        val title = maintenance.optString("title").ifBlank { "Scheduled Maintenance" }
+        val message = maintenance.optString("message").take(1200)
+        if (message.isNotBlank()) {
+            return LauncherAnnouncement(
+                id = "maintenance-${title.hashCode()}-${message.hashCode()}",
+                title = title.take(120),
+                message = message,
+                category = "MAINTENANCE",
+                releasePage = releasePage,
+                latestVersion = latestVersion
+            )
+        }
+    }
+
+    val items = root.optJSONArray("announcements") ?: return null
+    (0 until items.length())
+        .mapNotNull { items.optJSONObject(it) }
+        .filter { it.optBoolean("active", false) }
+        .maxByOrNull { it.optString("publishedAt") }
+        ?.let { item ->
+            val message = item.optString("message").take(1200)
+            if (message.isBlank()) return@let null
+            LauncherAnnouncement(
+                id = item.optString("id")
+                    .takeIf(String::isNotBlank)
+                    ?.take(100)
+                    ?: "announcement-${item.optString("publishedAt").hashCode()}",
+                title = item.optString("title").ifBlank { "VøidLaunchear Update" }.take(120),
+                message = message,
+                category = item.optString("category").ifBlank { "UPDATE" }.take(32),
+                releasePage = releasePage,
+                latestVersion = latestVersion
+            )
+        }
+} catch (_: Exception) {
+    null
 }
 
 private fun isNewerVersion(latest: String, installed: String): Boolean {
-    fun parts(value: String) = Regex("\\d+").findAll(value).mapNotNull { it.value.toIntOrNull() }.toList()
+    fun parts(value: String) =
+        Regex("\\d+").findAll(value).mapNotNull { it.value.toIntOrNull() }.toList()
+
     val a = parts(latest)
     val b = parts(installed)
     if (a.isEmpty() || b.isEmpty()) return false
