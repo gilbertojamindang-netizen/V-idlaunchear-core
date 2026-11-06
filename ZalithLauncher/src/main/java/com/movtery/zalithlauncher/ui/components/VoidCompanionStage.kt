@@ -162,7 +162,7 @@ fun VoidCompanionStage(
                 .fillMaxSize()
                 .offset {
                     androidx.compose.ui.unit.IntOffset(
-                        (dragX + with(this) { animatedOffset.toPx() }).roundToInt(),
+                        (dragX + if (isDragging) 0f else with(this) { animatedOffset.toPx() }).roundToInt(),
                         dragY.roundToInt()
                     )
                 },
