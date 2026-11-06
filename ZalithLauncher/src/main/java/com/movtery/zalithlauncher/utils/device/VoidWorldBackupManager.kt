@@ -182,8 +182,11 @@ object VoidWorldBackupManager {
         return canonicalDirectory
     }
 
-    internal fun isSafeBackupId(id: String): Boolean =
-        id.matches(Regex("^void-world-[A-Za-z0-9_-]+-[0-9]+\\.zip$"))
+    internal fun isSafeBackupId(id: String): Boolean {
+        if (!id.matches(Regex("^void-world-[A-Za-z0-9_-]+-[0-9]+\\.zip$"))) return false
+        val timestamp = id.substringAfterLast('-').removeSuffix(".zip").toLongOrNull()
+        return timestamp != null && timestamp > 0L
+    }
 
     internal fun isSafeWorldName(name: String): Boolean =
         name.isNotBlank() &&
