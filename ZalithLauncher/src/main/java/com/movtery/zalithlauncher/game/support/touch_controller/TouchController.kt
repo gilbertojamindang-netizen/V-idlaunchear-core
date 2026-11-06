@@ -171,7 +171,7 @@ private class TouchControllerInputConnection(
                                     RectF(
                                         inputAreaRect.left.toFloat(),
                                         inputAreaRect.top.toFloat(),
-                                        inputAreaRect.bottom.toFloat(),
+                                        inputAreaRect.right.toFloat(),
                                         inputAreaRect.bottom.toFloat(),
                                     )
                                 )
