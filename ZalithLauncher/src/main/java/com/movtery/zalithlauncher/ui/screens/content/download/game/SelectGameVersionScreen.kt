@@ -103,6 +103,8 @@ import com.movtery.zalithlauncher.utils.string.isEmptyOrBlank
 import com.movtery.zalithlauncher.viewmodel.EventViewModel
 import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.plugins.ResponseException
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.net.ConnectException
@@ -137,6 +139,8 @@ private data class VersionFilter(
 )
 
 private class VersionsViewModel: ViewModel() {
+    private var refreshJob: Job? = null
+
     var versionState by mutableStateOf<VersionState>(VersionState.Loading)
         private set
 
@@ -155,13 +159,18 @@ private class VersionsViewModel: ViewModel() {
     }
 
     fun refresh(forceReload: Boolean = false) {
-        viewModelScope.launch {
+        // A newer refresh supersedes the previous request. This prevents stale
+        // responses from overwriting the version list after repeated refresh taps.
+        refreshJob?.cancel()
+        refreshJob = viewModelScope.launch {
             versionState = VersionState.Loading
-            versionState = runCatching {
+            try {
                 MinecraftVersions.refreshVersions(forceReload)
                 val allVersions = MinecraftVersions.allVersions.value
-                VersionState.None(allVersions.filterVersions(versionFilter))
-            }.getOrElse { e ->
+                versionState = VersionState.None(allVersions.filterVersions(versionFilter))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
                 Logger.warning(TAG, "Failed to get version manifest!", e)
                 val message: AndroidStringText = when(e) {
                     is HttpRequestTimeoutException -> androidText(R.string.error_timeout)
@@ -173,7 +182,7 @@ private class VersionsViewModel: ViewModel() {
                         androidText(e.localizedMessage ?: e.message ?: e::class.qualifiedName ?: "Unknown error")
                     }
                 }
-                VersionState.Failure(message)
+                versionState = VersionState.Failure(message)
             }
         }
     }
