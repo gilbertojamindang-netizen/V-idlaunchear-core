@@ -49,4 +49,5 @@ Do not dispatch an APK build until the feature work is reviewed and the project 
 - `280c637a958af350d98705d4acad6b5ce9bdc2e1` — improve screen-reader heading and live status semantics in Vulkan setup.
 - `8ace4e4f0da849cbe06b30fafcb087479fbc8db7` — propagate coroutine cancellation instead of misreporting it as a failed Vulkan scan.
 - `0f2a0842954861a1d71ae02f1858217da2338eeb` — preserve the companion fall animation when an airborne drag gesture is cancelled.
+- `f66cb84f756d86ad16e82fe17a621a699122d78f` — stop autonomous roaming offset from moving the companion underneath the user's finger during a drag.
 - `1eb22e0b0d9b50d5de7a1a55ceb7959e870cbbfc` and `a5531412ebd4e3b4c6227a8341acb04c87144508` — recover world-save operation UI state after failures and keep Compose state updates on the main thread.
