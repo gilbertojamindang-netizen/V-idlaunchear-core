@@ -170,6 +170,7 @@ fun LauncherScreen(
                 }
         ) {
             val parentWidthPx = constraints.maxWidth.toFloat()
+            val brandHeaderHeight = 60.dp
             dragState.parentWidthPx = parentWidthPx
             dragState.outerPaddingPx = with(LocalDensity.current) { ActionMenuOuterPadding.toPx() }
             dragState.topContentOffsetPx = with(LocalDensity.current) { brandHeaderHeight.toPx() }
@@ -182,7 +183,6 @@ fun LauncherScreen(
 
             //卡片尺寸与停泊槽内容区保持一致
             val cardWidth = maxWidth * (ActionMenuWeight / (ActionMenuWeight + ContentWeight)) - ActionMenuOuterPadding
-            val brandHeaderHeight = 60.dp
             val cardHeight = maxHeight - ActionMenuOuterPadding * 2 - brandHeaderHeight
 
             val toAccountManageScreen: () -> Unit = {
