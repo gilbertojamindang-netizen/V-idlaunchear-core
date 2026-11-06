@@ -30,39 +30,46 @@ object PhysicalMouseChecker {
     /**
      * 当前是否有实体鼠标连接
      */
+    @Volatile
     var physicalMouseConnected = false
         private set
 
+    private var registeredInputManager: InputManager? = null
+    private var registeredListener: InputManager.InputDeviceListener? = null
+
+    @Synchronized
     fun initChecker(activity: Activity) {
-        //粗检测，因为启动软件前可能已经连接实体鼠标了
-        physicalMouseConnected = isPhysicalMouseConnected()
-        Logger.info(TAG, "Initialization complete, physical mouse connection status: $physicalMouseConnected")
+        val inputManager = activity.getSystemService(Context.INPUT_SERVICE) as InputManager
+
+        // Avoid retaining an old Activity's listener after recreation.
+        registeredListener?.let { oldListener ->
+            registeredInputManager?.unregisterInputDeviceListener(oldListener)
+        }
+
+        fun refreshConnectionState() {
+            physicalMouseConnected = isPhysicalMouseConnected()
+            Logger.info(TAG, "Physical mouse connection status: $physicalMouseConnected")
+        }
 
         val listener = object : InputManager.InputDeviceListener {
             override fun onInputDeviceAdded(deviceId: Int) {
-                if (deviceId.isMouseId()) {
-                    Logger.info(TAG, "Physical mouse connected, deviceId: $deviceId")
-                    physicalMouseConnected = true
-                }
+                refreshConnectionState()
             }
 
             override fun onInputDeviceRemoved(deviceId: Int) {
-                if (deviceId.isMouseId()) {
-                    Logger.info(TAG, "Physical mouse disconnected, deviceId: $deviceId")
-                    physicalMouseConnected = false
-                } else {
-                    physicalMouseConnected = isPhysicalMouseConnected()
-                    Logger.info(TAG, "Fallback check for physical mouse connection status: $physicalMouseConnected")
-                }
+                refreshConnectionState()
             }
 
             override fun onInputDeviceChanged(deviceId: Int) {
-                //ignore
+                refreshConnectionState()
             }
         }
 
-        val inputManager = activity.getSystemService(Context.INPUT_SERVICE) as InputManager
+        registeredInputManager = inputManager
+        registeredListener = listener
+        refreshConnectionState()
         inputManager.registerInputDeviceListener(listener, null)
+        Logger.info(TAG, "Input device listener registered.")
     }
 }
 
