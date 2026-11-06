@@ -29,6 +29,7 @@ import com.movtery.zalithlauncher.utils.file.readString
 import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.utils.network.fetchStringFromUrls
 import com.movtery.zalithlauncher.utils.network.withRetry
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -77,7 +78,24 @@ object MinecraftVersions {
                     localManifestFile.lastModified() + TimeUnit.DAYS.toMillis(1) < System.currentTimeMillis()
 
             val newManifest = if (force || isOutdated) {
-                downloadVersionManifest()
+                try {
+                    downloadVersionManifest()
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (networkError: Exception) {
+                    // Keep the last known-good catalog available when Mojang or the
+                    // network is temporarily unreachable. This prevents an otherwise
+                    // usable launcher from showing an empty version list.
+                    if (!localManifestFile.isFile) throw networkError
+                    try {
+                        Logger.warning(TAG, "Version manifest refresh failed; using cached manifest", networkError)
+                        GSON.fromJson(localManifestFile.readText(), VersionManifest::class.java)
+                    } catch (cacheError: Exception) {
+                        cacheError.addSuppressed(networkError)
+                        Logger.warning(TAG, "Cached version manifest is invalid", cacheError)
+                        throw cacheError
+                    }
+                }
             } else {
                 try {
                     GSON.fromJson(localManifestFile.readText(), VersionManifest::class.java)
