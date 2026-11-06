@@ -1,25 +1,15 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="192"
-    android:viewportHeight="192">
-    <path
-        android:fillColor="#00000000"
-        android:strokeColor="#7B35B8"
-        android:strokeWidth="10"
-        android:pathData="M96,22 A74,74 0,1 1,95.9 22" />
-    <path
-        android:fillColor="#00000000"
-        android:strokeColor="#EAD9FF"
-        android:strokeWidth="13"
-        android:strokeLineCap="round"
-        android:pathData="M57,145 L135,47" />
-    <path
-        android:fillColor="#00000000"
-        android:strokeColor="#B86CFF"
-        android:strokeWidth="4"
-        android:pathData="M96,22 A74,74 0,1 1,95.9 22" />
-    <path
-        android:fillColor="#9D4EDD"
-        android:pathData="M25,88 L35,88 L35,98 L25,98 Z M157,105 L167,105 L167,115 L157,115 Z M132,24 L140,24 L140,32 L132,32 Z M48,150 L56,150 L56,158 L48,158 Z" />
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="192" android:viewportHeight="192">
+    <path android:fillColor="#00000000" android:strokeColor="#A020F0" android:strokeWidth="8"
+        android:pathData="M18,96 A78,78 0,1 1,174 96 A78,78 0,1 1,18 96" />
+    <path android:fillColor="#00000000" android:strokeColor="#D9A7FF" android:strokeWidth="5"
+        android:pathData="M15,128 C48,158 144,38 177,64" />
+    <path android:fillColor="#00000000" android:strokeColor="#F2E8FF" android:strokeWidth="11" android:strokeLineJoin="round"
+        android:pathData="M43,66 L96,145 L149,66" />
+    <path android:fillColor="#00000000" android:strokeColor="#7B2CDB" android:strokeWidth="5"
+        android:pathData="M57,66 L96,123 L135,66" />
+    <path android:fillColor="#A020F0" android:pathData="M55,54 L48,29 L71,45 L96,16 L121,45 L144,29 L137,54 Z" />
+    <path android:fillColor="#EAD9FF" android:pathData="M88,43 L96,31 L104,43 L96,55 Z" />
+    <path android:fillColor="#D9A7FF" android:pathData="M21,92 L30,92 L30,101 L21,101 Z M162,105 L171,105 L171,114 L162,114 Z M146,42 L153,42 L153,49 L146,49 Z M39,139 L46,139 L46,146 L39,146 Z" />
 </vector>
