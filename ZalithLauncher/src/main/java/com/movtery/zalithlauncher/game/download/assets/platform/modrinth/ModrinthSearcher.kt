@@ -88,9 +88,30 @@ class ModrinthSearcher(
         projectID: String,
         pageCallback: (chunk: Int, page: Int) -> Unit
     ): List<ModrinthVersion> {
-        return getVersionsChunk(
-            projectID = projectID
-        )
+        // Modrinth's versions endpoint is paginated. Requesting it without
+        // limit/offset can silently return only the default first page.
+        // Fetch bounded pages so projects with many releases are complete.
+        val pageSize = 100
+        val allVersions = mutableListOf<ModrinthVersion>()
+        var offset = 0
+        var page = 1
+
+        while (true) {
+            val versions = getVersionsChunk(
+                projectID = projectID,
+                pageSize = pageSize,
+                offset = offset
+            )
+            pageCallback(1, page)
+            allVersions.addAll(versions)
+
+            if (versions.size < pageSize) break
+
+            offset += versions.size
+            page++
+        }
+
+        return allVersions
     }
 
     /**
