@@ -280,7 +280,8 @@ private fun parseAnnouncement(body: String): LauncherAnnouncement? {
             releaseUri.scheme == "https" && releaseUri.host == "github.com"
         ) releaseUri.toString() else RELEASES_URL
         val latestVersion = app.optString("latestVersion").take(32)
-        val downloadUrl = app.optString("downloadUrl").take(2048)
+        val candidateDownloadUri = Uri.parse(app.optString("downloadUrl"))
+        val downloadUrl = if (candidateDownloadUri.scheme == "https" && candidateDownloadUri.host == "github.com") candidateDownloadUri.toString().take(2048) else ""
         val maintenance = root.optJSONObject("maintenance")
 
         if (maintenance?.optBoolean("active", false) == true) {
