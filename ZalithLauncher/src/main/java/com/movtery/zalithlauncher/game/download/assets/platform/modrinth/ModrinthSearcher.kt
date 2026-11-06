@@ -93,6 +93,7 @@ class ModrinthSearcher(
         // Fetch bounded pages so projects with many releases are complete.
         val pageSize = 100
         val allVersions = mutableListOf<ModrinthVersion>()
+        val seenVersionIds = HashSet<String>()
         var offset = 0
         var page = 1
 
@@ -103,10 +104,21 @@ class ModrinthSearcher(
                 offset = offset
             )
             pageCallback(1, page)
-            allVersions.addAll(versions)
 
-            if (versions.size < pageSize) break
+            // Protect against duplicate records and a server/proxy that keeps
+            // returning the same full page for successive offsets.
+            var addedCount = 0
+            versions.forEach { version ->
+                if (seenVersionIds.add(version.id)) {
+                    allVersions.add(version)
+                    addedCount++
+                }
+            }
 
+            if (versions.size < pageSize || addedCount == 0) break
+
+            // Advance by the number returned by the API, not by the number
+            // retained after de-duplication, so normal pagination stays aligned.
             offset += versions.size
             page++
         }
