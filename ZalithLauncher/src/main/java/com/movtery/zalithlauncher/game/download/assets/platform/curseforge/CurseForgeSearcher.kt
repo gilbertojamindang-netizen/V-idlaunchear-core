@@ -110,8 +110,10 @@ class CurseForgeSearcher(
         val seenFileIds = HashSet<Int>()
         return getAllVersions(
             pageSize = 50,
-            chunkSize = 20,
-            maxConcurrent = 10,
+            // Keep page requests moderate on mobile networks and reduce the
+            // chance of bursts triggering provider-side rate limits.
+            chunkSize = 5,
+            maxConcurrent = 4,
             pageCallback = pageCallback,
             checkNotEmpty = { versions ->
                 versions.data.isNotEmpty()
