@@ -115,7 +115,7 @@ jobs:
             exit 1
           fi
           for apk in "${apks[@]}"; do
-            target="$output_dir/Void-Launchear-${version}-${{ matrix.arch }}-${BUILD_VARIANT}.apk"
+            target="$output_dir/Vøidlaunchear-${version}-${{ matrix.arch }}-${BUILD_VARIANT}.apk"
             mv "$apk" "$target"
             echo "Prepared $target"
           done
@@ -124,8 +124,8 @@ jobs:
         if: env.BUILD_VARIANT == 'Release'
         uses: actions/upload-artifact@v7
         with:
-          name: Void Launchear APK (${{ matrix.arch }})
-          path: ZalithLauncher/build/outputs/apk/release/Void-Launchear-*.apk
+          name: VøidLaunchear APK (${{ matrix.arch }})
+          path: ZalithLauncher/build/outputs/apk/release/Vøidlaunchear-*.apk
           if-no-files-found: error
 
       - name: Upload Release Mapping for ${{ matrix.arch }}
@@ -141,7 +141,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: Void Launchear APK (${{ matrix.arch }})
-          path: ZalithLauncher/build/outputs/apk/debug/Void-Launchear-*.apk
+          path: ZalithLauncher/build/outputs/apk/debug/Vøidlaunchear-*.apk
           if-no-files-found: error
 
   publish-public-apk:
@@ -159,7 +159,7 @@ jobs:
       - name: Download ARM64 APK
         uses: actions/download-artifact@v4
         with:
-          name: Void Launchear APK (arm64)
+          name: VøidLaunchear APK (arm64)
           path: release-assets
 
       - name: Verify APK asset
