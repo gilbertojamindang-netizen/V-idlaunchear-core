@@ -34,6 +34,7 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.time.Duration.Companion.milliseconds
@@ -73,6 +74,7 @@ class BatchDownloader(
     }
 
     private val files = Semaphore(maxConnections)
+    private val runStarted = AtomicBoolean(false)
 
     /** 连续永久失败计数，任何文件成功即清零；与零成功条件共同判定系统性故障 */
     private val systemicFailureCount = AtomicInteger(0)
@@ -88,6 +90,10 @@ class BatchDownloader(
         private set
 
     suspend fun run() {
+        check(runStarted.compareAndSet(false, true)) {
+            "BatchDownloader.run() may only be called once per instance"
+        }
+
         // 不做任何清零
         // 调用方可能在 run() 之前已把本地复用文件登记进 stats
         requests.forEach { stats.registerFile(it.expectedSize) }
