@@ -139,7 +139,11 @@ suspend fun <T> withRetry(
             }
 
             delay(currentDelay.milliseconds)
-            currentDelay = (currentDelay * 2).coerceAtMost(maxDelay)
+            currentDelay = if (currentDelay > maxDelay / 2) {
+                maxDelay
+            } else {
+                (currentDelay * 2).coerceAtMost(maxDelay)
+            }
             retryCount++
         }
     }
