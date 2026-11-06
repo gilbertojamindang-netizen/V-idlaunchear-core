@@ -211,26 +211,33 @@ private class SavesManageViewModel(
         job = viewModelScope.launch {
             savesState = LoadingState.Loading
 
-            val loadedSaves = withContext(Dispatchers.IO) {
-                val tempList = mutableListOf<SaveData>()
-                val dirs = savesDir.listFiles()?.filter { it.isDirectory }.orEmpty()
-                for (dir in dirs) {
-                    ensureActive()
-                    // Parse each level.dat on IO; publish Compose state only after returning to Main.
-                    val data = parseLevelDatFile(
-                        saveFile = dir,
-                        levelDatFile = File(dir, "level.dat"),
-                        worldGenDatFile = File(dir, "data/minecraft/world_gen_settings.dat")
-                            .takeIf { it.isFile && it.exists() }
-                    )
-                    tempList.add(data)
+            try {
+                val loadedSaves = withContext(Dispatchers.IO) {
+                    val tempList = mutableListOf<SaveData>()
+                    val dirs = savesDir.listFiles()?.filter { it.isDirectory }.orEmpty()
+                    for (dir in dirs) {
+                        ensureActive()
+                        // Parse each level.dat on IO; publish Compose state only after returning to Main.
+                        val data = parseLevelDatFile(
+                            saveFile = dir,
+                            levelDatFile = File(dir, "level.dat"),
+                            worldGenDatFile = File(dir, "data/minecraft/world_gen_settings.dat")
+                                .takeIf { it.isFile && it.exists() }
+                        )
+                        tempList.add(data)
+                    }
+                    tempList.sortedBy { it.saveFile.name }
                 }
-                tempList.sortedBy { it.saveFile.name }
-            }
 
-            allSaves = loadedSaves
-            filterSaves()
-            savesState = LoadingState.None
+                allSaves = loadedSaves
+                filterSaves()
+            } catch (th: CancellationException) {
+                throw th
+            } catch (th: Exception) {
+                Logger.error(TAG, "Failed to refresh the world save list.", th)
+            } finally {
+                savesState = LoadingState.None
+            }
         }
     }
 
