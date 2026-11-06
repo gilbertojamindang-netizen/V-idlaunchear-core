@@ -10,6 +10,7 @@ package com.movtery.zalithlauncher.ui.components
 import androidx.compose.animation.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -23,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.movtery.petlib.ArmModel
@@ -30,6 +32,7 @@ import com.movtery.petlib.PetAnimation
 import com.movtery.petlib.PetTapReaction
 import kotlinx.coroutines.delay
 import kotlin.math.PI
+import kotlin.math.roundToInt
 import kotlin.random.Random
 
 /**
@@ -52,6 +55,10 @@ fun VoidCompanionStage(
     var walking by remember { mutableStateOf(false) }
     var walkingRight by remember { mutableStateOf(true) }
     var targetOffset by remember { mutableStateOf(0.dp) }
+    var dragX by remember { mutableStateOf(0f) }
+    var dragY by remember { mutableStateOf(0f) }
+    var isDragging by remember { mutableStateOf(false) }
+    var ragdollTrigger by remember { mutableStateOf(0) }
     val animatedOffset by animateDpAsState(
         targetValue = targetOffset,
         animationSpec = tween(durationMillis = 1700),
@@ -65,21 +72,23 @@ fun VoidCompanionStage(
             targetOffset = 0.dp
             while (true) {
                 delay(Random.nextLong(3500L, 6000L))
-                sitting = false
-                walking = false
-                delay(Random.nextLong(900L, 1800L))
-
-                walkingRight = !walkingRight
-                walking = true
-                targetOffset = if (walkingRight) 12.dp else (-12).dp
-                delay(1900L)
-
-                walking = false
-                delay(Random.nextLong(1200L, 2400L))
-                if (Random.nextInt(4) == 0) {
-                    sitting = true
-                    delay(Random.nextLong(2200L, 3800L))
+                if (!isDragging) {
                     sitting = false
+                    walking = false
+                    delay(Random.nextLong(900L, 1800L))
+                    if (!isDragging) {
+                        walkingRight = !walkingRight
+                        walking = true
+                        targetOffset = if (walkingRight) 12.dp else (-12).dp
+                    }
+                    delay(1900L)
+                    walking = false
+                    delay(Random.nextLong(1200L, 2400L))
+                    if (!isDragging && Random.nextInt(4) == 0) {
+                        sitting = true
+                        delay(Random.nextLong(2200L, 3800L))
+                        sitting = false
+                    }
                 }
             }
         } else {
@@ -92,13 +101,44 @@ fun VoidCompanionStage(
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(20.dp))
-            .background(Color.Transparent),
+            .background(Color.Transparent)
+            .pointerInput(autoPose) {
+                detectDragGestures(
+                    onDragStart = {
+                        isDragging = true
+                        sitting = false
+                        walking = false
+                    },
+                    onDragEnd = {
+                        // An upward release is treated as an airborne drop.
+                        if (dragY < -12f) ragdollTrigger++
+                        dragX = 0f
+                        dragY = 0f
+                        isDragging = false
+                    },
+                    onDragCancel = {
+                        dragX = 0f
+                        dragY = 0f
+                        isDragging = false
+                    },
+                    onDrag = { change, amount ->
+                        change.consume()
+                        dragX = (dragX + amount.x).coerceIn(-96f, 96f)
+                        dragY = (dragY + amount.y).coerceIn(-120f, 48f)
+                    }
+                )
+            },
         contentAlignment = Alignment.Center
     ) {
         PetModelView(
             modifier = Modifier
                 .fillMaxSize()
-                .offset(x = animatedOffset),
+                .offset {
+                    androidx.compose.ui.unit.IntOffset(
+                        (dragX + with(this) { animatedOffset.toPx() }).roundToInt(),
+                        dragY.roundToInt()
+                    )
+                },
             skin = skin,
             cape = cape,
             arm = arm,
@@ -112,7 +152,7 @@ fun VoidCompanionStage(
             dragYaw = false,
             gazeEnabled = true,
             autonomousIdle = false,
-            ragdollTrigger = 0
+            ragdollTrigger = ragdollTrigger
         )
     }
 }
