@@ -454,11 +454,15 @@ private fun VulkanSetupPanel(
 
     var isScanning by remember { mutableStateOf(false) }
     var hasScanned by remember { mutableStateOf(false) }
+    var scannedDriverId by remember { mutableStateOf<String?>(null) }
     var capabilities by remember { mutableStateOf<VulkanCapabilities?>(null) }
     var showNativeVulkanWarning by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val supportedProfiles = capabilities?.profileSupport()?.filter { it.supported }.orEmpty()
-    val unsupportedProfiles = capabilities?.profileSupport()?.filterNot { it.supported }.orEmpty()
+    // A scan result belongs only to the exact driver that was selected when it ran.
+    val hasCurrentScan = hasScanned && scannedDriverId == selectedDriverId
+    val currentCapabilities = capabilities.takeIf { hasCurrentScan }
+    val supportedProfiles = currentCapabilities?.profileSupport()?.filter { it.supported }.orEmpty()
+    val unsupportedProfiles = currentCapabilities?.profileSupport()?.filterNot { it.supported }.orEmpty()
 
     SettingsCardColumn(modifier = modifier) {
         Column(
@@ -508,6 +512,8 @@ private fun VulkanSetupPanel(
                     isScanning = true
                     hasScanned = false
                     capabilities = null
+                    scannedDriverId = selectedDriverId
+                    val driverIdForScan = selectedDriverId
                     scope.launch {
                         val driver = selectedDriver
                         val tempDir = if (driver.isLauncher) {
@@ -524,8 +530,13 @@ private fun VulkanSetupPanel(
                                 )
                             }
                         }.getOrNull()
-                        capabilities = result
-                        hasScanned = true
+                        if (AllSettings.vulkanDriver.state == driverIdForScan) {
+                            capabilities = result
+                            hasScanned = true
+                        } else {
+                            capabilities = null
+                            hasScanned = false
+                        }
                         isScanning = false
                     }
                 }
@@ -533,8 +544,8 @@ private fun VulkanSetupPanel(
                 Text(if (isScanning) "SCANNING SELECTED DRIVER..." else "RUN COMPATIBILITY SCAN")
             }
 
-            if (hasScanned) {
-                val result = capabilities
+            if (hasCurrentScan) {
+                val result = currentCapabilities
                 if (result == null) {
                     Text(
                         text = "The selected driver scan could not complete. Try the built-in driver or keep OpenGL as the fallback.",
@@ -586,7 +597,7 @@ private fun VulkanSetupPanel(
                 }
                 OutlinedButton(
                     modifier = Modifier.weight(1f),
-                    enabled = zinkRendererAvailable && capabilities != null && !isScanning,
+                    enabled = zinkRendererAvailable && currentCapabilities != null && !isScanning,
                     onClick = {
                         AllSettings.renderer.save(KopperZinkRenderer.getUniqueIdentifier())
                         AllSettings.graphicsApi.save(GraphicsApi.DEFAULT_OPENGL)
