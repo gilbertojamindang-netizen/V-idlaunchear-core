@@ -11,6 +11,17 @@ import org.junit.Test
 
 class VoidWorldBackupManagerTest {
     @Test
+    fun acceptsOnlyGeneratedBackupIdentifiers() {
+        assertTrue(VoidWorldBackupManager.isSafeBackupId("void-world-Survival-1762380000000.zip"))
+        assertTrue(VoidWorldBackupManager.isSafeBackupId("void-world-My_World-1762380000000.zip"))
+        assertFalse(VoidWorldBackupManager.isSafeBackupId(""))
+        assertFalse(VoidWorldBackupManager.isSafeBackupId("../void-world-Survival-1.zip"))
+        assertFalse(VoidWorldBackupManager.isSafeBackupId("void-world-Survival.zip"))
+        assertFalse(VoidWorldBackupManager.isSafeBackupId("void-world-Survival-0.zip"))
+        assertFalse(VoidWorldBackupManager.isSafeBackupId("void-world-Survival-1.zip/../outside"))
+    }
+
+    @Test
     fun acceptsNormalWorldFolderNames() {
         assertTrue(VoidWorldBackupManager.isSafeWorldName("Survival"))
         assertTrue(VoidWorldBackupManager.isSafeWorldName("My World 2"))
