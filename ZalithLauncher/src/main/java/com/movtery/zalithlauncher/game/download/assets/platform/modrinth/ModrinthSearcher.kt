@@ -75,6 +75,15 @@ class ModrinthSearcher(
         pageSize: Int? = null,
         offset: Int? = null,
     ): List<ModrinthVersion> {
+        require((pageSize == null) == (offset == null)) {
+            "pageSize and offset must either both be set or both be null."
+        }
+        pageSize?.let {
+            require(it in 1..100) { "Modrinth pageSize must be between 1 and 100." }
+        }
+        offset?.let {
+            require(it >= 0) { "Modrinth offset must not be negative." }
+        }
         return httpGetJson(
             url = "$api/project/$projectID/version",
             parameters = if (pageSize != null && offset != null) {
