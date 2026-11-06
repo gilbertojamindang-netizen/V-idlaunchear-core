@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
@@ -32,6 +33,7 @@ import java.util.zip.ZipOutputStream
 object VoidWorldBackupManager {
     private const val META_ENTRY = ".void-world-backup.properties"
     private const val MAX_RESTORE_ENTRIES = 250_000
+    private const val MAX_METADATA_BYTES = 16 * 1024
     private const val MAX_RESTORE_UNCOMPRESSED_BYTES = 16L * 1024L * 1024L * 1024L
 
     data class WorldInfo(
@@ -275,11 +277,34 @@ object VoidWorldBackupManager {
     private fun readBackupInfo(file: File): BackupInfo {
         ZipFile(file).use { zip ->
             val entry = zip.getEntry(META_ENTRY) ?: error("Backup metadata is missing.")
-            val properties = Properties()
-            zip.getInputStream(entry).use { properties.load(it) }
+            require(entry.size in 0..MAX_METADATA_BYTES.toLong()) {
+                "Backup metadata is larger than the allowed safety limit."
+            }
+            val metadataBytes = zip.getInputStream(entry).use { input ->
+                val output = ByteArrayOutputStream()
+                val buffer = ByteArray(1024)
+                var total = 0
+                while (true) {
+                    val count = input.read(buffer)
+                    if (count < 0) break
+                    total += count
+                    require(total <= MAX_METADATA_BYTES) {
+                        "Backup metadata is larger than the allowed safety limit."
+                    }
+                    output.write(buffer, 0, count)
+                }
+                output.toByteArray()
+            }
+            val properties = Properties().apply {
+                ByteArrayInputStream(metadataBytes).use(::load)
+            }
             val worldName = properties.getProperty("worldName")
                 ?: error("Backup world name is missing.")
+            require(isSafeWorldName(worldName)) {
+                "Backup metadata contains an invalid world name."
+            }
             val createdAt = properties.getProperty("createdAt")?.toLongOrNull()
+                ?.takeIf { it > 0L }
                 ?: error("Backup timestamp is invalid.")
             return BackupInfo(file.name, worldName, createdAt, file.length())
         }
@@ -289,6 +314,7 @@ object VoidWorldBackupManager {
         val root = destination.canonicalFile
         var extractedEntries = 0
         var extractedBytes = 0L
+        val seenEntries = HashSet<String>()
         ZipInputStream(BufferedInputStream(FileInputStream(archive))).use { zip ->
             while (true) {
                 val entry = zip.nextEntry ?: break
@@ -300,6 +326,9 @@ object VoidWorldBackupManager {
                     }
                     require(isSafeArchiveEntryName(entry.name)) {
                         "The backup contains an unsafe file path."
+                    }
+                    require(seenEntries.add(entry.name)) {
+                        "The backup contains duplicate file entries."
                     }
 
                     val target = File(root, entry.name).canonicalFile
