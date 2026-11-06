@@ -143,14 +143,23 @@ object MinecraftVersions {
                     object : TypeToken<List<VersionManifest.Version>>() {}.type
                 )
             }?.let { unlistVersions ->
-                val versions = currentManifest.versions.toMutableList()
-                versions.addAll(unlistVersions)
-                versions.sortWith { version, other ->
+                // Merge by version ID so bundled hidden entries cannot create
+                // duplicate picker rows when Mojang later publishes the same ID.
+                // Prefer the live manifest whenever an ID exists in both sources.
+                val versionsById = LinkedHashMap<String, VersionManifest.Version>()
+                currentManifest.versions.forEach { version ->
+                    versionsById[version.id] = version
+                }
+                unlistVersions.forEach { version ->
+                    versionsById.putIfAbsent(version.id, version)
+                }
+
+                val versions = versionsById.values.sortedWith { version, other ->
                     other.releaseTime.compareTo(version.releaseTime)
                 }
 
                 currentManifest.copy(
-                    versions = versions.toList()
+                    versions = versions
                 )
             }
         }
