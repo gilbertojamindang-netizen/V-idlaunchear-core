@@ -66,6 +66,17 @@ fun VoidCompanionStage(
         label = "voidCompanionRoaming"
     )
 
+    LaunchedEffect(ragdollTrigger) {
+        if (ragdollTrigger > 0) {
+            // Keep the model at the release point while PetLib plays its fall animation.
+            delay(900L)
+            if (!isDragging) {
+                dragX = 0f
+                dragY = 0f
+            }
+        }
+    }
+
     LaunchedEffect(autoPose) {
         if (autoPose) {
             sitting = true
@@ -110,13 +121,17 @@ fun VoidCompanionStage(
                         wasLifted = false
                         sitting = false
                         walking = false
+                        targetOffset = 0.dp
                     },
                     onDragEnd = {
-                        // Once lifted, releasing at any point plays the fall/ragdoll.
-                        if (wasLifted || dragY < -12f) ragdollTrigger++
+                        // Keep an airborne release at its drop point until the fall animation finishes.
+                        if (wasLifted || dragY < -12f) {
+                            ragdollTrigger++
+                        } else {
+                            dragX = 0f
+                            dragY = 0f
+                        }
                         wasLifted = false
-                        dragX = 0f
-                        dragY = 0f
                         isDragging = false
                     },
                     onDragCancel = {
