@@ -44,18 +44,23 @@ class ServerAddress(
 
     companion object {
         const val DEFAULT_PORT = 25565
-        private val PORT_RANGE = 0..65535
+        private val PORT_RANGE = 1..65535
 
         fun parse(address: String): ServerAddress {
-            require(address.isNotEmpty()) { "Address cannot be empty" }
-            
+            val normalized = address.trim()
+            require(normalized.isNotEmpty()) { "Address cannot be empty" }
+            require(normalized.none(Char::isWhitespace)) { "Server address cannot contain whitespace" }
+
             return when {
-                //处理 IPv6 地址 -> [host]:port
-                address.startsWith('[') -> parseIPv6(address)
-                //普通 host:port 格式
-                ':' in address -> parseWithPort(address)
-                else -> ServerAddress(address, DEFAULT_PORT)
+                // IPv6 literals must be bracketed when a port is supplied.
+                normalized.startsWith('[') -> parseIPv6(normalized)
+                ':' in normalized -> parseWithPort(normalized)
+                else -> ServerAddress(normalized.also(::requireValidHost), DEFAULT_PORT)
             }
+        }
+
+        private fun requireValidHost(host: String) {
+            require(host.isNotBlank()) { "Server host cannot be empty" }
         }
         
         private fun parseIPv6(address: String): ServerAddress {
@@ -63,6 +68,7 @@ class ServerAddress(
                 ?: throw illegalAddress(address)
             
             val host = address.substring(1, closeBracketIndex)
+            requireValidHost(host)
 
             return when (val remaining = address.substring(closeBracketIndex + 1)) {
                 "" -> ServerAddress(host, DEFAULT_PORT)
@@ -78,10 +84,12 @@ class ServerAddress(
             val colonPos = address.indexOf(':')
             val hostPart = address.take(colonPos)
             val portPart = address.substring(colonPos + 1)
+            requireValidHost(hostPart)
             return parsePort(hostPart, portPart)
         }
         
         private fun parsePort(host: String, portPart: String): ServerAddress {
+            requireValidHost(host)
             val port = portPart.toIntOrNull()
                 ?.takeIf { it in PORT_RANGE }
                 ?: throw illegalAddress("$host:$portPart")
