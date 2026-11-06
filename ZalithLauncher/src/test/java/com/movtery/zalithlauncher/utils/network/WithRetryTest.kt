@@ -56,6 +56,14 @@ class WithRetryTest {
     }
 
     @Test
+    fun retryDelayDoublesAndStopsAtMaximumWithoutOverflow() {
+        assertEquals(2L, nextRetryDelay(1L, 10L))
+        assertEquals(10L, nextRetryDelay(8L, 10L))
+        assertEquals(Long.MAX_VALUE, nextRetryDelay(Long.MAX_VALUE / 2 + 1L, Long.MAX_VALUE))
+        assertEquals(0L, nextRetryDelay(0L, 0L))
+    }
+
+    @Test
     fun cancellationIsNeverRetried() = runBlocking {
         val attempts = AtomicInteger(0)
 
