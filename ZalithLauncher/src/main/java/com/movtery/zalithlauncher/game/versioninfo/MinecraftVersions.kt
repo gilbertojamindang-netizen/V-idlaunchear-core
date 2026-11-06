@@ -36,6 +36,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import org.apache.commons.io.FileUtils
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import java.util.concurrent.TimeUnit
 
 private const val TAG = "MinecraftVersions"
@@ -89,7 +91,7 @@ object MinecraftVersions {
                     if (!localManifestFile.isFile) throw networkError
                     try {
                         Logger.warning(TAG, "Version manifest refresh failed; using cached manifest", networkError)
-                        GSON.fromJson(localManifestFile.readText(), VersionManifest::class.java)
+                        parseManifest(localManifestFile.readText())
                     } catch (cacheError: Exception) {
                         cacheError.addSuppressed(networkError)
                         Logger.warning(TAG, "Cached version manifest is invalid", cacheError)
@@ -115,14 +117,53 @@ object MinecraftVersions {
     }
 
     /**
+     * Parse and minimally validate a manifest before it is cached or exposed.
+     * A syntactically valid but empty/truncated catalog must not replace the
+     * last-known-good manifest on disk.
+     */
+    private fun parseManifest(rawJson: String): VersionManifest {
+        val parsed = GSON.fromJson(rawJson, VersionManifest::class.java)
+            ?: throw IllegalStateException("Minecraft version manifest is empty")
+        require(parsed.latest.release.isNotBlank()) { "Manifest latest release is missing" }
+        require(parsed.latest.snapshot.isNotBlank()) { "Manifest latest snapshot is missing" }
+        require(parsed.versions.isNotEmpty()) { "Minecraft version catalog is empty" }
+        require(parsed.versions.all { it.id.isNotBlank() && it.url.isNotBlank() }) {
+            "Minecraft version catalog contains an invalid entry"
+        }
+        return parsed
+    }
+
+    /**
      * 从官方版本仓库获取版本信息
      */
     private suspend fun downloadVersionManifest(): VersionManifest {
         return withContext(Dispatchers.IO) {
             withRetry("MinecraftVersions", maxRetries = 2) {
                 val rawJson = fetchStringFromUrls(URL_MINECRAFT_VERSION_REPOS.mapBMCLMirrorUrls())
-                val versionManifest = GSON.fromJson(rawJson, VersionManifest::class.java)
-                PathManager.FILE_MINECRAFT_VERSIONS.writeText(rawJson)
+                val versionManifest = parseManifest(rawJson)
+                val manifestFile = PathManager.FILE_MINECRAFT_VERSIONS
+                val parent = manifestFile.toPath().toAbsolutePath().parent
+                Files.createDirectories(parent)
+                val temporaryFile = Files.createTempFile(parent, "minecraft-versions-", ".json.tmp")
+                try {
+                    Files.writeString(temporaryFile, rawJson)
+                    try {
+                        Files.move(
+                            temporaryFile,
+                            manifestFile.toPath(),
+                            StandardCopyOption.REPLACE_EXISTING,
+                            StandardCopyOption.ATOMIC_MOVE
+                        )
+                    } catch (_: java.nio.file.AtomicMoveNotSupportedException) {
+                        Files.move(
+                            temporaryFile,
+                            manifestFile.toPath(),
+                            StandardCopyOption.REPLACE_EXISTING
+                        )
+                    }
+                } finally {
+                    Files.deleteIfExists(temporaryFile)
+                }
                 versionManifest
             }
         }
