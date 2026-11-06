@@ -55,6 +55,14 @@ Make the path from tapping **Play** to entering Minecraft as direct as the Minec
 - Cold and warm launches both work; warm launch may be faster but neither skips required game initialization.
 - Normal launch remains available and all existing account/version protections remain intact.
 
+## Additional source audit (2026-11-06)
+
+- The saves screen sends `saveData.saveFile.name` to the Quick Play callback. This is the world-folder identifier expected by Minecraft's save quick-play argument; the displayed in-world level title is not substituted.
+- Launcher image/video background selection already exists through `BackgroundViewModel.import(...)`, and the UI supports both image and video media. This was an audit finding, not a new feature implementation.
+- The background import path was hardened in commit `9c450ac298106bc9612876601150c405a756808a`: it now copies and validates a staged replacement before moving the active background aside, and attempts rollback if installation fails. This prevents an invalid selection from deleting the currently working background.
+- Image validation decodes image bounds; video validation uses `MediaMetadataRetriever`, so the staged temporary filename does not need the original extension.
+- The staged import change has not been compiled or exercised on-device. Verify provider URI copying, image/video decoding, and rollback behavior in a future test pass.
+
 ## Verification status
 
 Source inspection only. No Gradle build, APK build, or device test was run. Existing-world/server Quick Play argument construction is present in source, but feature-level behavior is not yet verified. New-world automatic entry remains outstanding.
