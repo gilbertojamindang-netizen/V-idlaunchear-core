@@ -169,7 +169,8 @@ private fun fetchAnnouncement(context: Context): LauncherAnnouncement? {
     return prefs.getString(CACHED_FEED, null)?.let(::parseAnnouncement)
 }
 
-private fun parseAnnouncement(body: String): LauncherAnnouncement? = try {
+private fun parseAnnouncement(body: String): LauncherAnnouncement? {
+    return try {
     if (body.toByteArray(Charsets.UTF_8).size > MAX_FEED_BYTES) return null
     val root = JSONObject(body)
     val app = root.optJSONObject("app") ?: return null
@@ -217,8 +218,9 @@ private fun parseAnnouncement(body: String): LauncherAnnouncement? = try {
                 latestVersion = latestVersion
             )
         }
-} catch (_: Exception) {
-    null
+    } catch (_: Exception) {
+        null
+    }
 }
 
 private fun isNewerVersion(latest: String, installed: String): Boolean {
