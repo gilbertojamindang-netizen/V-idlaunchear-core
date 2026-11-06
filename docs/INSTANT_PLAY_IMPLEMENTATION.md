@@ -81,3 +81,12 @@ cannot be implemented by adding an unverified CLI flag or fabricating a
 Minecraft creation flow until a supported, version-aware integration exists.
 This is an identified product gap, not a completed Instant Create World
 feature.
+
+## Invalid server Quick Play behavior (2026-11-06)
+
+Commit `941158ed4abf9d15036d14b78f733c2cd3ca080a` changes invalid server
+address handling in `LaunchArgs`: it now logs a clear validation message and
+throws an argument error instead of omitting join arguments and silently
+starting an ordinary single-player session. This closes a misleading fallback
+path. The launcher UI's presentation of this error still needs on-device
+verification.
