@@ -30,6 +30,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -138,7 +142,9 @@ fun DownloadScreen(
         useClassEquality = true
     ) { isVisible: Boolean ->
         Column(modifier = Modifier.fillMaxSize()) {
-            DownloadHubHeader()
+            DownloadHubHeader(
+                onBack = { onBack(backScreenViewModel.mainScreen.backStack) }
+            )
             TabMenu(
                 modifier = Modifier.fillMaxWidth(),
                 isVisible = isVisible,
@@ -162,7 +168,7 @@ fun DownloadScreen(
 }
 
 @Composable
-private fun DownloadHubHeader() {
+private fun DownloadHubHeader(onBack: () -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -189,6 +195,14 @@ private fun DownloadHubHeader() {
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.White
+                    )
+                }
+                Spacer(modifier = Modifier.width(4.dp))
                 Column(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
