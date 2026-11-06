@@ -100,8 +100,19 @@ import com.movtery.zalithlauncher.utils.device.VoidCacheCleaner
 import com.movtery.zalithlauncher.utils.device.VoidPerformanceApplier
 import com.movtery.zalithlauncher.utils.device.VoidPerformanceAdvisor
 import com.movtery.zalithlauncher.utils.device.VoidWorldBackupManager
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+
+private suspend fun <T> runCatchingCancellable(
+    block: suspend () -> T
+): Result<T> = try {
+    Result.success(block())
+} catch (cancelled: CancellationException) {
+    throw cancelled
+} catch (error: Exception) {
+    Result.failure(error)
+}
 
 /** 主页网格的卡片操作 */
 private sealed interface HomeCardOperation {
@@ -200,12 +211,12 @@ fun HomeGrid(
     val performanceScope = rememberCoroutineScope()
     val worldVaultScope = rememberCoroutineScope()
     suspend fun refreshWorldVault() {
-        worldEntries = runCatching { VoidWorldBackupManager.listWorlds() }
+        worldEntries = runCatchingCancellable { VoidWorldBackupManager.listWorlds() }
             .getOrElse { error ->
                 worldVaultMessage = "World list unavailable: ${error.message ?: "unknown error"}"
                 emptyList()
             }
-        worldBackups = runCatching { VoidWorldBackupManager.listBackups() }
+        worldBackups = runCatchingCancellable { VoidWorldBackupManager.listBackups() }
             .getOrElse { error ->
                 worldVaultMessage = "Backup list unavailable: ${error.message ?: "unknown error"}"
                 emptyList()
@@ -862,7 +873,7 @@ fun HomeGrid(
                                 onClick = {
                                     worldVaultScope.launch {
                                         isWorldOperationRunning = true
-                                        val outcome = runCatching { VoidWorldBackupManager.createBackup(world.name) }
+                                        val outcome = runCatchingCancellable { VoidWorldBackupManager.createBackup(world.name) }
                                         worldVaultMessage = outcome.fold(
                                             onSuccess = { "Backup created for ${it.worldName}: ${it.id}" },
                                             onFailure = { "Backup failed: ${it.message ?: "unknown error"}" }
@@ -944,7 +955,7 @@ fun HomeGrid(
                         showWorldRestoreConfirmation = false
                         worldVaultScope.launch {
                             isWorldOperationRunning = true
-                            val outcome = runCatching { VoidWorldBackupManager.restoreBackup(backupId) }
+                            val outcome = runCatchingCancellable { VoidWorldBackupManager.restoreBackup(backupId) }
                             worldVaultMessage = outcome.fold(
                                 onSuccess = {
                                     "Restored ${it.worldName}. Safety archive: ${it.safetyBackupId ?: "not needed"}"
