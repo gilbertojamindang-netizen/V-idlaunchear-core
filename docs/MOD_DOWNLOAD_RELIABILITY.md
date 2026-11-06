@@ -16,8 +16,8 @@ Current request policy:
 The request batch and concurrency limits were reduced in commit
 `47205ec71b81dabd9dfb8c7f3521c9f6d839e83d` to avoid large request bursts,
 which can be especially troublesome on mobile connections and may trigger
-provider rate limits. This is a conservative request-pressure adjustment; it is separate from the
-shared transient-GET retry policy and does not guarantee availability during
+provider rate limits. This is a conservative request-pressure adjustment;
+it is separate from the shared transient-GET retry policy and does not guarantee availability during
 provider outages or sustained rate limiting.
 
 ## Modrinth project version pagination
@@ -45,8 +45,8 @@ No APK build or device test is implied by this document.
 
 Commit `5c7c1bba9626d73e18bfb6d7c11e0a468951ec82` routes JSON GET requests
 through the shared bounded retry helper. It retries network I/O/DNS failures,
-HTTP 5xx responses, Ktor request timeouts, HTTP 408 timeouts, and HTTP 429 rate-limit responses. Cancellation is never
-retried. Commit `d5aa9ef3d2364225a29322d51478163a352ea937` corrected the retry
+HTTP 5xx responses, Ktor request timeouts, HTTP 408 timeouts, and HTTP 429
+rate-limit responses. Cancellation is never retried. Commit `d5aa9ef3d2364225a29322d51478163a352ea937` corrected the retry
 loop so `maxRetries` means retries after the first attempt, validates delay
 settings, and does not sleep after the final failed attempt.
 
@@ -56,9 +56,11 @@ because their side effects may not be idempotent. Provider failover remains
 available where the platform search layer already uses configured mirrors;
 this change does not promise that every provider supports mirror fallback.
 
-Unit coverage for retry success, non-retryable errors, cancellation, and
-overflow-safe exponential delay calculation was added/extended in commits
-`7efdba33ba8f326e1a1d0a0b240761bf491b1247` and
-`f6f4fe88db025bb045ceee0a66c73228258f8f20` and
+Unit coverage for retry success, non-retryable errors, cancellation,
+retry-count semantics, and overflow-safe exponential delay calculation was
+added/extended in commits
+`7efdba33ba8f326e1a1d0a0b240761bf491b1247`,
+`69e59ecc3cf58b4d2e316628594fb2ceee2e6882`,
+`f6f4fe88db025bb045ceee0a66c73228258f8f20`, and
 `af33132fe485fbdc4fb5589b02f9f00956ad9d2b`. Tests have not yet been
 executed.
