@@ -105,6 +105,9 @@ class CurseForgeSearcher(
         projectID: String,
         pageCallback: (chunk: Int, page: Int) -> Unit
     ): List<CurseForgeFile> {
+        // Some mirrors may repeat files across adjacent pages. Keep the first
+        // occurrence while preserving API order so the version picker has no duplicates.
+        val seenFileIds = HashSet<Int>()
         return getAllVersions(
             pageSize = 50,
             chunkSize = 20,
@@ -122,7 +125,10 @@ class CurseForgeSearcher(
             },
             processVersions = { versions ->
                 val files = versions?.data ?: emptyArray()
-                files.toList() to files.size
+                val uniqueFiles = files.filter { seenFileIds.add(it.id) }
+                // Use the original page size for end-of-list detection; deduplication
+                // must not make a full API page look like the final partial page.
+                uniqueFiles to files.size
             }
         )
     }
@@ -185,7 +191,11 @@ private suspend fun <E, T> getAllVersions(
     checkNotEmpty: (E) -> Boolean,
     asyncVersions: suspend (index: Int, pageSize: Int) -> E,
     processVersions: suspend (E?) -> Pair<List<T>, Int>
-): List<T> = withContext(Dispatchers.IO) {
+): List<T> {
+    require(pageSize > 0) { "pageSize must be greater than 0" }
+    require(chunkSize > 0) { "chunkSize must be greater than 0" }
+    require(maxConcurrent > 0) { "maxConcurrent must be greater than 0" }
+    return withContext(Dispatchers.IO) {
     coroutineScope {
         val allVersions = mutableListOf<T>()
         /** 当前区间编号 */
@@ -242,5 +252,6 @@ private suspend fun <E, T> getAllVersions(
         }
 
         return@coroutineScope allVersions
+    }
     }
 }
