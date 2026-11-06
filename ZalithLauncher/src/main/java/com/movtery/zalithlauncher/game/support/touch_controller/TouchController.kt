@@ -613,11 +613,16 @@ private class TouchControllerInputModifierNode(
             // Ignore invalid/zero-sized layouts until the game surface is measured.
             val width = screenSize.width.coerceAtLeast(1)
             val height = screenSize.height.coerceAtLeast(1)
+            val x1 = (this.left * width).toInt().coerceIn(0, width)
+            val y1 = (this.top * height).toInt().coerceIn(0, height)
+            val x2 = ((this.left + this.width) * width).toInt().coerceIn(0, width)
+            val y2 = ((this.top + this.height) * height).toInt().coerceIn(0, height)
+            // Normalize potentially reversed provider bounds into a valid rectangle.
             return IntRect(
-                left = (this.left * width).toInt().coerceIn(0, width),
-                top = (this.top * height).toInt().coerceIn(0, height),
-                right = ((this.left + this.width) * width).toInt().coerceIn(0, width),
-                bottom = ((this.top + this.height) * height).toInt().coerceIn(0, height),
+                left = minOf(x1, x2),
+                top = minOf(y1, y2),
+                right = maxOf(x1, x2),
+                bottom = maxOf(y1, y2),
             )
         }
 
