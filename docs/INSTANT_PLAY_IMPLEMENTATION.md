@@ -1,6 +1,6 @@
 # VøidLaunchear — Instant Play implementation plan
 
-Status: planned; not yet implemented or verified in an APK.
+Status: partially implemented in existing source; end-to-end behavior is not yet build- or device-verified.
 
 ## User-facing goal
 
@@ -23,20 +23,29 @@ Make the path from tapping **Play** to entering Minecraft as direct as the Minec
 - Server quick join must report connection/authentication errors and allow a normal launch fallback.
 - Quick Play must not silently change the selected Minecraft version or account.
 
-## Existing code to integrate with
+## Existing implementation found in source (2026-11-06)
 
-- `viewmodel/LaunchGameViewModel.kt` already exposes `quickPlaySave(...)` and `quickPlayServer(...)`.
-- `game/launch/GameLaunchFlow.kt` owns account validation, mod scanning, integrity/download work, and the final `runGame(...)` call.
-- `game/version/saves/SaveUtils.kt` parses save metadata and should be reused for save validation.
+- `LaunchGameViewModel.kt` exposes `quickPlaySave(version, saveName)` and `quickPlayServer(version, address)`, which create `LaunchGameOperation.TryLaunch` with a `QuickPlay.Save` or `QuickPlay.Server` target.
+- `LauncherElements.kt` defines the parcelable `QuickPlay` variants and the `LaunchGameOperation.RealLaunch` state, preserving the selected version and target through the account/renderer checks.
+- The `LaunchGameOperation.RealLaunch` consumer assigns `version.quickPlaySingle = quickPlay` before calling `LaunchGameViewModel.start(...)`.
+- `LaunchArgs.kt` reads `version.quickPlaySingle` and appends Minecraft's supported command-line arguments:
+  - Save: `--quickPlaySingleplayer <save-name>`, only when the selected version metadata advertises single-player Quick Play support.
+  - Server: `--quickPlayMultiplayer <host:port>` when supported, with a parsed-address legacy `--server <host> --port <port>` fallback otherwise.
+- `LaunchArgs.kt` parses the server address with `ServerAddress.parse`; invalid addresses are logged and the automatic join arguments are omitted.
+- `GameLaunchFlow.kt` still performs account validation, mod scanning, required integrity/download work, and then calls `runGame(context, version, account)`. The quick-play target is carried on the version object rather than passed as a separate parameter to this function.
+- The selected-save callback is present in the saves UI. The existence of these paths means existing-world and server quick-play argument generation is already implemented in source; the remaining work is to verify save-name mapping, error/fallback behavior, and actual runtime behavior.
+- The new-world creation-to-launch handoff has not yet been traced or verified. Do not mark it complete until the creation UI and game launch path preserve the complete world options and automatically open the new world.
+- The splash loading screen already contains the VØID/LAUNCHER collision animation in current source; this area needs a visual/branding review rather than assuming it is absent.
+- The manifest already enforces landscape orientation for launcher and game activities.
 
-## Implementation sequence
+## Remaining implementation and verification
 
-1. Trace the existing QuickPlay model and the game process launch arguments end-to-end.
-2. Connect selected-save and selected-server quick play to the final game launch invocation.
-3. Add a dedicated new-world handoff that carries the complete world-creation settings into Minecraft's supported world-creation flow, then opens the created world.
-4. Add launch preparation/caching only where correctness is preserved; keep required initialization and integrity repair.
-5. Add unit tests for target validation, missing saves, invalid server addresses, fallback behavior, and one-launch-at-a-time protection.
-6. Verify on-device for an existing world, a newly created world, and a multiplayer server before marking this feature complete.
+1. Trace how save metadata/name maps to the exact `--quickPlaySingleplayer` target expected by each supported Minecraft version, including unsupported versions and missing saves.
+2. Trace the complete new-world creation UI and add a safe handoff so Create launches the chosen version and enters the newly created world with every selected option preserved. If Minecraft does not expose a supported direct-create argument for a version, use a compatible in-game creation handoff rather than inventing an unsupported CLI flag.
+3. Verify server parsing and connection failure feedback, including preserving the selected version/account and allowing normal launch fallback.
+4. Review launch preparation/caching only where correctness is preserved; keep required initialization, account checks, integrity checks, and downloads.
+5. Add tests for target validation, missing saves, invalid server addresses, fallback behavior, and one-launch-at-a-time protection where the current test structure permits.
+6. Verify on-device for an existing world, a newly created world, and a multiplayer server before marking Instant Play complete.
 
 ## Acceptance criteria
 
@@ -46,13 +55,6 @@ Make the path from tapping **Play** to entering Minecraft as direct as the Minec
 - Cold and warm launches both work; warm launch may be faster but neither skips required game initialization.
 - Normal launch remains available and all existing account/version protections remain intact.
 
-## Source audit findings (2026-11-06)
+## Verification status
 
-- `LaunchGameViewModel.kt` exposes `quickPlaySave(version, saveName)` and `quickPlayServer(version, address)`, but this only sets a `LaunchGameOperation.TryLaunch` request.
-- `GameLaunchFlow.launch(...)` currently accepts the version and account, and its final task calls `runGame(context, version, account)`. The `quickPlay` target is not passed into this flow or the game process configuration in the inspected path.
-- `GameLauncher.LaunchConfig` currently carries only the version and account. Therefore, the existing quick-play methods are not proof that automatic world/server entry is implemented.
-- `SavesManagerScreen.kt` has an `onQuickPlay` callback for save entries, but it depends on the missing downstream handoff described above.
-- The splash loading screen already contains the VØID/LAUNCHER collision animation in the current source; this area needs a visual/branding review rather than assuming it is absent.
-- The manifest already enforces landscape orientation for launcher and game activities.
-
-These findings are source inspection only. No Gradle build, APK build, or device test was run. The next implementation step is to trace the launch-operation consumer and VMActivity/GameService intent contract before changing parcelable launch configuration, so existing game startup and process boundaries are not broken.
+Source inspection only. No Gradle build, APK build, or device test was run. Existing-world/server Quick Play argument construction is present in source, but feature-level behavior is not yet verified. New-world automatic entry remains outstanding.
