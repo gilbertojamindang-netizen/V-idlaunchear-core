@@ -80,9 +80,10 @@ enum class ContentEncoding {
     companion object {
         fun fromHeaders(response: ResponseInfo): ContentEncoding {
             val encoding = response.header("content-encoding") ?: return IDENTITY
+            val normalized = encoding.trim()
             return when {
-                encoding.isEmpty() || encoding == "identity" -> IDENTITY
-                encoding.equals("gzip", ignoreCase = true) -> GZIP
+                normalized.isEmpty() || normalized.equals("identity", ignoreCase = true) -> IDENTITY
+                normalized.equals("gzip", ignoreCase = true) -> GZIP
                 else -> throw IOException("Unsupported content encoding: $encoding")
             }
         }
@@ -324,7 +325,9 @@ object Fetcher {
         sha1: String?,
         state: CandidateState
     ): AttemptResult {
-        var redirects: MutableList<URL>? = null
+        // Track the initial URL as well as redirect targets so cyclic redirects
+        // fail immediately instead of consuming the entire redirect budget.
+        val visitedRedirects = linkedSetOf(url)
 
         val headers = linkedMapOf("accept-encoding" to "gzip")
         val resumeRequested = state.resume?.hasPartialContent() == true
@@ -347,15 +350,18 @@ object Fetcher {
                 response = ResponseInfo.of(code, conn.url, conn)
 
                 if (code in 300..308 && code != HttpURLConnection.HTTP_NOT_MODIFIED && code != 306) {
-                    val seen = redirects ?: mutableListOf<URL>().also { redirects = it }
-                    if (seen.size >= MAX_REDIRECTS) throw IOException("Too much redirects")
+                    if (visitedRedirects.size > MAX_REDIRECTS) {
+                        throw IOException("Too many redirects")
+                    }
 
                     val location = conn.getHeaderField("Location")
                     if (location.isNullOrBlank()) throw IOException("Redirected to an empty location")
 
                     val target = currentUri.toURI().resolve(location).toURL()
-                    seen.add(target)
                     if (!isHttpUri(target)) throw IOException("Redirected to non-HTTP URL: $target")
+                    if (!visitedRedirects.add(target)) {
+                        throw IOException("Redirect loop detected at $target")
+                    }
                     currentUri = target
                 } else {
                     keep = true
