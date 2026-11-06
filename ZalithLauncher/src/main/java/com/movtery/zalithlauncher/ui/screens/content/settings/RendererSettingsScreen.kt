@@ -48,6 +48,10 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.game.plugin.Plugin
@@ -474,7 +478,8 @@ private fun VulkanSetupPanel(
             Text(
                 text = "VØID VULKAN SETUP",
                 color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics { heading() }
             )
             Text(
                 text = "Scan the selected driver, review supported Minecraft Vulkan profiles, then choose a graphics path.",
@@ -485,6 +490,7 @@ private fun VulkanSetupPanel(
             Text(
                 text = "Selected Vulkan driver: ${selectedDriver.name}" +
                     if (selectedDriver.isLauncher) " (built-in)" else " (plugin)",
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
@@ -550,6 +556,7 @@ private fun VulkanSetupPanel(
                     Text(
                         text = "The selected driver scan could not complete. Try the built-in driver or keep OpenGL as the fallback.",
                         color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                         style = MaterialTheme.typography.bodySmall
                     )
                 } else {
@@ -567,6 +574,7 @@ private fun VulkanSetupPanel(
                         },
                         color = if (supportedProfiles.isNotEmpty()) MaterialTheme.colorScheme.primary
                             else MaterialTheme.colorScheme.error,
+                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                         style = MaterialTheme.typography.bodySmall
                     )
                     if (unsupportedProfiles.isNotEmpty()) {
