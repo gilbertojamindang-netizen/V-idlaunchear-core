@@ -11,13 +11,23 @@ Current request policy:
 - At most 4 requests in flight.
 - File IDs are de-duplicated while preserving the first-seen API order.
 - End-of-list detection uses the raw API page size, not the de-duplicated count.
+- Pagination stops with a clear error after 1,000 pages (50,000 raw file slots) rather than looping forever if a provider never signals the end.
 
 The request batch and concurrency limits were reduced in commit
 `47205ec71b81dabd9dfb8c7f3521c9f6d839e83d` to avoid large request bursts,
 which can be especially troublesome on mobile connections and may trigger
-provider rate limits. This is a conservative request-pressure adjustment;
-it is not a retry policy and does not guarantee availability during provider
-outages or rate limiting.
+provider rate limits. This is a conservative request-pressure adjustment; it is separate from the
+shared transient-GET retry policy and does not guarantee availability during
+provider outages or sustained rate limiting.
+
+## Modrinth project version pagination
+
+`ModrinthSearcher.getVersions(projectID, pageCallback)` requests
+100 versions per page, de-duplicates by version ID, advances by the raw page
+length, and stops if a full page adds no new IDs. It also has a 100-page
+(10,000 raw version slot) safety cap; a provider that keeps returning full,
+unique pages beyond that cap produces a clear error instead of an unbounded
+loop or silent truncation.
 
 ## Remaining verification
 
@@ -32,9 +42,9 @@ No APK build or device test is implied by this document.
 
 ## Transient HTTP GET recovery
 
-Commit `34e17ad92c9bfbec1991adb774a8678b3f2cdd9c` routes JSON GET requests
+Commit `5c7c1bba9626d73e18bfb6d7c11e0a468951ec82` routes JSON GET requests
 through the shared bounded retry helper. It retries network I/O/DNS failures,
-HTTP 5xx responses, and HTTP 429 rate-limit responses. Cancellation is never
+HTTP 5xx responses, HTTP 408 timeouts, and HTTP 429 rate-limit responses. Cancellation is never
 retried. Commit `d5aa9ef3d2364225a29322d51478163a352ea937` corrected the retry
 loop so `maxRetries` means retries after the first attempt, validates delay
 settings, and does not sleep after the final failed attempt.
