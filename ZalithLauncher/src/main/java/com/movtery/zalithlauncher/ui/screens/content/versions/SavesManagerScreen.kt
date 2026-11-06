@@ -358,19 +358,19 @@ fun SavesManagerScreen(
                         val context = LocalContext.current
                         var savesOperation by remember { mutableStateOf<SavesOperation>(SavesOperation.None) }
                         fun runProgress(task: () -> Unit) {
-                            operationScope.launch(Dispatchers.IO) {
+                            operationScope.launch {
                                 savesOperation = SavesOperation.Progress
                                 try {
-                                    task()
+                                    withContext(Dispatchers.IO) {
+                                        task()
+                                    }
                                 } catch (th: CancellationException) {
                                     throw th
-                                } catch (th: Throwable) {
+                                } catch (th: Exception) {
                                     Logger.error(TAG, "A world save operation failed.", th)
                                 } finally {
-                                    withContext(Dispatchers.Main) {
-                                        savesOperation = SavesOperation.None
-                                        viewModel.refresh()
-                                    }
+                                    savesOperation = SavesOperation.None
+                                    viewModel.refresh()
                                 }
                             }
                         }
