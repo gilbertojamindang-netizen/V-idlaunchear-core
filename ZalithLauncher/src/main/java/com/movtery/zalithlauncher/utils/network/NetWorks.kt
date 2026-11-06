@@ -23,6 +23,7 @@ import com.movtery.zalithlauncher.path.GLOBAL_JSON
 import com.movtery.zalithlauncher.utils.logging.Logger
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -97,14 +98,16 @@ suspend inline fun <reified T> httpGetJson(
     parameters: Parameters? = null,
     context: CoroutineContext = Dispatchers.IO
 ): T = withContext(context) {
-    GLOBAL_CLIENT.get(url) {
-        headers?.takeIf { it.isNotEmpty() }?.forEach { (k, v) -> header(k, v) }
-        parameters?.let { value ->
-            url {
-                this.parameters.appendAll(value)
+    withRetry(logTag = "GET $url") {
+        GLOBAL_CLIENT.get(url) {
+            headers?.takeIf { it.isNotEmpty() }?.forEach { (k, v) -> header(k, v) }
+            parameters?.let { value ->
+                url {
+                    this.parameters.appendAll(value)
+                }
             }
-        }
-    }.safeBodyAsJson()
+        }.safeBodyAsJson()
+    }
 }
 
 suspend fun <T> withRetry(
@@ -143,7 +146,8 @@ suspend fun <T> withRetry(
 
 private fun canRetry(e: Exception): Boolean {
     return when (e) {
-        is ClientRequestException -> e.response.status.value in 500..599 //5xx错误可重试
+        is ClientRequestException -> e.response.status.value == 408 || e.response.status.value == 429
+        is ServerResponseException -> true // HTTP 5xx responses are transient candidates
         is UnresolvedAddressException -> true // DNS解析失败，可能是临时性故障
         is IOException -> true //网络错误
         else -> false
