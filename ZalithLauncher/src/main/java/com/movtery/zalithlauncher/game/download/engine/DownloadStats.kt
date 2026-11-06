@@ -49,7 +49,11 @@ class DownloadStats {
     val downloadedFiles: Int get() = downloadedFilesCounter.get()
 
     fun addBytes(count: Long) {
-        downloaded.addAndGet(count)
+        // Failed/restarted download attempts report negative deltas when their
+        // temporary bytes are discarded. Keep the public progress counter valid.
+        downloaded.updateAndGet { current ->
+            (current + count).coerceAtLeast(0L)
+        }
     }
 
     fun registerFile(expectedSize: Long) {
