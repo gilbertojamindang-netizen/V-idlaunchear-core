@@ -99,6 +99,7 @@ import com.movtery.zalithlauncher.ui.base.BaseScreen
 import com.movtery.zalithlauncher.ui.components.AnimatedDirection
 import com.movtery.zalithlauncher.ui.components.BackgroundCard
 import com.movtery.zalithlauncher.ui.components.MarqueeText
+import com.movtery.zalithlauncher.ui.components.VoidCompanionStage
 import com.movtery.zalithlauncher.ui.components.PetModelView
 import com.movtery.zalithlauncher.ui.components.ScalingActionButton
 import com.movtery.zalithlauncher.ui.components.animated
@@ -354,6 +355,15 @@ fun LauncherScreen(
                     )
                 }
             }
+
+            // Home-screen companion: seated/standing pose cycle with mouse gaze tracking.
+            VoidCompanionStage(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 6.dp)
+                    .size(width = 112.dp, height = 154.dp),
+                autoPose = true
+            )
             }
 
             if (isBackgroundOnly) {
