@@ -90,7 +90,7 @@ object VoidWorldBackupManager {
     }
 
     suspend fun restoreBackup(backupId: String): RestoreResult = withContext(Dispatchers.IO) {
-        require(backupId.matches(Regex("^void-world-[A-Za-z0-9_-]+-[0-9]+\\.zip$"))) {
+        require(isSafeBackupId(backupId)) {
             "Invalid VØID world backup identifier."
         }
 
@@ -181,6 +181,9 @@ object VoidWorldBackupManager {
         }
         return canonicalDirectory
     }
+
+    internal fun isSafeBackupId(id: String): Boolean =
+        id.matches(Regex("^void-world-[A-Za-z0-9_-]+-[0-9]+\\.zip$"))
 
     internal fun isSafeWorldName(name: String): Boolean =
         name.isNotBlank() &&
