@@ -46,3 +46,5 @@ Do not dispatch an APK build until the feature work is reviewed and the project 
 - `dc8f9aad0a467b0b633c23c68c371715088d5820` and `e6cab2bfc22ae0962cfb516e1c586ddd4a88e7dd` — Vøidlaunchear APK artifact filename and labels.
 - `535a0d31b56afc4a08eecdc1b5c262a254a2484c` — discard stale Vulkan compatibility results after driver changes.
 - `02065066f6934d79fde1c6e550b0e4096680b2bc` — retain companion drop position during the ragdoll animation.
+- `280c637a958af350d98705d4acad6b5ce9bdc2e1` — improve screen-reader heading and live status semantics in Vulkan setup.
+- `8ace4e4f0da849cbe06b30fafcb087479fbc8db7` — propagate coroutine cancellation instead of misreporting it as a failed Vulkan scan.
