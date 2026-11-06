@@ -100,7 +100,7 @@ object MinecraftVersions {
                 }
             } else {
                 try {
-                    GSON.fromJson(localManifestFile.readText(), VersionManifest::class.java)
+                    parseManifest(localManifestFile.readText())
                 } catch (e: Exception) {
                     Logger.warning(TAG, "Failed to parse version manifest, will redownload", e)
                     //读取失败则删除当前的版本信息文件
