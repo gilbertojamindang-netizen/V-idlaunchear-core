@@ -29,3 +29,22 @@ outages or rate limiting.
 - Run unit tests and an Android build before claiming runtime reliability.
 
 No APK build or device test is implied by this document.
+
+## Transient HTTP GET recovery
+
+Commit `34e17ad92c9bfbec1991adb774a8678b3f2cdd9c` routes JSON GET requests
+through the shared bounded retry helper. It retries network I/O/DNS failures,
+HTTP 5xx responses, and HTTP 429 rate-limit responses. Cancellation is never
+retried. Commit `d5aa9ef3d2364225a29322d51478163a352ea937` corrected the retry
+loop so `maxRetries` means retries after the first attempt, validates delay
+settings, and does not sleep after the final failed attempt.
+
+The retry schedule starts at 1 second and doubles up to 10 seconds, with three
+retries by default. POST requests are intentionally not automatically retried
+because their side effects may not be idempotent. Provider failover remains
+available where the platform search layer already uses configured mirrors;
+this change does not promise that every provider supports mirror fallback.
+
+Unit coverage for retry success, non-retryable errors, and cancellation was
+added in commit `7efdba33ba8f326e1a1d0a0b240761bf491b1247`. Tests have not yet
+been executed.
