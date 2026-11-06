@@ -24,10 +24,11 @@ provider outages or sustained rate limiting.
 
 `ModrinthSearcher.getVersions(projectID, pageCallback)` requests
 100 versions per page, de-duplicates by version ID, advances by the raw page
-length, and stops if a full page adds no new IDs. It also has a 100-page
-(10,000 raw version slot) safety cap; a provider that keeps returning full,
-unique pages beyond that cap produces a clear error instead of an unbounded
-loop or silent truncation.
+length, and stops if a full page adds no new IDs. It also has a 100-full-page
+(10,000 raw version slot) safety cap and permits one terminal probe to
+distinguish an exactly-full final page from additional data. A provider that
+keeps returning full, unique pages beyond the cap produces a clear error
+instead of an unbounded loop or silent truncation.
 
 ## Remaining verification
 
