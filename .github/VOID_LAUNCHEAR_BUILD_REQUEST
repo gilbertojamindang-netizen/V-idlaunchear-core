@@ -9,3 +9,6 @@ Changes: Download Lab empty-results state and announcement feed metadata.
 
 VøidLaunchear 1.0.9 build request: 2026-11-06
 Changes: version bump and latest main branding/icon updates.
+
+VøidLaunchear 1.0.9 rebuild request: 2026-11-06
+Changes: Fix Compose animateDpAsState import and missing Modifier import after build #31 compilation failure.
