@@ -20,12 +20,12 @@ This checklist is for the next APK test pass. It deliberately separates implemen
 4. Existing-world Quick Play: launch a known save by its folder name; test a missing save and confirm the launcher reports/handles the failure instead of silently launching normal gameplay.
 5. Server Quick Play: test hostname, hostname with port, IPv4 with port, IPv6 if supported, and malformed/blank input. Confirm malformed input does not silently become an ordinary launch.
 6. New World: no launcher-owned Create New World screen exists in the current Kotlin/Java source tree. Use Minecraft's native Create New World screen for now. Automatic launcher creation-to-entry remains an open feature gap; do not add undocumented command-line flags or fabricate world metadata.
-7. Mods: search and install one Modrinth mod and one CurseForge mod; test no results, pagination, cancellation, rate limiting, and retry after network restoration. JSON GET calls now retry transient I/O/DNS, HTTP 5xx and 429 with bounded backoff; POST is not automatically retried. Retry unit tests were added but not executed.
+7. Mods: search and install one Modrinth mod and one CurseForge mod; test no results, pagination, cancellation, rate limiting, and retry after network restoration. JSON GET calls now retry transient I/O/DNS, Ktor request timeouts, HTTP 408, 429 and 5xx with bounded backoff; POST is not automatically retried. Modrinth and CurseForge pagination also have upper safety bounds. Retry unit tests were added but not executed.
 8. Renderer: test OpenGL on a known-compatible device. Test Vulkan only when the device/driver capability check reports support; confirm unsupported Vulkan falls back safely.
 9. Low-end profile: apply the low-memory profile, launch, check memory allocation and render/simulation distances, then restore balanced settings.
 10. Companion: drag, release after lifting, observe walk/sit/idle and roaming. Current ragdoll is an animation trigger, not a full rigid-body physics simulation.
 11. Controls: verify touch layout editing, on-screen controls, keyboard, mouse, rotation, and landscape orientation in an actual game session.
-12. Branding: verify app label, launcher icon, splash/loading collision animation, credits, and version label on a clean install and upgrade install.
+12. Branding: verify app label and navigation title both read VøidLaunchear, launcher icon, splash/loading collision animation, credits, APK filename Vøidlaunchear, and version label on a clean install and upgrade install.
 
 ## Build gate
 Do not dispatch an APK build until the feature work is reviewed and the project owner explicitly approves the build. Source changes and source tests are not proof of a successful Android build or device test.
@@ -38,3 +38,9 @@ Do not dispatch an APK build until the feature work is reviewed and the project 
 - `d5aa9ef3d2364225a29322d51478163a352ea937` — retry-count semantics and input validation.
 - `ff0cb045da3ebe09c71ceadc77b3621fdf22d6ff` — mod download retry documentation.
 - `54fa11ca7722327a942d3bef5874da44c722b6ca` — New World source-tree audit.
+- `5c7c1bba9626d73e18bfb6d7c11e0a468951ec82` and `9168b80e3d5a05644065b97c95a4f9b24e3d219a` — bounded JSON GET retries including Ktor request timeouts.
+- `bd3f713981626b2c4100ca3ad7f27ed67ff182b2` and `104f6a5708dd2633cd25eee562342aca58c26807` — Modrinth and CurseForge pagination safety caps.
+- `69e59ecc3cf58b4d2e316628594fb2ceee2e6882`, `f6f4fe88db025bb045ceee0a66c73228258f8f20`, and `af33132fe485fbdc4fb5589b02f9f00956ad9d2b` — retry backoff arithmetic and retry-count tests.
+- `350102e8e88c8e603969cc08ba1d5343ea362e81` through `a8e412bf47c4eac1f8ad29730c70dbef5a77c706` — world backup metadata, archive-entry, and restore-target hardening.
+- `dd0bf9d2a43e204e10843e6e0bb486f3002aa776` — VøidLaunchear navigation-title branding.
+- `dc8f9aad0a467b0b633c23c68c371715088d5820` and `e6cab2bfc22ae0962cfb516e1c586ddd4a88e7dd` — Vøidlaunchear APK artifact filename and labels.
