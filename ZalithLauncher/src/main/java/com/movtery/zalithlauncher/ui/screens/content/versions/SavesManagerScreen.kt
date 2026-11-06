@@ -211,29 +211,25 @@ private class SavesManageViewModel(
         job = viewModelScope.launch {
             savesState = LoadingState.Loading
 
-            withContext(Dispatchers.IO) {
+            val loadedSaves = withContext(Dispatchers.IO) {
                 val tempList = mutableListOf<SaveData>()
-                savesDir.listFiles()?.filter { it.isDirectory }?.takeIf { it.isNotEmpty() }?.let { dirs ->
-                    try {
-                        dirs.forEach { dir ->
-                            ensureActive()
-                            //解析存档 level.dat，读取必要数据
-                            val data = parseLevelDatFile(
-                                saveFile = dir,
-                                levelDatFile = File(dir, "level.dat"),
-                                worldGenDatFile = File(dir, "data/minecraft/world_gen_settings.dat")
-                                    .takeIf { it.isFile && it.exists() }
-                            )
-                            tempList.add(data)
-                        }
-                    } catch (_: CancellationException) {
-                        return@withContext
-                    }
+                val dirs = savesDir.listFiles()?.filter { it.isDirectory }.orEmpty()
+                for (dir in dirs) {
+                    ensureActive()
+                    // Parse each level.dat on IO; publish Compose state only after returning to Main.
+                    val data = parseLevelDatFile(
+                        saveFile = dir,
+                        levelDatFile = File(dir, "level.dat"),
+                        worldGenDatFile = File(dir, "data/minecraft/world_gen_settings.dat")
+                            .takeIf { it.isFile && it.exists() }
+                    )
+                    tempList.add(data)
                 }
-                allSaves = tempList.sortedBy { it.saveFile.name }
-                filterSaves()
+                tempList.sortedBy { it.saveFile.name }
             }
 
+            allSaves = loadedSaves
+            filterSaves()
             savesState = LoadingState.None
         }
     }
