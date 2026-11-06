@@ -59,5 +59,6 @@ this change does not promise that every provider supports mirror fallback.
 Unit coverage for retry success, non-retryable errors, cancellation, and
 overflow-safe exponential delay calculation was added/extended in commits
 `7efdba33ba8f326e1a1d0a0b240761bf491b1247` and
-`f6f4fe88db025bb045ceee0a66c73228258f8f20`. Tests have not yet been
+`f6f4fe88db025bb045ceee0a66c73228258f8f20` and
+`af33132fe485fbdc4fb5589b02f9f00956ad9d2b`. Tests have not yet been
 executed.
