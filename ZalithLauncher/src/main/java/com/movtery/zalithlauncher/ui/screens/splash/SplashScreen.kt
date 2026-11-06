@@ -205,7 +205,7 @@ private fun LoadingScreen(
                         modifier = Modifier.offset(
                             x = (-76f * (1f - logoProgress.value)).dp
                         ),
-                        text = "VØID",
+                        text = "Vøid",
                         color = Color(0xFFE0BDFF),
                         fontSize = 38.sp,
                         fontWeight = FontWeight.Black,
@@ -215,7 +215,7 @@ private fun LoadingScreen(
                         modifier = Modifier.offset(
                             x = (76f * (1f - logoProgress.value)).dp
                         ),
-                        text = "LAUNCHER",
+                        text = "Launchear",
                         color = Color(0xFFFFF8FF),
                         fontSize = 23.sp,
                         fontWeight = FontWeight.ExtraBold,
