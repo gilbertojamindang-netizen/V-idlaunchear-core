@@ -711,7 +711,7 @@ fun Modifier.touchControllerInputModifier(
 @Composable
 fun Modifier.touchControllerTouchModifier(
     screenSize: IntSize,
-) = this.pointerInput(Unit) {
+) = this.pointerInput(screenSize) {
     awaitPointerEventScope {
         val activePointers = mutableMapOf<PointerId, Int>()
         var nextPointerId = 1
