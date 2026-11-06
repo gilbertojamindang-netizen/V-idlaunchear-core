@@ -59,6 +59,7 @@ fun VoidCompanionStage(
     var dragY by remember { mutableStateOf(0f) }
     var isDragging by remember { mutableStateOf(false) }
     var ragdollTrigger by remember { mutableStateOf(0) }
+    var wasLifted by remember { mutableStateOf(false) }
     val animatedOffset by animateDpAsState(
         targetValue = targetOffset,
         animationSpec = tween(durationMillis = 1700),
@@ -106,12 +107,14 @@ fun VoidCompanionStage(
                 detectDragGestures(
                     onDragStart = {
                         isDragging = true
+                        wasLifted = false
                         sitting = false
                         walking = false
                     },
                     onDragEnd = {
-                        // An upward release is treated as an airborne drop.
-                        if (dragY < -12f) ragdollTrigger++
+                        // Once lifted, releasing at any point plays the fall/ragdoll.
+                        if (wasLifted || dragY < -12f) ragdollTrigger++
+                        wasLifted = false
                         dragX = 0f
                         dragY = 0f
                         isDragging = false
@@ -125,6 +128,7 @@ fun VoidCompanionStage(
                         change.consume()
                         dragX = (dragX + amount.x).coerceIn(-96f, 96f)
                         dragY = (dragY + amount.y).coerceIn(-120f, 48f)
+                        if (dragY < -12f) wasLifted = true
                     }
                 )
             },
