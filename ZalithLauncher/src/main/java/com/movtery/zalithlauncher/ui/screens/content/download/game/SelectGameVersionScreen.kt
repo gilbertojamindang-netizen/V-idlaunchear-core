@@ -357,7 +357,7 @@ private fun List<MinecraftVersion>.filterVersions(
 }.filter { version ->
     //Fix：单独过滤版本名称
     val versionId = versionFilter.id
-    versionId.isEmptyOrBlank() || version.version.id.contains(versionId)
+    versionId.isEmptyOrBlank() || version.version.id.contains(versionId, ignoreCase = true)
 }
 
 @Composable
