@@ -129,31 +129,26 @@ class LaunchArgs(
         address: String,
         quickPlay: VersionInfo.QuickPlay
     ) {
-        runCatching {
+        val parsed = try {
             ServerAddress.parse(address)
-        }.onFailure {
-            val msg = "Unable to resolve the server address: $address. The automatic server join feature is unavailable."
+        } catch (error: IllegalArgumentException) {
+            val msg = "Invalid server address: $address. Fix the address before launching Quick Play."
             LoggerBridge.append(msg)
-            Logger.warning(TAG, msg, it)
-        }.getOrNull()?.let { parsed ->
-            val args = if (quickPlay.isQuickPlayMultiplayer) {
-                val port = if (parsed.port < 0) {
-                    ServerAddress.DEFAULT_PORT
-                } else {
-                    parsed.port
-                }
-
-                listOf(
-                    "--quickPlayMultiplayer",
-                    "${parsed.getASCIIHost()}:$port"
-                )
-            } else {
-                val port = parsed.port.takeIf { it >= 0 } ?: ServerAddress.DEFAULT_PORT
-                listOf("--server", parsed.getASCIIHost(), "--port", port.toString())
-            }
-
-            addAll(args)
+            Logger.warning(TAG, msg, error)
+            // Do not silently continue into a normal world when the user asked to join a server.
+            throw IllegalArgumentException(msg, error)
         }
+
+        val args = if (quickPlay.isQuickPlayMultiplayer) {
+            listOf(
+                "--quickPlayMultiplayer",
+                "${parsed.getASCIIHost()}:${parsed.port}"
+            )
+        } else {
+            listOf("--server", parsed.getASCIIHost(), "--port", parsed.port.toString())
+        }
+
+        addAll(args)
     }
 
     /**
