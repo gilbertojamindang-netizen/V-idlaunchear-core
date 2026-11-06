@@ -296,7 +296,7 @@ object VoidWorldBackupManager {
                 output.toByteArray()
             }
             val properties = Properties().apply {
-                ByteArrayInputStream(metadataBytes).use(::load)
+                ByteArrayInputStream(metadataBytes).use { load(it) }
             }
             val worldName = properties.getProperty("worldName")
                 ?: error("Backup world name is missing.")
