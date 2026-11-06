@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content
 
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -131,6 +132,8 @@ fun DownloadScreen(
     eventViewModel: EventViewModel,
     submitError: (ErrorViewModel.ThrowableMessage) -> Unit
 ) {
+    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+
     //进入下载屏幕时确保收藏仓库完成初始化
     LaunchedEffect(Unit) {
         FavoriteProjectsRepository.ensureLoaded()
@@ -143,7 +146,7 @@ fun DownloadScreen(
     ) { isVisible: Boolean ->
         Column(modifier = Modifier.fillMaxSize()) {
             DownloadHubHeader(
-                onBack = { onBack(backScreenViewModel.mainScreen.backStack) }
+                onBack = { backDispatcher?.onBackPressed() }
             )
             TabMenu(
                 modifier = Modifier.fillMaxWidth(),
@@ -428,6 +431,11 @@ private fun NavigationUI(
     val stackTopKey = backStack.lastOrNull()
     LaunchedEffect(stackTopKey) {
         backScreenViewModel.downloadScreen.currentKey = stackTopKey
+    }
+    LaunchedEffect(backStack.isEmpty()) {
+        if (backStack.isEmpty()) {
+            backStack.add(NestedNavKey.DownloadGame())
+        }
     }
 
     if (backStack.isNotEmpty()) {
