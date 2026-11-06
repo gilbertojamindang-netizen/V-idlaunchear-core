@@ -44,7 +44,7 @@ No APK build or device test is implied by this document.
 
 Commit `5c7c1bba9626d73e18bfb6d7c11e0a468951ec82` routes JSON GET requests
 through the shared bounded retry helper. It retries network I/O/DNS failures,
-HTTP 5xx responses, HTTP 408 timeouts, and HTTP 429 rate-limit responses. Cancellation is never
+HTTP 5xx responses, Ktor request timeouts, HTTP 408 timeouts, and HTTP 429 rate-limit responses. Cancellation is never
 retried. Commit `d5aa9ef3d2364225a29322d51478163a352ea937` corrected the retry
 loop so `maxRetries` means retries after the first attempt, validates delay
 settings, and does not sleep after the final failed attempt.
