@@ -120,4 +120,37 @@ class VoidPerformanceAdvisorTest {
         assertTrue(result.maxMemoryMb >= 512)
         assertTrue(result.maxMemoryMb <= 512)
     }
+
+    @Test
+    fun everyProfileStaysWithinMemoryAndDistanceSafetyBoundsAcrossDeviceSizes() {
+        val ramSizes = listOf(512, 1024, 2048, 3072, 4096, 6144, 8192, 16384, 32768)
+        val profiles = VoidPerformanceAdvisor.Profile.values()
+
+        ramSizes.forEach { ram ->
+            profiles.forEach { profile ->
+                val result = VoidPerformanceAdvisor.recommend(ram, profile)
+                val safeLimit = minOf((ram.coerceAtLeast(512) * 0.35f).toInt(), 4096)
+                    .coerceAtLeast(512)
+
+                assertEquals(profile, result.profile)
+                assertTrue("RAM recommendation exceeded safe cap: RAM=$ram profile=$profile", result.maxMemoryMb in 512..safeLimit)
+                assertTrue("Render distance outside supported range: $result", result.renderDistance in 2..24)
+                assertTrue("Simulation distance outside supported range: $result", result.simulationDistance in 2..16)
+                assertTrue("Entity distance outside percentage range: $result", result.entityDistancePercent in 0..200)
+                assertTrue("Missing recommendation explanation: $result", result.explanation.isNotBlank())
+            }
+        }
+    }
+
+    @Test
+    fun balancedProfileDoesNotAllocateMostOfLowEndDeviceRam() {
+        listOf(1024, 2048, 3072, 4096).forEach { ram ->
+            val result = VoidPerformanceAdvisor.recommend(
+                ram,
+                VoidPerformanceAdvisor.Profile.BALANCED
+            )
+            assertTrue("Balanced profile should leave substantial native/Android headroom", result.maxMemoryMb <= ram * 0.35f)
+        }
+    }
+
 }
