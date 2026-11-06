@@ -73,7 +73,11 @@ class DownloadStats {
     fun registerBytes(bytes: Long) {
         if (bytes > 0) {
             totalBytesCounter.accumulateAndGet(bytes) { previous, add ->
-                if (previous < 0) add else previous + add
+                when {
+                    previous < 0L -> add
+                    previous > Long.MAX_VALUE - add -> Long.MAX_VALUE
+                    else -> previous + add
+                }
             }
         }
     }
@@ -104,8 +108,14 @@ class DownloadStats {
             if (elapsed < SAMPLE_INTERVAL_NANOS) return currentSpeed
 
             val bytes = downloaded.get()
-            currentSpeed = ((bytes - blockStartBytes) * NANOS_PER_SEC / elapsed)
-                .coerceAtLeast(0L)
+            val deltaBytes = (bytes - blockStartBytes).coerceAtLeast(0L)
+            // Saturate before multiplication so unusually large downloads cannot
+            // wrap the speed display into a negative or misleading value.
+            currentSpeed = if (deltaBytes > Long.MAX_VALUE / NANOS_PER_SEC) {
+                Long.MAX_VALUE
+            } else {
+                (deltaBytes * NANOS_PER_SEC / elapsed).coerceAtLeast(0L)
+            }
             blockStartNanos = now
             blockStartBytes = bytes
             return currentSpeed
