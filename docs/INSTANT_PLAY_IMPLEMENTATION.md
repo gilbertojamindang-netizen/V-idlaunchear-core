@@ -63,6 +63,8 @@ Make the path from tapping **Play** to entering Minecraft as direct as the Minec
 - Image validation decodes image bounds; video validation uses `MediaMetadataRetriever`, so the staged temporary filename does not need the original extension.
 - The staged import change has not been compiled or exercised on-device. Verify provider URI copying, image/video decoding, and rollback behavior in a future test pass.
 
+- Quick Play request guards were added in commit `eed6c9c5161cac545e943c01d8d987810112da8c`: blank save identifiers are ignored, blank server addresses are ignored, and nonblank server addresses are trimmed before creating the Quick Play request. This prevents an empty target from accidentally falling through to a normal game launch. It does not replace full address parsing in `LaunchArgs.kt` or runtime connection verification.
+
 ## Verification status
 
 Source inspection only. No Gradle build, APK build, or device test was run. Existing-world/server Quick Play argument construction is present in source, but feature-level behavior is not yet verified. New-world automatic entry remains outstanding.
