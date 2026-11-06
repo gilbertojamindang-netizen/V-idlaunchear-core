@@ -360,9 +360,18 @@ fun SavesManagerScreen(
                         fun runProgress(task: () -> Unit) {
                             operationScope.launch(Dispatchers.IO) {
                                 savesOperation = SavesOperation.Progress
-                                task()
-                                savesOperation = SavesOperation.None
-                                viewModel.refresh()
+                                try {
+                                    task()
+                                } catch (th: CancellationException) {
+                                    throw th
+                                } catch (th: Throwable) {
+                                    Logger.error(TAG, "A world save operation failed.", th)
+                                } finally {
+                                    withContext(Dispatchers.Main) {
+                                        savesOperation = SavesOperation.None
+                                        viewModel.refresh()
+                                    }
+                                }
                             }
                         }
                         SaveOperation(
