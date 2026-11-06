@@ -114,31 +114,31 @@ suspend fun <T> withRetry(
     maxDelay: Long = 10_000,
     block: suspend () -> T
 ): T {
+    require(maxRetries >= 0) { "maxRetries must not be negative" }
+    require(initialDelay >= 0) { "initialDelay must not be negative" }
+    require(maxDelay >= initialDelay) { "maxDelay must be at least initialDelay" }
+
     var currentDelay = initialDelay
     var retryCount = 0
-    var lastError: Throwable? = null
 
-    while (retryCount < maxRetries) {
+    while (true) {
         try {
             return block()
         } catch (e: CancellationException) {
-            //协程被取消时不重试，直接抛出
+            // Cancellation is control flow; never retry it.
             Logger.debug(TAG, "$logTag: Cancelled: ${e.message}")
             throw e
         } catch (e: Exception) {
-            // 部分异常（如 UnresolvedAddressException）message 为 null，需要输出异常类型以便诊断
             Logger.debug(TAG, "$logTag: Attempt ${retryCount + 1} failed: ${e::class.simpleName}: ${e.message}")
-            lastError = e
-            if (canRetry(e)) {
-                delay(currentDelay.milliseconds)
-                currentDelay = (currentDelay * 2).coerceAtMost(maxDelay)
-                retryCount++
-            } else {
-                throw e //不可重试
+            if (!canRetry(e) || retryCount >= maxRetries) {
+                throw e
             }
+
+            delay(currentDelay.milliseconds)
+            currentDelay = (currentDelay * 2).coerceAtMost(maxDelay)
+            retryCount++
         }
     }
-    throw lastError ?: Exception("Failed after $maxRetries retries")
 }
 
 private fun canRetry(e: Exception): Boolean {
