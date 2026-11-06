@@ -45,3 +45,14 @@ Make the path from tapping **Play** to entering Minecraft as direct as the Minec
 - Server: one Join action reaches the selected server, with useful error feedback on failure.
 - Cold and warm launches both work; warm launch may be faster but neither skips required game initialization.
 - Normal launch remains available and all existing account/version protections remain intact.
+
+## Source audit findings (2026-11-06)
+
+- `LaunchGameViewModel.kt` exposes `quickPlaySave(version, saveName)` and `quickPlayServer(version, address)`, but this only sets a `LaunchGameOperation.TryLaunch` request.
+- `GameLaunchFlow.launch(...)` currently accepts the version and account, and its final task calls `runGame(context, version, account)`. The `quickPlay` target is not passed into this flow or the game process configuration in the inspected path.
+- `GameLauncher.LaunchConfig` currently carries only the version and account. Therefore, the existing quick-play methods are not proof that automatic world/server entry is implemented.
+- `SavesManagerScreen.kt` has an `onQuickPlay` callback for save entries, but it depends on the missing downstream handoff described above.
+- The splash loading screen already contains the VØID/LAUNCHER collision animation in the current source; this area needs a visual/branding review rather than assuming it is absent.
+- The manifest already enforces landscape orientation for launcher and game activities.
+
+These findings are source inspection only. No Gradle build, APK build, or device test was run. The next implementation step is to trace the launch-operation consumer and VMActivity/GameService intent contract before changing parcelable launch configuration, so existing game startup and process boundaries are not broken.
