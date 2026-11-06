@@ -197,10 +197,10 @@ private fun DownloadHubHeader(onBack: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color.White
+                    Text(
+                        text = "←",
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleLarge
                     )
                 }
                 Spacer(modifier = Modifier.width(4.dp))
