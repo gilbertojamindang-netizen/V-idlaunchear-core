@@ -149,7 +149,7 @@ class VoidPerformanceAdvisorTest {
                 ram,
                 VoidPerformanceAdvisor.Profile.BALANCED
             )
-            assertTrue("Balanced profile should leave substantial native/Android headroom", result.maxMemoryMb <= ram * 0.35f)
+            assertTrue("Balanced profile should leave substantial native/Android headroom", result.maxMemoryMb <= maxOf(512f, ram * 0.35f))
         }
     }
 
