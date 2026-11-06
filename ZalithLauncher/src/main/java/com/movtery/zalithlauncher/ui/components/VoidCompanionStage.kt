@@ -7,9 +7,12 @@
  */
 package com.movtery.zalithlauncher.ui.components
 
+import androidx.compose.animation.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,14 +29,15 @@ import com.movtery.petlib.ArmModel
 import com.movtery.petlib.PetAnimation
 import com.movtery.petlib.PetTapReaction
 import kotlinx.coroutines.delay
+import kotlin.math.PI
 import kotlin.random.Random
 
 /**
- * Seated/standing home-screen companion.
+ * Home-screen Minecraft companion with a lightweight roaming loop.
  *
- * The companion stays in its stage, alternates between sitting and standing,
- * uses the native idle pose animation, follows the Activity mouse gaze router,
- * and reacts to taps. It deliberately has no wandering, dragging or ragdoll.
+ * It alternates between sitting, idle pauses and short walking steps. The
+ * movement is deliberately kept inside a small stage-safe range to avoid
+ * covering launcher controls or clipping the model on narrow screens.
  */
 @Composable
 fun VoidCompanionStage(
@@ -45,18 +49,43 @@ fun VoidCompanionStage(
     autoPose: Boolean = true
 ) {
     var sitting by remember { mutableStateOf(true) }
+    var walking by remember { mutableStateOf(false) }
+    var walkingRight by remember { mutableStateOf(true) }
+    var targetOffset by remember { mutableStateOf(0.dp) }
+    val animatedOffset by animateDpAsState(
+        targetValue = targetOffset,
+        animationSpec = tween(durationMillis = 1700),
+        label = "voidCompanionRoaming"
+    )
 
     LaunchedEffect(autoPose) {
         if (autoPose) {
             sitting = true
+            walking = false
+            targetOffset = 0.dp
             while (true) {
-                delay(Random.nextLong(6500L, 9500L))
+                delay(Random.nextLong(3500L, 6000L))
                 sitting = false
-                delay(Random.nextLong(5000L, 8000L))
-                sitting = true
+                walking = false
+                delay(Random.nextLong(900L, 1800L))
+
+                walkingRight = !walkingRight
+                walking = true
+                targetOffset = if (walkingRight) 12.dp else (-12).dp
+                delay(1900L)
+
+                walking = false
+                delay(Random.nextLong(1200L, 2400L))
+                if (Random.nextInt(4) == 0) {
+                    sitting = true
+                    delay(Random.nextLong(2200L, 3800L))
+                    sitting = false
+                }
             }
         } else {
             sitting = true
+            walking = false
+            targetOffset = 0.dp
         }
     }
 
@@ -67,12 +96,18 @@ fun VoidCompanionStage(
         contentAlignment = Alignment.Center
     ) {
         PetModelView(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .offset(x = animatedOffset),
             skin = skin,
             cape = cape,
             arm = arm,
-            yaw = yaw,
-            animation = if (sitting) PetAnimation.Sitting else PetAnimation.Idle,
+            yaw = yaw + if (walkingRight) 0f else PI.toFloat(),
+            animation = when {
+                sitting -> PetAnimation.Sitting
+                walking -> PetAnimation.Walking
+                else -> PetAnimation.Idle
+            },
             tapReaction = PetTapReaction.Interact,
             dragYaw = false,
             gazeEnabled = true,
