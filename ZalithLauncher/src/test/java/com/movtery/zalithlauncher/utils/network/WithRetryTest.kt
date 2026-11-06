@@ -35,6 +35,27 @@ class WithRetryTest {
     }
 
     @Test
+    fun maxRetriesCountsAttemptsAfterTheInitialRequest() = runBlocking {
+        val attempts = AtomicInteger(0)
+
+        assertThrows(IOException::class.java) {
+            runBlocking {
+                withRetry(
+                    logTag = "unit-test",
+                    maxRetries = 2,
+                    initialDelay = 0,
+                    maxDelay = 0
+                ) {
+                    attempts.incrementAndGet()
+                    throw IOException("still unavailable")
+                }
+            }
+        }
+
+        assertEquals(3, attempts.get())
+    }
+
+    @Test
     fun doesNotRetryNonNetworkFailure() = runBlocking {
         val attempts = AtomicInteger(0)
 
