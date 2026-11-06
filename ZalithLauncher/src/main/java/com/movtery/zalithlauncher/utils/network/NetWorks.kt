@@ -139,13 +139,19 @@ suspend fun <T> withRetry(
             }
 
             delay(currentDelay.milliseconds)
-            currentDelay = if (currentDelay > maxDelay / 2) {
-                maxDelay
-            } else {
-                (currentDelay * 2).coerceAtMost(maxDelay)
-            }
+            currentDelay = nextRetryDelay(currentDelay, maxDelay)
             retryCount++
         }
+    }
+}
+
+internal fun nextRetryDelay(currentDelay: Long, maxDelay: Long): Long {
+    require(currentDelay >= 0L) { "currentDelay must not be negative" }
+    require(maxDelay >= currentDelay) { "maxDelay must be at least currentDelay" }
+    return if (currentDelay > maxDelay / 2) {
+        maxDelay
+    } else {
+        (currentDelay * 2).coerceAtMost(maxDelay)
     }
 }
 
