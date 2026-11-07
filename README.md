@@ -60,10 +60,6 @@ Build variants, SDK requirements, and workflow details may change. Refer to the 
 
 VøidLaunchear is based on and includes code from existing open-source projects. Original copyright notices, required attribution, license texts, and applicable license terms are retained. This README is not a replacement for those notices.
 
-## License
-
-The project source is distributed under the license and applicable terms included in the repository. Read [LICENSE](LICENSE) before using, modifying, or redistributing this software. Third-party components may have their own licenses and notices.
-
 ## Disclaimer
 
 You are responsible for complying with the Minecraft EULA, applicable platform terms, and the licenses of all included components. Do not use this project to distribute unauthorized game files or other copyrighted material.
