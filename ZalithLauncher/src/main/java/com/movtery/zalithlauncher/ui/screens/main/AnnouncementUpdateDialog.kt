@@ -265,7 +265,8 @@ private fun fetchAnnouncement(context: Context): LauncherAnnouncement? {
         prefs.getString(CACHED_FEED, null)?.let(::parseAnnouncement)
     }
 
-    // GitHub Releases is the source of truth; a stale feed cannot pin updates to 1.0.11.
+    // The published GitHub release is authoritative. Never show an old UPDATE
+    // announcement again after the installed app has reached that release.
     val latestRelease = fetchLatestRelease()
     if (latestRelease != null) {
         val latestVersion = latestRelease.first
@@ -281,14 +282,23 @@ private fun fetchAnnouncement(context: Context): LauncherAnnouncement? {
                 downloadUrl = downloadUrl
             )
         }
-        if (feed != null) {
+
+        // Keep maintenance and informational notices, but suppress release notices
+        // whose version is already installed (for example 1.0.12 on 1.0.12).
+        if (feed != null && feed.category != "UPDATE") {
             return feed.copy(
                 releasePage = RELEASES_URL,
                 latestVersion = latestVersion,
                 downloadUrl = downloadUrl
             )
         }
+        return null
     }
+    // Offline fallback: a cached UPDATE must still be checked against the installed
+    // version, so it cannot repeatedly prompt for the same or an older release.
+    if (feed?.category == "UPDATE" &&
+        !isNewerVersion(feed.latestVersion, BuildConfig.VERSION_NAME)
+    ) return null
     return feed
 }
 
