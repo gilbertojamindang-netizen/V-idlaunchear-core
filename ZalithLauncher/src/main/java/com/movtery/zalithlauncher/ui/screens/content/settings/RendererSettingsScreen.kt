@@ -595,9 +595,9 @@ private fun VulkanSetupPanel(
                 }
             }
 
-            val zinkRendererAvailable = Renderers.getRenderers().any {
-                it.getUniqueIdentifier() == KopperZinkRenderer.getUniqueIdentifier()
-            }
+            // Kopper Zink is bundled as a built-in renderer. Do not disable its
+            // selection button just because the runtime renderer registry has not
+            // finished populating when this settings panel is composed.
 
             Text(
                 text = "VØID RENDERING MODES",
@@ -636,7 +636,7 @@ private fun VulkanSetupPanel(
 
             OutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
-                enabled = zinkRendererAvailable && !isScanning,
+                enabled = !isScanning,
                 onClick = {
                     AllSettings.renderer.save(KopperZinkRenderer.getUniqueIdentifier())
                     AllSettings.graphicsApi.save(GraphicsApi.DEFAULT_OPENGL)
