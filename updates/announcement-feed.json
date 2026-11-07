@@ -3,18 +3,18 @@
   "app": {
     "id": "com.movtery.zalithlauncher.v2",
     "name": "VøidLaunchear",
-    "latestVersion": "1.0.11",
-    "releaseTag": "v1.0.11",
+    "latestVersion": "1.0.12",
+    "releaseTag": "v1.0.12",
     "releasePage": "https://github.com/gilbertojamindang-netizen/V-idlaunchear-core/releases",
-    "downloadUrl": "https://github.com/gilbertojamindang-netizen/V-idlaunchear-core/releases/download/v1.0.11/Voidlaunchear-1.0.11-arm64-Debug.apk"
+    "downloadUrl": "https://github.com/gilbertojamindang-netizen/V-idlaunchear-core/releases/download/v1.0.12/Voidlaunchear-1.0.12-arm64-Debug.apk"
   },
   "announcements": [
     {
-      "id": "v1-0-11-release",
-      "title": "VøidLaunchear 1.0.11 is available",
-      "message": "VøidLaunchear 1.0.11 is available. Download the update directly inside VøidLaunchear, then tap Install Update to open Android's installer.",
+      "id": "v1-0-12-release",
+      "title": "VøidLaunchear 1.0.12 is available",
+      "message": "VøidLaunchear 1.0.12 is available. Download the latest ARM64 update directly inside VøidLaunchear, then tap Install Update.",
       "category": "UPDATE",
-      "publishedAt": "2026-11-06T22:00:00Z",
+      "publishedAt": "2026-11-07T07:00:00Z",
       "active": true
     }
   ],
