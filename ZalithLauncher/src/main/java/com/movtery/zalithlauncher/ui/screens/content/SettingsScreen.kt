@@ -29,9 +29,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -91,9 +93,9 @@ fun SettingsScreen(
         currentKey = backStackViewModel.mainScreen.currentKey
     ) { isVisible ->
 
-        Row(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
             TabMenu(
-                modifier = Modifier.fillMaxHeight(),
+                modifier = Modifier.fillMaxWidth(),
                 isVisible = isVisible,
                 settingsScreenKey = backStackViewModel.settingsScreen.currentKey,
                 navigateTo = { settingKey ->
@@ -110,7 +112,7 @@ fun SettingsScreen(
                 openLicenseScreen = openLicenseScreen,
                 eventViewModel = eventViewModel,
                 submitError = submitError,
-                modifier = Modifier.fillMaxHeight()
+                modifier = Modifier.weight(1f).fillMaxWidth()
             )
         }
     }
@@ -139,119 +141,100 @@ private fun TabMenu(
 
     Column(
         modifier = modifier
-            .width(148.dp)
             .background(Color(0xFF100D17))
-            .fadeEdge(scrollState)
-            .animated(ctx, from = AnimatedDirection.Left)
-            .verticalScroll(scrollState)
-            .padding(horizontal = 9.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .animated(ctx, from = AnimatedDirection.Top)
+            .padding(horizontal = 12.dp, vertical = 9.dp)
     ) {
-        Spacer(modifier = Modifier.height(14.dp))
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(18.dp))
-                .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0xFF38204F), Color(0xFF1B1425))
-                    )
-                )
-                .padding(vertical = 13.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            Column(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(13.dp))
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(Color(0xFF653A91), Color(0xFF24172F))
+                        )
+                    )
+                    .padding(horizontal = 12.dp, vertical = 7.dp)
+            ) {
+                Text(
+                    text = "Ø  VØID",
+                    color = Color(0xFFF0D8FF),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.sp,
+                    maxLines = 1
+                )
+                Text(
+                    text = "SETTINGS",
+                    color = Color(0xFFB99ACD),
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.2.sp,
+                    maxLines = 1
+                )
+            }
             Text(
-                text = "Ø",
-                color = Color(0xFFF0D8FF),
-                fontSize = 29.sp,
-                fontWeight = FontWeight.Black
-            )
-            Text(
-                text = "VØID CONTROL",
-                color = Color(0xFFE8C8FF),
+                text = "CONFIGURATION",
+                color = Color(0xFFB99ACD),
                 fontSize = 9.sp,
                 fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 1.1.sp,
-                maxLines = 1
-            )
-            Text(
-                text = "SYSTEM SETTINGS",
-                color = Color(0xFFB99ACD),
-                fontSize = 7.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 0.7.sp,
+                letterSpacing = 1.sp,
                 maxLines = 1
             )
         }
-        Spacer(modifier = Modifier.height(13.dp))
-        Text(
-            text = "CONFIGURATION",
+
+        Spacer(modifier = Modifier.height(9.dp))
+
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 5.dp, bottom = 8.dp),
-            color = Color(0xFFB99ACD),
-            fontSize = 9.sp,
-            fontWeight = FontWeight.ExtraBold,
-            letterSpacing = 1.sp
-        )
-
-        settingItems.forEach { item ->
-            if (item.division) {
-                Spacer(modifier = Modifier.height(5.dp))
-                HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 9.dp, vertical = 7.dp)
-                        .alpha(0.35f),
-                    color = Color(0xFFB99ACD)
-                )
-            }
-            val selected = settingsScreenKey == item.key
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 3.dp),
-                onClick = { navigateTo(item.key) },
-                shape = RoundedCornerShape(14.dp),
-                color = if (selected) Color(0xFF653A91)
-                    else Color(0xFF211B2B),
-                contentColor = if (selected) Color.White
-                    else Color(0xFFD4C9DE),
-                tonalElevation = if (selected) 3.dp else 0.dp
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(54.dp)
-                        .padding(horizontal = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(9.dp)
+                .horizontalScroll(scrollState),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            settingItems.forEach { item ->
+                val selected = settingsScreenKey == item.key
+                Surface(
+                    modifier = Modifier.height(48.dp),
+                    onClick = { navigateTo(item.key) },
+                    shape = RoundedCornerShape(15.dp),
+                    color = if (selected) Color(0xFF7544A5) else Color(0xFF211B2B),
+                    contentColor = if (selected) Color.White else Color(0xFFD4C9DE),
+                    tonalElevation = if (selected) 4.dp else 0.dp,
+                    shadowElevation = if (selected) 3.dp else 0.dp
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .width(32.dp)
-                            .height(32.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                if (selected) Color.White.copy(alpha = 0.16f)
-                                else Color(0xFF352941)
-                            ),
-                        contentAlignment = Alignment.Center
+                    Row(
+                        modifier = Modifier.padding(horizontal = 13.dp, vertical = 7.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        item.icon()
+                        Box(
+                            modifier = Modifier
+                                .width(31.dp)
+                                .height(31.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(
+                                    if (selected) Color.White.copy(alpha = 0.18f)
+                                    else Color(0xFF382B45)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            item.icon()
+                        }
+                        Text(
+                            text = stringResource(item.textRes),
+                            maxLines = 1,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold
+                        )
                     }
-                    Text(
-                        text = stringResource(item.textRes),
-                        modifier = Modifier.weight(1f),
-                        maxLines = 2,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold
-                    )
                 }
             }
         }
-        Spacer(modifier = Modifier.height(14.dp))
     }
 }
 
