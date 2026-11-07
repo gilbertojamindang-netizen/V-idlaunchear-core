@@ -137,6 +137,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.lwjgl.glfw.CallbackBridge
 import java.io.File
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val TAG = "GameScreen"
@@ -581,7 +582,7 @@ fun GameScreen(
     gamepadViewModel: GamepadViewModel,
 ) {
     val context = LocalContext.current
-    var quickPlayFailureReported by remember(version) { mutableStateOf(false) }
+    val quickPlayFailureReported = remember(version) { AtomicBoolean(false) }
     val quickPlayServer = version.quickPlaySingle as? QuickPlay.Server
     val viewModel = rememberGameViewModel(version) { mode ->
         eventViewModel.sendEvent(EventViewModel.Event.Game.SwitchIme(mode))
@@ -771,8 +772,7 @@ fun GameScreen(
                     "disconnected from server",
                     "internal exception: java.io.ioexception"
                 ).any { it in message }
-                if (quickPlayServer != null && isConnectionFailure && !quickPlayFailureReported) {
-                    quickPlayFailureReported = true
+                if (quickPlayServer != null && isConnectionFailure && quickPlayFailureReported.compareAndSet(false, true)) {
                     eventViewModel.sendToast(
                         androidText("Quick Join failed: ${quickPlayServer.serverAddress}. Check the server address and connection.")
                     )
