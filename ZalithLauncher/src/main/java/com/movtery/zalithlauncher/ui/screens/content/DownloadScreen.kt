@@ -177,7 +177,7 @@ private fun DownloadHubHeader(onBack: () -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 14.dp, top = 14.dp, end = 14.dp, bottom = 9.dp),
+            .padding(start = 10.dp, top = 6.dp, end = 10.dp, bottom = 4.dp),
         shape = RoundedCornerShape(26.dp),
         color = Color.Transparent,
         contentColor = Color.White
@@ -193,8 +193,8 @@ private fun DownloadHubHeader(onBack: () -> Unit) {
                         )
                     )
                 )
-                .padding(horizontal = 18.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(11.dp)
+                .padding(horizontal = 12.dp, vertical = 7.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -220,13 +220,8 @@ private fun DownloadHubHeader(onBack: () -> Unit) {
                     )
                     Text(
                         text = "DOWNLOAD LAB",
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Black
-                    )
-                    Text(
-                        text = "Build your Minecraft setup from one control hub",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.76f)
                     )
                 }
                 Surface(
@@ -235,7 +230,7 @@ private fun DownloadHubHeader(onBack: () -> Unit) {
                     contentColor = Color.White
                 ) {
                     Column(
-                        modifier = Modifier.padding(horizontal = 13.dp, vertical = 11.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
@@ -251,32 +246,7 @@ private fun DownloadHubHeader(onBack: () -> Unit) {
                     }
                 }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = Color.White.copy(alpha = 0.12f),
-                    contentColor = Color.White
-                ) {
-                    Text(
-                        text = "LIVE CATALOG",
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = Color.White.copy(alpha = 0.12f),
-                    contentColor = Color.White
-                ) {
-                    Text(
-                        text = "8 CONTENT CHANNELS",
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
+
         }
     }
 }
