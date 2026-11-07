@@ -257,15 +257,76 @@ private fun fetchAnnouncement(context: Context): LauncherAnnouncement? {
         connection?.disconnect()
     }
 
-    if (fresh != null) {
-        val parsed = parseAnnouncement(fresh)
-        if (parsed != null) {
+    val feed = if (fresh != null) {
+        parseAnnouncement(fresh)?.also {
             prefs.edit().putString(CACHED_FEED, fresh).apply()
-            return parsed
         }
+    } else {
+        prefs.getString(CACHED_FEED, null)?.let(::parseAnnouncement)
     }
 
-    return prefs.getString(CACHED_FEED, null)?.let(::parseAnnouncement)
+    // GitHub Releases is the source of truth; a stale feed cannot pin updates to 1.0.11.
+    val latestRelease = fetchLatestRelease()
+    if (latestRelease != null) {
+        val latestVersion = latestRelease.first
+        val downloadUrl = latestRelease.second
+        if (isNewerVersion(latestVersion, BuildConfig.VERSION_NAME)) {
+            return LauncherAnnouncement(
+                id = "release-$latestVersion",
+                title = "VøidLaunchear $latestVersion is available",
+                message = "A newer VøidLaunchear release is available. Download it here, then tap Install Update.",
+                category = "UPDATE",
+                releasePage = RELEASES_URL,
+                latestVersion = latestVersion,
+                downloadUrl = downloadUrl
+            )
+        }
+        if (feed != null) {
+            return feed.copy(
+                releasePage = RELEASES_URL,
+                latestVersion = latestVersion,
+                downloadUrl = downloadUrl
+            )
+        }
+    }
+    return feed
+}
+
+private fun fetchLatestRelease(): Pair<String, String>? {
+    var connection: HttpURLConnection? = null
+    return try {
+        connection = (URL("https://api.github.com/repos/gilbertojamindang-netizen/V-idlaunchear-core/releases/latest")
+            .openConnection() as HttpURLConnection).apply {
+            requestMethod = "GET"
+            connectTimeout = 6_000
+            readTimeout = 6_000
+            instanceFollowRedirects = true
+            setRequestProperty("Accept", "application/vnd.github+json")
+            setRequestProperty("User-Agent", "VoidLaunchear-Android/${BuildConfig.VERSION_NAME}")
+        }
+        if (connection.responseCode !in 200..299) return null
+        val body = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+        if (body.toByteArray(Charsets.UTF_8).size > MAX_FEED_BYTES) return null
+        val release = JSONObject(body)
+        if (release.optBoolean("draft", true) || release.optBoolean("prerelease", true)) return null
+        val version = release.optString("tag_name").removePrefix("v").take(32)
+        if (version.isBlank()) return null
+        val assets = release.optJSONArray("assets") ?: return null
+        val apk = (0 until assets.length())
+            .mapNotNull { assets.optJSONObject(it) }
+            .firstOrNull {
+                val name = it.optString("name")
+                name.endsWith(".apk", ignoreCase = true) &&
+                    (name.contains("arm64", ignoreCase = true) || name.contains("universal", ignoreCase = true))
+            } ?: return null
+        val uri = Uri.parse(apk.optString("browser_download_url"))
+        if (uri.scheme != "https" || uri.host != "github.com") return null
+        version to uri.toString()
+    } catch (_: Exception) {
+        null
+    } finally {
+        connection?.disconnect()
+    }
 }
 
 private fun parseAnnouncement(body: String): LauncherAnnouncement? {
