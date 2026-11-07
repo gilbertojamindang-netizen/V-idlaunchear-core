@@ -142,18 +142,19 @@ class LaunchGameViewModel : ViewModel() {
     fun quickPlayServer(
         version: Version,
         address: String
-    ) {
-        // Avoid silently starting the game without a server target when the
-        // saved address is empty or consists only of whitespace.
-        if (address.isBlank()) return
-        if (launchGameOperation.value == LaunchGameOperation.None && _launchFlow.value == null) {
-            updateOperation(
-                LaunchGameOperation.TryLaunch(
-                    version = version,
-                    quickPlay = QuickPlay.Server(address.trim()),
-                )
-            )
+    ): Boolean {
+        // Reject invalid targets and duplicate launch requests explicitly.
+        if (address.isBlank()) return false
+        if (launchGameOperation.value != LaunchGameOperation.None || _launchFlow.value != null) {
+            return false
         }
+        updateOperation(
+            LaunchGameOperation.TryLaunch(
+                version = version,
+                quickPlay = QuickPlay.Server(address.trim()),
+            )
+        )
+        return true
     }
 
     fun updateOperation(operation: LaunchGameOperation) {
