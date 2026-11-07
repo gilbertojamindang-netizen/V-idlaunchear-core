@@ -24,12 +24,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -67,7 +72,9 @@ import com.movtery.zalithlauncher.utils.platform.getMaxMemoryForSettings
 import com.movtery.zalithlauncher.viewmodel.EventViewModel
 import com.movtery.zalithlauncher.viewmodel.sendDLPlugin
 import com.movtery.zalithlauncher.utils.device.VoidPerformanceAdvisor
+import com.movtery.zalithlauncher.utils.device.VoidPerformanceApplier
 import com.movtery.zalithlauncher.utils.device.VoidSmartLagAnalyzer
+import kotlinx.coroutines.launch
 import java.io.File
 
 @Composable
@@ -298,6 +305,10 @@ fun GameSettingsScreen(
                 val deviceRecommendation = remember {
                     VoidPerformanceAdvisor.recommend(context)
                 }
+                val coroutineScope = rememberCoroutineScope()
+                val showApplyConfirmation = remember { mutableStateOf(false) }
+                val isApplyingRecommendation = remember { mutableStateOf(false) }
+                val applyResultMessage = remember { mutableStateOf<String?>(null) }
                 SettingsCardColumn(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -331,7 +342,80 @@ fun GameSettingsScreen(
                         style = MaterialTheme.typography.bodySmall
                     )
                     Text(
-                        text = "These checks are advisory only. They do not promise extra FPS or change your settings automatically.",
+                        text = deviceRecommendation.explanation,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Text(
+                        text = "Live FPS and FPS-drop warnings are shown in the in-game VØID status widget while Minecraft is running.",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Button(
+                        onClick = { showApplyConfirmation.value = true },
+                        enabled = selectedVersion != null && !isApplyingRecommendation.value
+                    ) {
+                        Text(
+                            if (isApplyingRecommendation.value) "Applying safe profile..."
+                            else "Apply recommended settings"
+                        )
+                    }
+                    applyResultMessage.value?.let { message ->
+                        Text(text = message, style = MaterialTheme.typography.bodySmall)
+                    }
+                    Text(
+                        text = "Applying changes creates a timestamped backup of options.txt and version.config first.",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    if (showApplyConfirmation.value) {
+                        AlertDialog(
+                            onDismissRequest = {
+                                if (!isApplyingRecommendation.value) {
+                                    showApplyConfirmation.value = false
+                                }
+                            },
+                            title = { Text("Apply VØID performance profile?") },
+                            text = {
+                                Text(
+                                    "Close Minecraft before continuing. VØID will back up the selected installation's settings, then apply the recommended RAM, render distance, simulation distance, and entity distance. You can restore from the saved backup if needed."
+                                )
+                            },
+                            confirmButton = {
+                                TextButton(
+                                    enabled = !isApplyingRecommendation.value,
+                                    onClick = {
+                                        showApplyConfirmation.value = false
+                                        isApplyingRecommendation.value = true
+                                        applyResultMessage.value = null
+                                        coroutineScope.launch {
+                                            val result = runCatching {
+                                                VoidPerformanceApplier.apply(deviceRecommendation)
+                                            }
+                                            applyResultMessage.value = result.fold(
+                                                onSuccess = {
+                                                    "Applied to Minecraft ${it.minecraftVersion}. Backup ID: ${it.backupId}"
+                                                },
+                                                onFailure = {
+                                                    "Could not apply settings: ${it.message ?: "unknown error"}"
+                                                }
+                                            )
+                                            isApplyingRecommendation.value = false
+                                        }
+                                    }
+                                ) {
+                                    Text("Apply")
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(
+                                    enabled = !isApplyingRecommendation.value,
+                                    onClick = { showApplyConfirmation.value = false }
+                                ) {
+                                    Text("Cancel")
+                                }
+                            }
+                        )
+                    }
+                    Text(
+                        text = "Recommendations are estimates, not guaranteed FPS improvements. Reduce settings or stop playing if the device becomes too hot.",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
