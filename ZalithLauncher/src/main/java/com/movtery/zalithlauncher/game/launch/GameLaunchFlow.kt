@@ -46,6 +46,7 @@ import com.movtery.zalithlauncher.game.version.mod.AllModReader
 import com.movtery.zalithlauncher.game.version.mod.isEnabled
 import com.movtery.zalithlauncher.game.versioninfo.models.GameManifest
 import com.movtery.zalithlauncher.ui.activities.runGame
+import com.movtery.zalithlauncher.ui.screens.content.elements.QuickPlay
 import com.movtery.zalithlauncher.ui.androidText
 import com.movtery.zalithlauncher.utils.GSON
 import com.movtery.zalithlauncher.utils.network.isNetworkAvailable
@@ -239,7 +240,22 @@ class GameLaunchFlow(scope: CoroutineScope) {
                             .build()
                     )
                 }
-                runGame(context, version, account)
+                try {
+                    runGame(context, version, account)
+                } catch (th: CancellationException) {
+                    throw th
+                } catch (th: Throwable) {
+                    // The launcher can report failures while handing off Quick Play to Minecraft.
+                    // Connection failures after the game process starts remain handled by Minecraft itself.
+                    val serverQuickPlay = version.quickPlaySingle as? QuickPlay.Server
+                    if (serverQuickPlay != null) {
+                        throw IllegalStateException(
+                            "Could not start Minecraft Quick Play for ${serverQuickPlay.serverAddress}: ${th.getMessageOrToString()}",
+                            th
+                        )
+                    }
+                    throw th
+                }
                 exitActivity()
             }
         }
