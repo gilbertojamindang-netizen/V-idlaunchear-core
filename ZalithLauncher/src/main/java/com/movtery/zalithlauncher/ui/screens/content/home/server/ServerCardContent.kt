@@ -125,6 +125,9 @@ import com.movtery.zalithlauncher.ui.screens.content.versions.ServerSignalIcon
 import com.movtery.zalithlauncher.ui.theme.cardColor
 import com.movtery.zalithlauncher.ui.theme.onCardColor
 import com.movtery.zalithlauncher.utils.copyText
+import com.movtery.zalithlauncher.utils.GSON
+import com.movtery.zalithlauncher.utils.file.readText
+import java.util.zip.ZipFile
 import com.movtery.zalithlauncher.utils.string.stripColorCodes
 
 /** 服务器卡片快速启动回调；版本为 null 时由接收方解析为当前选中版本 */
@@ -472,6 +475,19 @@ private fun StatusInfoRow(card: ServerCardState?) {
     }
 }
 
+/**
+ * Read the protocol number from the installed Minecraft client JAR.
+ * Some old/custom client JARs do not contain version.json; return null in that case.
+ */
+private fun Version.readProtocolVersion(): Int? = runCatching {
+    ZipFile(getClientJar()).use { zip ->
+        zip.getEntry("version.json")?.let { entry ->
+            GSON.fromJson(entry.readText(zip), com.google.gson.JsonObject::class.java)
+                ?.get("protocol_version")?.asInt
+        }
+    }
+}.getOrNull()
+
 /** 快速启动按钮：重复点击保护、版本/服务器状态确认与连接反馈 */
 @Composable
 private fun QuickLaunchButton(
@@ -501,10 +517,19 @@ private fun QuickLaunchButton(
         Regex("""\d+\.\d+(?:\.\d+)?""").find(value.orEmpty())?.value
     val serverMinecraftVersion = minecraftVersionOf(serverVersion)
     val selectedMinecraftVersion = minecraftVersionOf(selectedVersionName)
+    val serverProtocolVersion = serverStatus?.version?.protocol
+    val selectedProtocolVersion = targetVersion?.readProtocolVersion()
     val targetVersionMissing = targetVersion == null
-    val versionMismatch = serverMinecraftVersion != null &&
+    // Prefer protocol IDs: different version labels can still share a compatible protocol.
+    // Fall back to the visible version names only when protocol metadata is unavailable.
+    val protocolMismatch = serverProtocolVersion != null &&
+            selectedProtocolVersion != null &&
+            serverProtocolVersion != selectedProtocolVersion
+    val versionNameMismatch = (serverProtocolVersion == null || selectedProtocolVersion == null) &&
+            serverMinecraftVersion != null &&
             selectedMinecraftVersion != null &&
             serverMinecraftVersion != selectedMinecraftVersion
+    val versionMismatch = protocolMismatch || versionNameMismatch
     val pingFailed = card.ping is ServerCardPingStatus.Failed
 
     fun launchNow() {
@@ -537,6 +562,8 @@ private fun QuickLaunchButton(
                 "The selected Minecraft version is missing or invalid. Select or install a valid version before joining."
             pingFailed ->
                 "The server could not be reached during the status check. It may be offline or temporarily unavailable. Try anyway?"
+            versionMismatch && protocolMismatch ->
+                "Protocol mismatch: the server uses protocol $serverProtocolVersion, while your selected Minecraft client uses $selectedProtocolVersion. Joining may fail. Continue anyway?"
             versionMismatch ->
                 "The server reports Minecraft $serverMinecraftVersion, while your selected version is $selectedMinecraftVersion. Joining may fail or cause compatibility issues. Continue anyway?"
             else -> "The server status is still being checked. Continue with the join request?"
