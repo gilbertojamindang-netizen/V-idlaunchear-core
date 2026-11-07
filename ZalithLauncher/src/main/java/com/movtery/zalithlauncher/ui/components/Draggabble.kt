@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.components
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.drag
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,6 +48,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.LayoutDirection
 import kotlin.math.roundToInt
 
@@ -57,9 +60,9 @@ fun FloatingBall(
     onSavePos: () -> Unit = {},
     onClick: () -> Unit = {},
     alpha: Float = 1f,
-    color: Color = Color.Black.copy(alpha = 0.25f),
+    color: Color = Color(0xE61A1028),
     contentColor: Color = Color.White.copy(alpha = 0.95f),
-    shape: Shape = MaterialTheme.shapes.medium,
+    shape: Shape = RoundedCornerShape(18.dp),
     content: @Composable () -> Unit
 ) {
     var ballSize by remember { mutableStateOf(IntSize.Zero) }
@@ -100,6 +103,11 @@ fun FloatingBall(
 
         Surface(
             modifier = Modifier
+                .border(
+                    width = 1.dp,
+                    color = Color(0xFFB56CFF).copy(alpha = 0.72f),
+                    shape = shape
+                )
                 .onSizeChanged { size ->
                     ballSize = size
                     if (isInitialized || currentPosition != Offset.Zero) return@onSizeChanged
