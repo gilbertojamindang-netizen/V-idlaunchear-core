@@ -290,7 +290,14 @@ class MainActivity : BaseAppCompatActivity() {
                         launchGameViewModel.tryLaunch(event.version)
                     }
                     is EventViewModel.Event.Launch.PlayServer -> {
-                        launchGameViewModel.quickPlayServer(event.version, event.address)
+                        val accepted = launchGameViewModel.quickPlayServer(event.version, event.address)
+                        if (!accepted) {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "A game launch is already in progress or the server address is invalid.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
                     is EventViewModel.Event.Launch.PlaySave -> {
                         launchGameViewModel.quickPlaySave(event.version, event.saveName)
