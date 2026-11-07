@@ -362,21 +362,26 @@ private fun List<MinecraftVersion>.filterVersions(
 
 @Composable
 private fun DownloadCatalogBanner(versionCount: Int) {
+    // Compact banner: keep the version filters and actual download list visible
+    // without forcing the user to scroll past a tall decorative header.
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 14.dp, vertical = 12.dp),
-        shape = RoundedCornerShape(23.dp),
+            .padding(horizontal = 12.dp, vertical = 4.dp),
+        shape = RoundedCornerShape(14.dp),
         color = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 17.dp, vertical = 15.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(1.dp)
             ) {
                 Text(
                     text = "VØID  /  GAME CATALOG",
@@ -384,30 +389,26 @@ private fun DownloadCatalogBanner(versionCount: Int) {
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Black
                 )
-                Spacer(modifier = Modifier.weight(1f))
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.65f),
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                ) {
-                    Text(
-                        text = "$versionCount BUILDS",
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                Text(
+                    text = "Choose your Minecraft version",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
             }
-            Text(
-                text = "Choose your Minecraft version",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "Select a release or explore snapshots and legacy builds.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f)
-            )
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.65f),
+                contentColor = MaterialTheme.colorScheme.onSurface
+            ) {
+                Text(
+                    text = "$versionCount BUILDS",
+                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
+            }
         }
     }
 }
