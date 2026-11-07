@@ -10,9 +10,9 @@
   },
   "announcements": [
     {
-      "id": "v1-0-10-release",
+      "id": "v1-0-11-release",
       "title": "VøidLaunchear 1.0.11 is available",
-      "message": "VøidLaunchear 1.0.11 fixes a Minecraft version manifest download crash. Download the APK inside VøidLaunchear, then tap Install Update. Download the APK directly inside VøidLaunchear, then tap Install Update to open Android's installer.",
+      "message": "VøidLaunchear 1.0.11 is available. Download the update directly inside VøidLaunchear, then tap Install Update to open Android's installer.",
       "category": "UPDATE",
       "publishedAt": "2026-11-06T22:00:00Z",
       "active": true
