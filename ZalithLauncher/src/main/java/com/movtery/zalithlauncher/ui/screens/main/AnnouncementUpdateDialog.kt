@@ -175,7 +175,7 @@ internal fun AnnouncementUpdateDialog() {
                                     )
                                 }
                             }.onFailure { downloadError = "Unable to open Android installer: " + (it.message ?: "unknown error") }
-                        } else if (downloadId == null && item.downloadUrl.startsWith("https://")) {
+                        } else if (isUpdateAvailable && downloadId == null && item.downloadUrl.startsWith("https://")) {
                             runCatching {
                                 val request = DownloadManager.Request(Uri.parse(item.downloadUrl))
                                     .setTitle("VøidLaunchear " + item.latestVersion)
@@ -189,8 +189,13 @@ internal fun AnnouncementUpdateDialog() {
                                 downloadError = null
                                 downloadStatus = "Preparing download…"
                             }.onFailure { downloadError = "Could not start download: " + (it.message ?: "unknown error") }
-                        } else if (item.downloadUrl.isBlank()) {
-                            downloadError = "No in-app APK download is configured yet."
+                        } else {
+                            runCatching {
+                                context.startActivity(
+                                    Intent(Intent.ACTION_VIEW, Uri.parse(item.releasePage))
+                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                )
+                            }.onFailure { downloadError = "Unable to open release notes: " + (it.message ?: "unknown error") }
                         }
                     },
                     enabled = downloadId == null
