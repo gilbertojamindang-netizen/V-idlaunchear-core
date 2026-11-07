@@ -497,11 +497,14 @@ private fun QuickLaunchButton(
     val serverStatus = (card.ping as? ServerCardPingStatus.Loaded)?.result?.status
     val serverVersion = serverStatus?.version?.name?.stripColorCodes()?.trim()
     val selectedVersionName = targetVersion?.getVersionName()
-    val versionMismatch = serverVersion != null &&
-            selectedVersionName != null &&
-            !serverVersion.equals(selectedVersionName, ignoreCase = true) &&
-            !serverVersion.startsWith(selectedVersionName, ignoreCase = true) &&
-            !selectedVersionName.startsWith(serverVersion, ignoreCase = true)
+    fun minecraftVersionOf(value: String?): String? =
+        Regex("""\\d+\\.\\d+(?:\\.\\d+)?""").find(value.orEmpty())?.value
+    val serverMinecraftVersion = minecraftVersionOf(serverVersion)
+    val selectedMinecraftVersion = minecraftVersionOf(selectedVersionName)
+    val targetVersionMissing = targetVersion == null
+    val versionMismatch = serverMinecraftVersion != null &&
+            selectedMinecraftVersion != null &&
+            serverMinecraftVersion != selectedMinecraftVersion
     val pingFailed = card.ping is ServerCardPingStatus.Failed
 
     fun launchNow() {
@@ -530,21 +533,26 @@ private fun QuickLaunchButton(
 
     if (showWarning) {
         val message = when {
+            targetVersionMissing ->
+                "The selected Minecraft version is missing or invalid. Select or install a valid version before joining."
             pingFailed ->
                 "The server could not be reached during the status check. It may be offline or temporarily unavailable. Try anyway?"
             versionMismatch ->
-                "The server reports Minecraft $serverVersion, while your selected version is $selectedVersionName. Joining may fail or cause compatibility issues. Continue anyway?"
-            else -> "Server status could not be confirmed. Continue with the join request?"
+                "The server reports Minecraft $serverMinecraftVersion, while your selected version is $selectedMinecraftVersion. Joining may fail or cause compatibility issues. Continue anyway?"
+            else -> "The server status is still being checked. Continue with the join request?"
         }
         AlertDialog(
             onDismissRequest = { showWarning = false },
             title = { Text("Check before joining") },
             text = { Text(message) },
             confirmButton = {
-                TextButton(onClick = {
-                    showWarning = false
-                    launchNow()
-                }) { Text("Join anyway") }
+                TextButton(
+                    enabled = !targetVersionMissing,
+                    onClick = {
+                        showWarning = false
+                        launchNow()
+                    }
+                ) { Text(if (targetVersionMissing) "OK" else "Join anyway") }
             },
             dismissButton = {
                 TextButton(onClick = { showWarning = false }) { Text("Cancel") }
@@ -554,7 +562,7 @@ private fun QuickLaunchButton(
 
     val launch = {
         if (!isLaunching) {
-            if (versionMismatch || pingFailed || card.ping is ServerCardPingStatus.Loading) {
+            if (targetVersionMissing || versionMismatch || pingFailed || card.ping is ServerCardPingStatus.Loading) {
                 showWarning = true
             } else {
                 launchNow()
