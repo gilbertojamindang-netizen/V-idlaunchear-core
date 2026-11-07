@@ -3,16 +3,16 @@
   "app": {
     "id": "com.movtery.zalithlauncher.v2",
     "name": "VøidLaunchear",
-    "latestVersion": "1.0.10",
-    "releaseTag": "v1.0.10",
+    "latestVersion": "1.0.11",
+    "releaseTag": "v1.0.11",
     "releasePage": "https://github.com/gilbertojamindang-netizen/V-idlaunchear-core/releases",
-    "downloadUrl": "https://github.com/gilbertojamindang-netizen/V-idlaunchear-core/releases/download/v1.0.10/Voidlaunchear-1.0.10-arm64-Debug.apk"
+    "downloadUrl": "https://github.com/gilbertojamindang-netizen/V-idlaunchear-core/releases/download/v1.0.11/Voidlaunchear-1.0.11-arm64-Debug.apk"
   },
   "announcements": [
     {
       "id": "v1-0-10-release",
-      "title": "VøidLaunchear 1.0.10 is available",
-      "message": "VøidLaunchear 1.0.10 is ready to test. This update includes the redesigned Download hub with a Back button, removes the walking Steve companion from the main screen, and includes the latest launcher maintenance changes. Download the APK directly inside VøidLaunchear, then tap Install Update to open Android's installer.",
+      "title": "VøidLaunchear 1.0.11 is available",
+      "message": "VøidLaunchear 1.0.11 fixes a Minecraft version manifest download crash. Download the APK inside VøidLaunchear, then tap Install Update. Download the APK directly inside VøidLaunchear, then tap Install Update to open Android's installer.",
       "category": "UPDATE",
       "publishedAt": "2026-11-06T22:00:00Z",
       "active": true
