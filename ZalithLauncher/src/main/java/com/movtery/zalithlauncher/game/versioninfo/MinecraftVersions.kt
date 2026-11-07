@@ -146,7 +146,7 @@ object MinecraftVersions {
                 Files.createDirectories(parent)
                 val temporaryFile = Files.createTempFile(parent, "minecraft-versions-", ".json.tmp")
                 try {
-                    Files.writeString(temporaryFile, rawJson)
+                    temporaryFile.toFile().writeText(rawJson, Charsets.UTF_8)
                     try {
                         Files.move(
                             temporaryFile,
