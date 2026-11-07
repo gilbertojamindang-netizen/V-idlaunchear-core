@@ -636,7 +636,7 @@ private fun VulkanSetupPanel(
 
             OutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
-                enabled = zinkRendererAvailable && currentCapabilities?.isVersionSupported == true && !isScanning,
+                enabled = zinkRendererAvailable && !isScanning,
                 onClick = {
                     AllSettings.renderer.save(KopperZinkRenderer.getUniqueIdentifier())
                     AllSettings.graphicsApi.save(GraphicsApi.DEFAULT_OPENGL)
@@ -645,7 +645,7 @@ private fun VulkanSetupPanel(
                 Text("VULKAN / COMPATIBILITY")
             }
             Text(
-                text = "Uses Kopper Zink (OpenGL translated over Vulkan), not native Vulkan. It is a compatibility route and may behave differently by GPU and driver.",
+                text = "Uses Kopper Zink (OpenGL translated over Vulkan), not native Vulkan. This option is available when the Zink renderer is installed; a successful native Vulkan profile scan is not required. It may still fail on unsupported GPU drivers.",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodySmall
             )
