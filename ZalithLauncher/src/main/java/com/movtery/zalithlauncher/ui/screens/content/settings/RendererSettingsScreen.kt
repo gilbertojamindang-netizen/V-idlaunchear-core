@@ -616,7 +616,7 @@ private fun VulkanSetupPanel(
                 Text("OPENGL ES / EXPERIMENTAL")
             }
             Text(
-                text = "Use at your own risk. Some devices or drivers may show glitches, fail to render, or crash. You can return here and switch to a Vulkan mode or the default OpenGL path.",
+                text = "Uses the launcher's standard OpenGL ES path with an experimental warning profile; it does not install a separate renderer. Use at your own risk: some devices or drivers may show glitches, fail to render, or crash. You can return here and switch to a supported Vulkan mode.",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodySmall
             )
