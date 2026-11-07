@@ -135,7 +135,7 @@ private fun TabMenu(
 
     Column(
         modifier = modifier
-            .background(Color(0xFF100D17))
+            .background(MaterialTheme.colorScheme.background)
             .animated(ctx, from = AnimatedDirection.Top)
             .padding(horizontal = 12.dp, vertical = 9.dp)
     ) {
@@ -149,14 +149,14 @@ private fun TabMenu(
                     .clip(RoundedCornerShape(13.dp))
                     .background(
                         Brush.horizontalGradient(
-                            listOf(Color(0xFF653A91), Color(0xFF24172F))
+                            listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primaryContainer)
                         )
                     )
                     .padding(horizontal = 12.dp, vertical = 7.dp)
             ) {
                 Text(
                     text = "Ø  VØID",
-                    color = Color(0xFFF0D8FF),
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.sp,
@@ -164,7 +164,7 @@ private fun TabMenu(
                 )
                 Text(
                     text = "SETTINGS",
-                    color = Color(0xFFB99ACD),
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.78f),
                     fontSize = 8.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.2.sp,
@@ -173,7 +173,7 @@ private fun TabMenu(
             }
             Text(
                 text = "CONFIGURATION",
-                color = Color(0xFFB99ACD),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 9.sp,
                 fontWeight = FontWeight.ExtraBold,
                 letterSpacing = 1.sp,
@@ -196,8 +196,8 @@ private fun TabMenu(
                     modifier = Modifier.height(48.dp),
                     onClick = { navigateTo(item.key) },
                     shape = RoundedCornerShape(15.dp),
-                    color = if (selected) Color(0xFF7544A5) else Color(0xFF211B2B),
-                    contentColor = if (selected) Color.White else Color(0xFFD4C9DE),
+                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
                     tonalElevation = if (selected) 4.dp else 0.dp,
                     shadowElevation = if (selected) 3.dp else 0.dp
                 ) {
@@ -212,8 +212,8 @@ private fun TabMenu(
                                 .height(31.dp)
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(
-                                    if (selected) Color.White.copy(alpha = 0.18f)
-                                    else Color(0xFF382B45)
+                                    if (selected) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.18f)
+                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f)
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
