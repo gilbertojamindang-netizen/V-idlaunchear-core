@@ -40,9 +40,17 @@ data class VulkanCapabilities(
     val versionString: String
         get() = "$apiVersionMajor.$apiVersionMinor.$apiVersionPatch"
 
-    /** 检查 Vulkan 版本是否至少为 1.2 */
+    /** Native Minecraft Vulkan backend baseline (kept separate from the Zink compatibility path). */
     val isVersionSupported: Boolean
         get() = apiVersionMajor > 1 || (apiVersionMajor == 1 && apiVersionMinor >= 2)
+
+    /**
+     * Vulkan 1.1+ is only a preliminary requirement for trying a Vulkan-backed
+     * OpenGL translation layer such as Zink. It does NOT guarantee that the
+     * installed driver exposes the extensions/features Zink needs.
+     */
+    val isZinkVulkanCandidate: Boolean
+        get() = apiVersionMajor > 1 || (apiVersionMajor == 1 && apiVersionMinor >= 1)
 }
 
 @Keep
@@ -84,7 +92,8 @@ object VulkanChecker {
                 cacheDir = cacheDir,
             )?.also { caps ->
                 Logger.info(TAG, "Vulkan version: ${caps.versionString}")
-                Logger.info(TAG, "Version >= 1.2: ${caps.isVersionSupported}")
+                Logger.info(TAG, "Native Minecraft Vulkan baseline (>= 1.2): ${caps.isVersionSupported}")
+                Logger.info(TAG, "Zink Vulkan 1.1+ candidate (not a compatibility guarantee): ${caps.isZinkVulkanCandidate}")
                 caps.profileSupport().forEach { profile ->
                     Logger.info(
                         TAG,
