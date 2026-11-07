@@ -142,20 +142,6 @@ fun AboutInfoScreen(
                 }
             }
 
-            //额外依赖库板块
-            animatedItem { ctx ->
-                ChunkLayout(
-                    modifier = Modifier.animated(ctx),
-                    title = "Open-Source Licenses & Dependencies"
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        libraryData.forEach { info ->
-                            LibraryInfoItem(info = info, openLicense = openLicense, openLink = openLink)
-                        }
-                    }
-                }
-            }
-
             //已加载插件板块
             PluginLoader.allPlugins.takeIf { it.isNotEmpty() }?.let { allPlugins ->
                 animatedItem { ctx ->
