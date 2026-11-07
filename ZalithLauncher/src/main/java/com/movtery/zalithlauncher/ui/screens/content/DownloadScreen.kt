@@ -148,6 +148,7 @@ fun DownloadScreen(
     ) { isVisible: Boolean ->
         Column(modifier = Modifier.fillMaxSize()) {
             DownloadHubHeader(
+                compact = backScreenViewModel.downloadScreen.currentKey != backScreenViewModel.downloadGameScreen,
                 onBack = { backDispatcher?.onBackPressed() }
             )
             TabMenu(
@@ -173,11 +174,11 @@ fun DownloadScreen(
 }
 
 @Composable
-private fun DownloadHubHeader(onBack: () -> Unit) {
+private fun DownloadHubHeader(compact: Boolean, onBack: () -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 10.dp, top = 6.dp, end = 10.dp, bottom = 4.dp),
+             .padding(start = 10.dp, top = if (compact) 3.dp else 6.dp, end = 10.dp, bottom = if (compact) 2.dp else 4.dp),
         shape = RoundedCornerShape(26.dp),
         color = Color.Transparent,
         contentColor = Color.White
@@ -193,8 +194,8 @@ private fun DownloadHubHeader(onBack: () -> Unit) {
                         )
                     )
                 )
-                .padding(horizontal = 12.dp, vertical = 7.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+                 .padding(horizontal = 12.dp, vertical = if (compact) 4.dp else 7.dp),
+            verticalArrangement = Arrangement.spacedBy(if (compact) 2.dp else 4.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -204,13 +205,13 @@ private fun DownloadHubHeader(onBack: () -> Unit) {
                     Text(
                         text = "←",
                         color = Color.White,
-                        style = MaterialTheme.typography.titleLarge
+                        style = if (compact) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleLarge
                     )
                 }
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(if (compact) 2.dp else 4.dp))
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(if (compact) 1.dp else 4.dp)
                 ) {
                     Text(
                         text = "VØID  /  CONTENT SYSTEM",
@@ -220,7 +221,7 @@ private fun DownloadHubHeader(onBack: () -> Unit) {
                     )
                     Text(
                         text = "DOWNLOAD LAB",
-                        style = MaterialTheme.typography.titleMedium,
+                        style = if (compact) MaterialTheme.typography.titleSmall else MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Black
                     )
                 }
@@ -230,12 +231,12 @@ private fun DownloadHubHeader(onBack: () -> Unit) {
                     contentColor = Color.White
                 ) {
                     Column(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                        modifier = Modifier.padding(horizontal = if (compact) 6.dp else 8.dp, vertical = if (compact) 3.dp else 6.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
                             text = "VØID",
-                            style = MaterialTheme.typography.titleLarge,
+                            style = if (compact) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Black
                         )
                         Text(
