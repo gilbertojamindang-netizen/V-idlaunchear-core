@@ -462,6 +462,7 @@ private fun VulkanSetupPanel(
     var scannedDriverId by remember { mutableStateOf<String?>(null) }
     var capabilities by remember { mutableStateOf<VulkanCapabilities?>(null) }
     var showNativeVulkanWarning by remember { mutableStateOf(false) }
+    var showExperimentalWarning by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     // A scan result belongs only to the exact driver that was selected when it ran.
     val hasCurrentScan = hasScanned && scannedDriverId == selectedDriverId
@@ -598,39 +599,70 @@ private fun VulkanSetupPanel(
                 it.getUniqueIdentifier() == KopperZinkRenderer.getUniqueIdentifier()
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Button(
-                    modifier = Modifier.weight(1f),
-                    enabled = supportedProfiles.isNotEmpty() && !isScanning,
-                    onClick = { showNativeVulkanWarning = true }
-                ) {
-                    Text("NATIVE VULKAN · 26.2+")
-                }
-                OutlinedButton(
-                    modifier = Modifier.weight(1f),
-                    enabled = zinkRendererAvailable && currentCapabilities != null && !isScanning,
-                    onClick = {
-                        AllSettings.renderer.save(KopperZinkRenderer.getUniqueIdentifier())
-                        AllSettings.graphicsApi.save(GraphicsApi.DEFAULT_OPENGL)
-                    }
-                ) {
-                    Text("KOPPER ZINK")
-                }
-            }
+            Text(
+                text = "VØID RENDERING MODES",
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.semantics { heading() }
+            )
 
+            // OpenGL experimental mode is intentionally available even when the device has not
+            // been validated. The warning explains the risk and gives the user a safe fallback.
             OutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isScanning,
+                onClick = { showExperimentalWarning = true }
+            ) {
+                Text("OPENGL ES / EXPERIMENTAL")
+            }
+            Text(
+                text = "Use at your own risk. Some devices or drivers may show glitches, fail to render, or crash. You can return here and switch to a Vulkan mode or the default OpenGL path.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall
+            )
+
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                enabled = supportedProfiles.isNotEmpty() && !isScanning,
+                onClick = { showNativeVulkanWarning = true }
+            ) {
+                Text("VULKAN / GPU BATCHING")
+            }
+            Text(
+                text = "Uses Minecraft's native Vulkan path only when the selected driver passes the supported profile scan (currently 26.2+ profiles).",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall
+            )
+
+            OutlinedButton(
+                modifier = Modifier.fillMaxWidth(),
+                enabled = zinkRendererAvailable && currentCapabilities?.isVersionSupported == true && !isScanning,
                 onClick = {
-                    // Clear the Zink renderer too; otherwise this would not be a true OpenGL fallback.
-                    AllSettings.renderer.save("")
+                    AllSettings.renderer.save(KopperZinkRenderer.getUniqueIdentifier())
                     AllSettings.graphicsApi.save(GraphicsApi.DEFAULT_OPENGL)
                 }
             ) {
-                Text("OPENGL FALLBACK")
+                Text("VULKAN / COMPATIBILITY")
+            }
+            Text(
+                text = "Uses Kopper Zink (OpenGL translated over Vulkan), not native Vulkan. It is a compatibility route and may behave differently by GPU and driver.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall
+            )
+
+            if (showExperimentalWarning) {
+                SimpleAlertDialog(
+                    title = "Enable OpenGL ES / Experimental?",
+                    text = "This mode is experimental and is used at your own risk. Rendering glitches, poor performance, or launch failures are possible on some devices. You can switch back to a supported Vulkan mode or default OpenGL if needed.",
+                    onConfirm = {
+                        AllSettings.renderer.save("")
+                        AllSettings.graphicsApi.save(GraphicsApi.DEFAULT_OPENGL)
+                        showExperimentalWarning = false
+                    },
+                    onDismiss = {
+                        showExperimentalWarning = false
+                    }
+                )
             }
 
             if (showNativeVulkanWarning) {
@@ -649,7 +681,7 @@ private fun VulkanSetupPanel(
             }
 
             Text(
-                text = "Kopper Zink runs OpenGL over Vulkan; it is not Minecraft's native Vulkan backend. A passing scan checks the selected driver's Vulkan capabilities, but cannot guarantee every device, game version, shader, or modpack will work.",
+                text = "A passing scan checks the selected driver's Vulkan capabilities, but cannot guarantee every device, game version, shader, or modpack will work. Vulkan GPU Batching is native Vulkan; Vulkan Compatibility uses Kopper Zink to translate OpenGL over Vulkan.",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodySmall
             )
