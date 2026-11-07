@@ -30,3 +30,4 @@ Fix: replace unavailable java.nio.file.Files.writeString call with java.io.File.
 
 VøidLaunchear 1.0.12 Debug build request: 2026-11-07
 Includes source through version bump commit 4af803a610d3ccf44cf6f8bc4d17a58380044a04; monthly sponsor startup popup disabled. Official icon artwork asset pack is prepared separately and is not yet integrated in this repository.
+Smart Lag Fix integration verification build 2026-11-07
