@@ -83,11 +83,13 @@ import com.movtery.zalithlauncher.game.sdl.SdlTextSender
 import com.movtery.zalithlauncher.game.support.touch_controller.touchControllerInputModifier
 import com.movtery.zalithlauncher.game.support.touch_controller.touchControllerTouchModifier
 import com.movtery.zalithlauncher.game.version.installed.Version
+import com.movtery.zalithlauncher.ui.screens.content.elements.QuickPlay
 import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.setting.enums.GestureActionType
 import com.movtery.zalithlauncher.setting.enums.isLauncherInDarkTheme
 import com.movtery.zalithlauncher.setting.enums.toAction
 import com.movtery.zalithlauncher.terracotta.Terracotta
+import com.movtery.zalithlauncher.ui.androidText
 import com.movtery.zalithlauncher.ui.components.BackgroundCard
 import com.movtery.zalithlauncher.ui.components.MenuState
 import com.movtery.zalithlauncher.ui.components.rememberBoxSize
@@ -579,6 +581,8 @@ fun GameScreen(
     gamepadViewModel: GamepadViewModel,
 ) {
     val context = LocalContext.current
+    var quickPlayFailureReported by remember(version) { mutableStateOf(false) }
+    val quickPlayServer = version.quickPlaySingle as? QuickPlay.Server
     val viewModel = rememberGameViewModel(version) { mode ->
         eventViewModel.sendEvent(EventViewModel.Event.Game.SwitchIme(mode))
     }
@@ -753,7 +757,27 @@ fun GameScreen(
             onClose = {
                 onLogStateChange(LogState.CLOSE)
             },
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            onLogLine = { line ->
+                val message = line.lowercase()
+                val isConnectionFailure = listOf(
+                    "failed to connect to the server",
+                    "connection refused",
+                    "unknown host",
+                    "connection timed out",
+                    "timed out",
+                    "no route to host",
+                    "unable to resolve",
+                    "disconnected from server",
+                    "internal exception: java.io.ioexception"
+                ).any { it in message }
+                if (quickPlayServer != null && isConnectionFailure && !quickPlayFailureReported) {
+                    quickPlayFailureReported = true
+                    eventViewModel.sendToast(
+                        androidText("Quick Join failed: ${quickPlayServer.serverAddress}. Check the server address and connection.")
+                    )
+                }
+            }
         )
 
         GameMenuSubscreen(
