@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -58,6 +59,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -359,68 +361,61 @@ fun TitleTaskFlowDialog(
     onCancel: () -> Unit = {},
     logOutput: TaskLogOutput? = null
 ) {
+    var uiHidden by remember { mutableStateOf(false) }
     Dialog(
         onDismissRequest = {},
         properties = DialogProperties(
             dismissOnClickOutside = false,
-            usePlatformDefaultWidth = logOutput == null
+            usePlatformDefaultWidth = false
         )
     ) {
-        BoxWithConstraints(
-            modifier = Modifier
-                .heightIn(max = rememberDialogMaxHeight())
-                .fillMaxHeight(),
-            contentAlignment = Alignment.Center
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
         ) {
             Surface(
-                modifier = Modifier
-                    .padding(all = 6.dp)
-                    .heightIn(max = (maxHeight - 12.dp).coerceAtMost(rememberDialogMaxHeight()))
-                    .wrapContentHeight()
-                    .then(
-                        if (logOutput != null) {
-                            Modifier.fillMaxWidth(0.8f)
-                        } else Modifier
-                    ),
-                shape = MaterialTheme.shapes.extraLarge,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 12.dp),
+                shape = RoundedCornerShape(24.dp),
                 color = cardColor(false),
                 contentColor = onCardColor(),
-                shadowElevation = 6.dp
+                shadowElevation = 10.dp
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    if (logOutput == null) {
-                        TaskFlowListColumn(
-                            title = title,
-                            tasks = tasks,
-                            modifier = Modifier.weight(1f, fill = false)
-                        )
-                    } else {
+                if (uiHidden) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Text(title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleSmall, maxLines = 1)
+                        Button(onClick = { uiHidden = false }) { Text("Show UI") }
+                        Button(onClick = onCancel) { Text(stringResource(R.string.generic_cancel)) }
+                    }
+                } else {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
                         Row(
-                            modifier = Modifier.weight(1f),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            TaskFlowListColumn(
-                                title = title,
-                                tasks = tasks,
-                                modifier = Modifier.weight(1f)
-                            )
+                            Text(title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, maxLines = 1)
+                            Button(onClick = { uiHidden = true }) { Text("Hide UI") }
+                        }
+                        TaskFlowListColumn(
+                            title = "",
+                            tasks = tasks,
+                            modifier = Modifier.heightIn(max = if (logOutput == null) 132.dp else 112.dp)
+                        )
+                        if (logOutput != null) {
                             TaskLogCard(
                                 logOutput = logOutput,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .fillMaxHeight()
+                                modifier = Modifier.fillMaxWidth().heightIn(max = 72.dp)
                             )
                         }
-                    }
-
-                    Button(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = onCancel
-                    ) {
-                        MarqueeText(text = stringResource(R.string.generic_cancel))
+                        Button(modifier = Modifier.fillMaxWidth(), onClick = onCancel) {
+                            Text(stringResource(R.string.generic_cancel))
+                        }
                     }
                 }
             }
