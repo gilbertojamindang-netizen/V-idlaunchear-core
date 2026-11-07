@@ -39,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.game.multirt.RuntimesManager
+import com.movtery.zalithlauncher.game.version.installed.VersionsManager
 import com.movtery.zalithlauncher.game.plugin.natives.NativePlugin
 import com.movtery.zalithlauncher.game.plugin.natives.NativePluginManager
 import com.movtery.zalithlauncher.path.URL_CLOUD_NATIVE_LIB_PLUGINS
@@ -65,6 +66,9 @@ import com.movtery.zalithlauncher.ui.screens.content.settings.layouts.TextInputS
 import com.movtery.zalithlauncher.utils.platform.getMaxMemoryForSettings
 import com.movtery.zalithlauncher.viewmodel.EventViewModel
 import com.movtery.zalithlauncher.viewmodel.sendDLPlugin
+import com.movtery.zalithlauncher.utils.device.VoidPerformanceAdvisor
+import com.movtery.zalithlauncher.utils.device.VoidSmartLagAnalyzer
+import java.io.File
 
 @Composable
 fun GameSettingsScreen(
@@ -73,6 +77,7 @@ fun GameSettingsScreen(
     mainScreenKey: TitledNavKey?,
     eventViewModel: EventViewModel
 ) {
+    val context = LocalContext.current
     BaseScreen(
         Triple(key, mainScreenKey, false),
         Triple(NormalNavKey.Settings.Game, settingsScreenKey, false)
@@ -277,6 +282,57 @@ fun GameSettingsScreen(
                         valueRange = AllSettings.logBufferFlushInterval.floatRange,
                         suffix = "ms",
                         fineTuningControl = true
+                    )
+                }
+            }
+
+            // VØID Smart Lag Fix: read-only modpack and Android thermal diagnostics.
+            AnimatedItem { ctx ->
+                val selectedVersion = VersionsManager.currentVersion.value
+                val modpackReport = remember(selectedVersion?.getVersionName()) {
+                    selectedVersion?.let {
+                        VoidSmartLagAnalyzer.inspectModpack(File(it.getGameDir(), "mods"))
+                    }
+                }
+                val thermal = VoidSmartLagAnalyzer.thermalStatus(context)
+                val deviceRecommendation = remember {
+                    VoidPerformanceAdvisor.recommend(context)
+                }
+                SettingsCardColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .animated(ctx)
+                ) {
+                    Text(
+                        text = "VØID SMART LAG FIX",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = "Device profile: ${deviceRecommendation.profile} • RAM suggestion: ${deviceRecommendation.maxMemoryMb} MB • Render distance: ${deviceRecommendation.renderDistance}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "Modpack scan: ${modpackReport?.load ?: "No Minecraft version selected"}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    modpackReport?.let { report ->
+                        Text(
+                            text = "${report.enabledMods} enabled JARs • ${report.totalBytes / (1024L * 1024L)} MB total • Largest JAR: ${report.largestModBytes / (1024L * 1024L)} MB",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Text(text = report.recommendation, style = MaterialTheme.typography.bodySmall)
+                    }
+                    Text(
+                        text = "Thermal status: $thermal",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = VoidSmartLagAnalyzer.thermalAdvice(thermal),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Text(
+                        text = "These checks are advisory only. They do not promise extra FPS or change your settings automatically.",
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
             }
