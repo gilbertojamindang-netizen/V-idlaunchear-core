@@ -135,7 +135,7 @@ fun AboutInfoScreen(
                         Text("Code and Assistance • Project Development")
                         Text("Tester • Quality Checks")
                         Text(
-                            text = "Built on Zalith Launcher 2. Upstream copyright notices and required open-source license terms are preserved in the source and license files.",
+                            text = "Third-party open-source copyright notices and required license terms are preserved in the source and license files.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
