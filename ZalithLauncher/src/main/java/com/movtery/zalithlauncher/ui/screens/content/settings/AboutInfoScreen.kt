@@ -18,7 +18,6 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.settings
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -43,10 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -100,7 +96,6 @@ fun AboutInfoScreen(
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         ButtonIconItem(
-                            icon = painterResource(R.drawable.img_launcher),
                             title = "VøidLaunchear",
                             text = stringResource(R.string.about_launcher_version, BuildConfig.VERSION_NAME),
                             button = {
@@ -209,7 +204,6 @@ private fun ChunkLayout(
 @Composable
 private fun LinkIconItem(
     modifier: Modifier = Modifier,
-    icon: Painter,
     title: String,
     text: String,
     openLicense: (() -> Unit)? = null,
@@ -315,15 +309,6 @@ private fun ButtonIconItem(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                modifier = Modifier
-                    .size(34.dp)
-                    .clip(shape = RoundedCornerShape(6.dp)),
-                painter = icon,
-                contentDescription = null,
-                contentScale = ContentScale.Fit
-            )
-
             Column(
                 modifier = Modifier.weight(1f)
             ) {
