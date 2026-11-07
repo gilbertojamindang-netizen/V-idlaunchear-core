@@ -20,6 +20,8 @@ package com.movtery.zalithlauncher.ui.screens.content
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,12 +32,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.foundation.clickable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -284,79 +288,45 @@ private fun TabMenu(
     backStack: NavBackStack<TitledNavKey>,
     backScreenViewModel: ScreenBackStackViewModel,
 ) {
-    val downloadsList = listOf(
+    val categories = listOf(
         CategoryItem(backScreenViewModel.downloadGameScreen, { CategoryIcon(R.drawable.ic_sports_esports_outlined, R.string.download_category_game) }, R.string.download_category_game),
-        CategoryItem(backScreenViewModel.downloadModPackScreen, { CategoryIcon(R.drawable.ic_package_2_outlined, R.string.download_category_modpack) }, R.string.download_category_modpack),
         CategoryItem(backScreenViewModel.downloadModScreen, { CategoryIcon(R.drawable.ic_extension_outlined, R.string.download_category_mod) }, R.string.download_category_mod),
-        CategoryItem(backScreenViewModel.downloadResourcePackScreen, { CategoryIcon(R.drawable.ic_format_paint_outlined, R.string.download_category_resource_pack) }, R.string.download_category_resource_pack),
-        CategoryItem(backScreenViewModel.downloadSavesScreen, { CategoryIcon(R.drawable.ic_public, R.string.download_category_saves) }, R.string.download_category_saves),
         CategoryItem(backScreenViewModel.downloadShadersScreen, { CategoryIcon(R.drawable.ic_lightbulb, R.string.download_category_shaders) }, R.string.download_category_shaders),
+        CategoryItem(backScreenViewModel.downloadResourcePackScreen, { CategoryIcon(R.drawable.ic_format_paint_outlined, R.string.download_category_resource_pack) }, R.string.download_category_resource_pack),
+        CategoryItem(backScreenViewModel.downloadModPackScreen, { CategoryIcon(R.drawable.ic_package_2_outlined, R.string.download_category_modpack) }, R.string.download_category_modpack),
+        CategoryItem(backScreenViewModel.downloadSavesScreen, { CategoryIcon(R.drawable.ic_public, R.string.download_category_saves) }, R.string.download_category_saves),
+        CategoryItem(backScreenViewModel.downloadFavoritesScreen, { CategoryIcon(R.drawable.ic_favorite_outlined, R.string.download_category_favorites) }, R.string.download_category_favorites)
     )
-
     val ctx = rememberAnimatedContext(isVisible = isVisible)
-    Column(modifier = modifier) {
+    Column(
+        modifier = modifier
+            .animated(ctx, from = AnimatedDirection.Left)
+            .padding(top = 5.dp, bottom = 9.dp),
+        verticalArrangement = Arrangement.spacedBy(9.dp)
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 17.dp, end = 17.dp, top = 1.dp, bottom = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "DOWNLOAD CHANNELS",
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Black
-            )
-            Text(
-                text = "SELECT A CATEGORY",
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        androidx.compose.foundation.lazy.grid.LazyVerticalGrid(
-            columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(2),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(184.dp)
-                .padding(horizontal = 12.dp)
-                .animated(ctx, from = AnimatedDirection.Left),
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(9.dp),
-            verticalArrangement = Arrangement.spacedBy(9.dp),
-            userScrollEnabled = true
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            items(downloadsList.size) { index ->
-                val item = downloadsList[index]
+            categories.forEach { item ->
                 val selected = backScreenViewModel.downloadScreen.currentKey == item.key
                 Surface(
-                    modifier = Modifier.height(82.dp),
                     onClick = { backStack.navigateOnce(item.key) },
-                    shape = RoundedCornerShape(17.dp),
-                    color = if (selected) Color(0xFF7042B8)
-                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.62f),
-                    contentColor = if (selected) Color.White
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                    tonalElevation = if (selected) 3.dp else 0.dp
+                    shape = RoundedCornerShape(50),
+                    color = if (selected) Color(0xFF7C35D8) else Color(0xFF241832),
+                    contentColor = Color.White,
+                    tonalElevation = if (selected) 4.dp else 0.dp
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 13.dp, vertical = 10.dp),
-                        verticalArrangement = Arrangement.SpaceBetween
+                    Row(
+                        modifier = Modifier.padding(horizontal = 15.dp, vertical = 11.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            item.icon()
-                            Spacer(modifier = Modifier.weight(1f))
-                            Text(
-                                text = (index + 1).toString().padStart(2, '0'),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = if (selected) Color.White.copy(alpha = 0.76f)
-                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.68f)
-                            )
-                        }
+                        item.icon()
                         Text(
                             text = stringResource(item.textRes),
                             style = MaterialTheme.typography.labelLarge,
@@ -366,50 +336,24 @@ private fun TabMenu(
                     }
                 }
             }
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 7.dp),
-            horizontalArrangement = Arrangement.spacedBy(9.dp)
-        ) {
-            val quickItems = listOf(
-                CategoryItem(
-                    backScreenViewModel.downloadFavoritesScreen,
-                    { CategoryIcon(R.drawable.ic_favorite_outlined, R.string.download_category_favorites) },
-                    R.string.download_category_favorites
-                ),
-                CategoryItem(
-                    NormalNavKey.SearchId,
-                    { CategoryIcon(R.drawable.ic_card, R.string.download_category_by_id) },
-                    R.string.download_category_by_id
-                )
-            )
-            quickItems.forEach { item ->
-                val selected = backScreenViewModel.downloadScreen.currentKey == item.key
-                Surface(
-                    modifier = Modifier.weight(1f),
-                    onClick = { backStack.navigateOnce(item.key) },
-                    shape = RoundedCornerShape(14.dp),
-                    color = if (selected) Color(0xFF7042B8)
-                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.48f),
-                    contentColor = if (selected) Color.White
-                        else MaterialTheme.colorScheme.onSurfaceVariant
+            Surface(
+                onClick = { backStack.navigateOnce(NormalNavKey.SearchId) },
+                shape = RoundedCornerShape(50),
+                color = Color(0xFF241832),
+                contentColor = Color.White
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 17.dp, vertical = 11.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        item.icon()
-                        Text(
-                            text = stringResource(item.textRes),
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1
-                        )
-                    }
+                    Text("⌕", style = MaterialTheme.typography.titleLarge, color = Color(0xFFD5A6FF))
+                    Text(
+                        text = "Search by ID",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
+                    )
                 }
             }
         }
