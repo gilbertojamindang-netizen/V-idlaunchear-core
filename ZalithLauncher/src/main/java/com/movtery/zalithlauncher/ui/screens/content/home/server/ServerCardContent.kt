@@ -44,6 +44,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -56,6 +57,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
@@ -87,6 +89,7 @@ import coil3.compose.AsyncImagePainter
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import kotlinx.coroutines.delay
 import com.movtery.cardgrid.model.CardSize
 import com.movtery.cardgrid.model.CardSizeClass
 import com.movtery.cardgrid.model.CardState
@@ -469,7 +472,7 @@ private fun StatusInfoRow(card: ServerCardState?) {
     }
 }
 
-/** 快速启动按钮 */
+/** 快速启动按钮：重复点击保护、版本/服务器状态确认与连接反馈 */
 @Composable
 private fun QuickLaunchButton(
     card: ServerCardState?,
@@ -478,58 +481,133 @@ private fun QuickLaunchButton(
     iconOnly: Boolean = false
 ) {
     if (card?.record?.quickLaunchEnabled != true) return
+
     val onQuickPlay = LocalServerCardQuickPlay.current
     val record = card.record
-    val launch = {
+    val context = LocalContext.current
+    var isLaunching by remember(record.cardId) { mutableStateOf(false) }
+    var showWarning by remember(record.cardId) { mutableStateOf(false) }
+
+    val targetVersion = when (record.versionMode) {
+        ServerCardVersionMode.SPECIFIC ->
+            (card.versionStatus as? VersionCardStatus.Available)
+                ?.version?.takeIf { it.isValid() }
+        ServerCardVersionMode.CURRENT -> VersionsManager.currentVersion.value?.takeIf { it.isValid() }
+    }
+    val serverStatus = (card.ping as? ServerCardPingStatus.Loaded)?.result?.status
+    val serverVersion = serverStatus?.version?.name?.stripColorCodes()?.trim()
+    val selectedVersionName = targetVersion?.getVersionName()
+    val versionMismatch = serverVersion != null &&
+            selectedVersionName != null &&
+            !serverVersion.equals(selectedVersionName, ignoreCase = true) &&
+            !serverVersion.startsWith(selectedVersionName, ignoreCase = true) &&
+            !selectedVersionName.startsWith(serverVersion, ignoreCase = true)
+    val pingFailed = card.ping is ServerCardPingStatus.Failed
+
+    fun launchNow() {
+        if (isLaunching) return
+        isLaunching = true
         when (record.versionMode) {
-            ServerCardVersionMode.SPECIFIC -> {
-                //启动前校验绑定版本是否仍然可用，失效则回退当前选中版本
-                val available = card.versionStatus as? VersionCardStatus.Available
-                onQuickPlay(available?.version?.takeIf { it.isValid() }, record.cardId)
-            }
-            ServerCardVersionMode.CURRENT -> onQuickPlay(null, record.cardId)
+            ServerCardVersionMode.SPECIFIC ->
+                onQuickPlay(targetVersion, record.cardId)
+            ServerCardVersionMode.CURRENT ->
+                onQuickPlay(null, record.cardId)
         }
     }
-    when {
-        iconOnly -> Button(
-            onClick = launch,
-            modifier = modifier,
-            shape = CircleShape,
-            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
-        ) {
-            Icon(
+
+    // Safety release in case the launcher does not transition to the game launch screen.
+    LaunchedEffect(isLaunching, record.cardId) {
+        if (isLaunching) {
+            delay(20_000)
+            isLaunching = false
+            Toast.makeText(
+                context,
+                "Join request took too long. You can try again.",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    if (showWarning) {
+        val message = when {
+            pingFailed ->
+                "The server could not be reached during the status check. It may be offline or temporarily unavailable. Try anyway?"
+            versionMismatch ->
+                "The server reports Minecraft $serverVersion, while your selected version is $selectedVersionName. Joining may fail or cause compatibility issues. Continue anyway?"
+            else -> "Server status could not be confirmed. Continue with the join request?"
+        }
+        AlertDialog(
+            onDismissRequest = { showWarning = false },
+            title = { Text("Check before joining") },
+            text = { Text(message) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showWarning = false
+                    launchNow()
+                }) { Text("Join anyway") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showWarning = false }) { Text("Cancel") }
+            }
+        )
+    }
+
+    val launch = {
+        if (!isLaunching) {
+            if (versionMismatch || pingFailed || card.ping is ServerCardPingStatus.Loading) {
+                showWarning = true
+            } else {
+                launchNow()
+            }
+        }
+    }
+
+    val buttonContent: @Composable (Boolean) -> Unit = { showLabel ->
+        if (isLaunching) {
+            CircularProgressIndicator(
                 modifier = Modifier.size(14.dp),
+                strokeWidth = 2.dp
+            )
+            if (showLabel) {
+                Text(
+                    modifier = Modifier.padding(start = 6.dp),
+                    text = "Joining…"
+                )
+            }
+        } else {
+            Icon(
+                modifier = Modifier.size(if (showLabel) 16.dp else 14.dp),
                 painter = painterResource(R.drawable.ic_play_arrow_filled),
                 contentDescription = stringResource(R.string.main_launch_game)
             )
+            if (showLabel) {
+                Text(
+                    modifier = Modifier.padding(start = 6.dp),
+                    text = stringResource(R.string.main_launch_game)
+                )
+            }
         }
+    }
+
+    when {
+        iconOnly -> Button(
+            onClick = launch,
+            enabled = !isLaunching,
+            modifier = modifier,
+            shape = CircleShape,
+            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+        ) { buttonContent(false) }
         compact -> Button(
             onClick = launch,
+            enabled = !isLaunching,
             modifier = modifier,
             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
-        ) {
-            Icon(
-                modifier = Modifier.size(14.dp),
-                painter = painterResource(R.drawable.ic_play_arrow_filled),
-                contentDescription = null
-            )
-            Text(
-                modifier = Modifier.padding(start = 4.dp),
-                text = stringResource(R.string.main_launch_game),
-                style = MaterialTheme.typography.labelSmall
-            )
-        }
-        else -> Button(onClick = launch, modifier = modifier) {
-            Icon(
-                modifier = Modifier.size(16.dp),
-                painter = painterResource(R.drawable.ic_play_arrow_filled),
-                contentDescription = null
-            )
-            Text(
-                modifier = Modifier.padding(start = 6.dp),
-                text = stringResource(R.string.main_launch_game)
-            )
-        }
+        ) { buttonContent(true) }
+        else -> Button(
+            onClick = launch,
+            enabled = !isLaunching,
+            modifier = modifier
+        ) { buttonContent(true) }
     }
 }
 
