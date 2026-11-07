@@ -181,7 +181,9 @@ class SponsorsViewModel : ViewModel() {
 
             val newData = toDataOperation(ensureData())
             _data.update { newData }
-            if (showLastMonth) checkLastMonthReport(newData)
+            // VøidLaunchear: never interrupt the launcher with the upstream
+            // automatic monthly-sponsor settlement dialog. Sponsor information
+            // remains available only when the user opens it manually.
         }
     }
 
