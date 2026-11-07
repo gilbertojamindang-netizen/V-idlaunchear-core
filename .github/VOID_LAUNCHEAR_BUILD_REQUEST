@@ -23,3 +23,7 @@ In-app updater flow: DownloadManager APK transfer, progress/error display, and e
 
 VøidLaunchear 1.0.10 rebuild request: 2026-11-06
 Fix: replace unresolved Icons reference in DownloadScreen back button with Compose Text arrow.
+
+
+VøidLaunchear 1.0.11 rebuild request: 2026-11-07
+Fix: replace unavailable java.nio.file.Files.writeString call with java.io.File.writeText to prevent Minecraft version manifest download crash on Android. About credits now display the project creator while retaining required third-party copyright and license notices.
