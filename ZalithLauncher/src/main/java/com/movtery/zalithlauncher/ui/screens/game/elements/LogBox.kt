@@ -164,7 +164,11 @@ fun LogBox(
             }
         } else {
             scrollChannel.value = null
-            LoggerBridge.setListener(null)
+            // Keep a lightweight listener active even when the log panel is hidden,
+            // so Quick Play can still detect connection errors from Minecraft output.
+            LoggerBridge.setListener { log ->
+                onLogLine(log)
+            }
             logList.clear()
             buffer.clear()
         }
