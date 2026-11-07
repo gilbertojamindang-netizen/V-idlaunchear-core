@@ -498,7 +498,7 @@ private fun QuickLaunchButton(
     val serverVersion = serverStatus?.version?.name?.stripColorCodes()?.trim()
     val selectedVersionName = targetVersion?.getVersionName()
     fun minecraftVersionOf(value: String?): String? =
-        Regex("""\\d+\\.\\d+(?:\\.\\d+)?""").find(value.orEmpty())?.value
+        Regex("""\d+\.\d+(?:\.\d+)?""").find(value.orEmpty())?.value
     val serverMinecraftVersion = minecraftVersionOf(serverVersion)
     val selectedMinecraftVersion = minecraftVersionOf(selectedVersionName)
     val targetVersionMissing = targetVersion == null
