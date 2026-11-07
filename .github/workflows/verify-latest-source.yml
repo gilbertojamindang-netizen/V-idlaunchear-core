@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - ".github/VERIFY_LATEST_SOURCE"
+      - ".github/workflows/verify-latest-source.yml"
   workflow_dispatch:
 
 permissions:
@@ -28,7 +29,7 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64-linux-android
+          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
       - name: Cache Rust
         uses: actions/cache@v4
         with:
