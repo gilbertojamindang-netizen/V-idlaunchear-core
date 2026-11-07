@@ -82,7 +82,8 @@ private data class LogLine(val id: Long, val text: AnnotatedString)
 fun LogBox(
     enableLog: Boolean,
     onClose: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onLogLine: (String) -> Unit = {}
 ) {
     val scrollState = rememberLazyListState()
 
@@ -107,6 +108,7 @@ fun LogBox(
             scrollChannel.value = Channel(capacity = 100)
 
             LoggerBridge.setListener { log ->
+                onLogLine(log)
                 synchronized(buffer) {
                     buffer.add(log)
                 }
